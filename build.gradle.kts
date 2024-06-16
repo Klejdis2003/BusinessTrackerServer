@@ -2,6 +2,7 @@ val kotlin_version: String by project
 val logback_version: String by project
 val ktorm_version: String by project
 val postgresql_driver_version: String by project
+val koin_version: String by project
 
 plugins {
     kotlin("jvm") version "2.0.0"
@@ -27,13 +28,16 @@ repositories {
 dependencies {
     implementation("io.ktor:ktor-server-core-jvm")
     implementation("io.ktor:ktor-server-auth-jvm")
+    implementation("io.ktor:ktor-server-auth-jwt-jvm")
     implementation("io.ktor:ktor-server-content-negotiation-jvm")
     implementation("io.ktor:ktor-serialization-kotlinx-json-jvm")
     implementation("io.ktor:ktor-server-host-common-jvm")
     implementation("io.ktor:ktor-server-netty")
+    implementation("io.insert-koin:koin-ktor:$koin_version")
     implementation("org.postgresql:postgresql:$postgresql_driver_version")
     implementation("org.ktorm:ktorm-core:$ktorm_version")
     implementation("ch.qos.logback:logback-classic:$logback_version")
+    implementation("org.mindrot:jbcrypt:0.4")
     implementation("com.github.dotenv-org:dotenv-vault-kotlin:0.0.3")
     testImplementation("io.ktor:ktor-server-tests-jvm")
     testImplementation("org.jetbrains.kotlin:kotlin-test-junit:$kotlin_version")

@@ -2,6 +2,7 @@ package com.klejdis.services.config
 
 import com.klejdis.services.MODE
 import com.klejdis.services.Mode
+import com.klejdis.services.tables.Accounts
 import com.klejdis.services.tables.ItemTypes
 import com.klejdis.services.tables.Items
 import com.klejdis.services.util.parseSqlFile
@@ -25,6 +26,7 @@ val postgresDatabase: Database by lazy { configuredDB() }
 
 val Database.items get() = this.sequenceOf(Items)
 val Database.itemTypes get() = this.sequenceOf(ItemTypes)
+val Database.accounts get() = this.sequenceOf(Accounts)
 
 private object DBService {
     private fun executeSqlFile(fileName: String) {

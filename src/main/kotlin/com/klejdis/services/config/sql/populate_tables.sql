@@ -68,4 +68,8 @@ INSERT INTO order_items (order_id, item_id, quantity) VALUES
 (10, 5, 1),
 (10, 6, 2);
 
+INSERT INTO accounts (username, password, salt) VALUES
+('business1', '123456', '123456'),
+('business2', '123456', '123456');
+
 -- End of file
