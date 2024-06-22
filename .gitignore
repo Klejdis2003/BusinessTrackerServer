@@ -1,6 +1,7 @@
 .gradle
 build/
 .env
+keystore.jks
 !gradle/wrapper/gradle-wrapper.jar
 !**/src/main/**/build/
 !**/src/test/**/build/

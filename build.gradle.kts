@@ -1,3 +1,4 @@
+val ktor_version: String by project
 val kotlin_version: String by project
 val logback_version: String by project
 val ktorm_version: String by project
@@ -28,17 +29,24 @@ repositories {
 dependencies {
     implementation("io.ktor:ktor-server-core-jvm")
     implementation("io.ktor:ktor-server-auth-jvm")
+    implementation("io.ktor:ktor-server-http-redirect")
     implementation("io.ktor:ktor-server-auth-jwt-jvm")
-    implementation("io.ktor:ktor-server-content-negotiation-jvm")
-    implementation("io.ktor:ktor-serialization-kotlinx-json-jvm")
-    implementation("io.ktor:ktor-server-host-common-jvm")
+    implementation("io.ktor:ktor-network-tls-certificates")
+    implementation("io.ktor:ktor-server-content-negotiation")
+    implementation("io.ktor:ktor-client-content-negotiation")
+    implementation("io.ktor:ktor-server-html-builder:$ktor_version")
+    implementation("io.ktor:ktor-serialization-kotlinx-json")
+    implementation("io.ktor:ktor-server-host-common")
     implementation("io.ktor:ktor-server-netty")
+    implementation("io.ktor:ktor-client-core")
+    implementation("io.ktor:ktor-client-cio")
     implementation("io.insert-koin:koin-ktor:$koin_version")
     implementation("org.postgresql:postgresql:$postgresql_driver_version")
     implementation("org.ktorm:ktorm-core:$ktorm_version")
     implementation("ch.qos.logback:logback-classic:$logback_version")
     implementation("org.mindrot:jbcrypt:0.4")
     implementation("com.github.dotenv-org:dotenv-vault-kotlin:0.0.3")
+    implementation("io.ktor:ktor-client-cio-jvm:3.0.0-beta-1")
     testImplementation("io.ktor:ktor-server-tests-jvm")
     testImplementation("org.jetbrains.kotlin:kotlin-test-junit:$kotlin_version")
 }

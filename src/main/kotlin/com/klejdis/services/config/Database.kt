@@ -2,9 +2,10 @@ package com.klejdis.services.config
 
 import com.klejdis.services.MODE
 import com.klejdis.services.Mode
-import com.klejdis.services.tables.Accounts
+import com.klejdis.services.model.Businesses
+import com.klejdis.services.model.Items
 import com.klejdis.services.tables.ItemTypes
-import com.klejdis.services.tables.Items
+
 import com.klejdis.services.util.parseSqlFile
 import io.ktor.server.application.*
 import org.dotenv.vault.dotenvVault
@@ -26,7 +27,7 @@ val postgresDatabase: Database by lazy { configuredDB() }
 
 val Database.items get() = this.sequenceOf(Items)
 val Database.itemTypes get() = this.sequenceOf(ItemTypes)
-val Database.accounts get() = this.sequenceOf(Accounts)
+val Database.accounts get() = this.sequenceOf(Businesses)
 
 private object DBService {
     private fun executeSqlFile(fileName: String) {

@@ -5,7 +5,8 @@ import java.time.LocalDate
 
 interface Order: Entity<Order> {
     companion object: Entity.Factory<Order>()
-    val id: Int
+    var id: Int
+    var business: Business
     var date: LocalDate
     var amount: Double
     var items: List<Item>

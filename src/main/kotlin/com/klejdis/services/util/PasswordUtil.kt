@@ -1,17 +1,10 @@
 package com.klejdis.services.util
 
 import io.github.cdimascio.dotenv.Dotenv
-import io.ktor.util.*
+import kotlinx.serialization.Serializable
 import org.koin.core.component.KoinComponent
 import org.koin.core.component.inject
-import org.koin.java.KoinJavaComponent.inject
 import org.mindrot.jbcrypt.BCrypt
-import java.security.MessageDigest
-import java.security.SecureRandom
-import java.security.spec.KeySpec
-import javax.crypto.SecretKeyFactory
-import javax.crypto.spec.PBEKeySpec
-import kotlin.text.toCharArray
 
 object PasswordUtil : KoinComponent {
     private val vault by inject<Dotenv>()
@@ -21,6 +14,13 @@ object PasswordUtil : KoinComponent {
 
     fun generateSalt(): String {
         return BCrypt.gensalt()
+    }
+
+    fun hashString(input: String): HashedString {
+        val hashedString = BCrypt.hashpw(input, BCrypt.gensalt())
+        val lastSeparator = hashedString.lastIndexOf('$')
+        val (version, hash) = (hashedString.substring(0, lastSeparator) to hashedString.substring(lastSeparator + 1))
+        return HashedString(hash, version)
     }
     fun hashPassword(password: String, salt: String): String {
         return BCrypt.hashpw(password, salt)
@@ -32,3 +32,5 @@ object PasswordUtil : KoinComponent {
         return hash.contentEquals(storedHash)
     }
 }
+@Serializable
+data class HashedString(val hash: String, val version: String)

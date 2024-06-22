@@ -1,27 +1,91 @@
 package com.klejdis.services.plugins
 
+import com.klejdis.services.model.ProfileInfo
+import com.klejdis.services.model.Session
 import com.klejdis.services.routes.accountsRoute
-import com.klejdis.services.routes.loginRoute
+import com.klejdis.services.routes.authRoute
+import com.klejdis.services.routes.businessesRoute
+import com.klejdis.services.services.AuthenticationService
+import com.klejdis.services.services.BusinessService
+import com.klejdis.services.services.OAuthenticationService
+import io.ktor.http.*
 import io.ktor.server.application.*
 import io.ktor.server.auth.*
+import io.ktor.server.html.*
 import io.ktor.server.http.content.*
+import io.ktor.server.request.*
 import io.ktor.server.response.*
 import io.ktor.server.routing.*
+import io.ktor.server.sessions.*
+import io.ktor.server.util.*
+import kotlinx.html.body
+import kotlinx.html.h1
+import kotlinx.html.li
+import kotlinx.html.ul
+import org.koin.ktor.ext.inject
+
+const val HOME_ROUTE = "/"
 
 fun Application.configureRouting() {
+    val oAuthenticationService by inject<OAuthenticationService>()
+    val businessService by inject<BusinessService>()
     routing {
-        authenticate(AuthMethod.Bearer.provider) {
-            route("/") {
-                get {
-                    call.respondText("Hello World!")
+        authenticate(AuthMethod.OAuth.provider) {
+            accountsRoute()
+            authRoute()
+            staticResources(remotePath = "/static", "static")
+        }
+
+        businessesRoute()
+        get(HOME_ROUTE) {
+            val userSession = call.getSession()
+            if(userSession != null) {
+                val user = oAuthenticationService.getProfileInfoFromToken(userSession.token)
+                val items = businessService.getBusinessItems(user.email)
+                call.respondHtml {
+                    body {
+                        h1 { +"Welcome, ${user.email}" }
+                        ul {
+                            items.forEach {
+                                li { +"${it.name} - ${it.price}" }
+                            }
+                        }
+                    }
                 }
             }
         }
+        get("/login") {
+            if(call.sessions.get<Session>() != null)
+                call.respondRedirect(HOME_ROUTE)
+            else
+                call.respondRedirect("/loginRedirect")
 
+        }
+        get ("/logout"){
+            val authToken = call.getSession()?.token
+            if(authToken == null)
+                call.respond(HttpStatusCode.Unauthorized, "You are not logged in.")
 
-        accountsRoute()
-        loginRoute()
-        // Static plugin. Try to access `/static/index.html`
-        staticResources(remotePath = "/static", "static")
+            oAuthenticationService.logout(authToken!!)
+            call.sessions.clear<Session>()
+            call.respondRedirect(HOME_ROUTE)
+        }
     }
+}
+
+
+suspend fun RoutingCall.getSession(): Session? {
+    val session: Session? = sessions.get()
+    if(session == null) {
+        val redirectUrl = url{
+            protocol = URLProtocol.HTTPS
+            port = 8080
+            path("/login")
+            parameters.append("redirectUrl", request.uri)
+        }
+        respondRedirect(redirectUrl)
+        return null
+    }
+    return session
+
 }
