@@ -3,7 +3,7 @@ package com.klejdis.services.services
 import com.klejdis.services.dto.BusinessMapper
 import com.klejdis.services.dto.BusinessDto
 import com.klejdis.services.model.Business
-import com.klejdis.services.model.ItemDto
+import com.klejdis.services.dto.ItemDto
 import com.klejdis.services.repositories.BusinessRepository
 import com.klejdis.services.repositories.ItemRepository
 import org.postgresql.util.PSQLException

@@ -1,7 +1,6 @@
 package com.klejdis.services.model
 
-import com.klejdis.services.tables.ItemTypes
-import kotlinx.serialization.Serializable
+import com.klejdis.services.dto.ItemDto
 import org.ktorm.entity.Entity
 import org.ktorm.schema.Table
 import org.ktorm.schema.int
@@ -25,29 +24,16 @@ interface Item: Entity<Item> {
     var business: Business
     var purchasePrice: Int
     var price: Int
-    var quantity: Int
     var type: ItemType
-    fun toDto(): ItemDto = ItemDto(id, name, business, purchasePrice, price, quantity, type)
+    fun toDto(): ItemDto = ItemDto(id, name, purchasePrice, price, type.name)
 }
-
-@Serializable
-class ItemDto(
-    val id: Int,
-    val name: String,
-    val business: Business,
-    val purchasePrice: Int,
-    val price: Int,
-    val quantity: Int,
-    val type: ItemType
-)
 
 object Items: Table<Item>("items") {
     val id = int("id").primaryKey().bindTo { it.id }
     val businessId = int("business_id").references(Businesses) { it.business }
     val name = varchar("name").bindTo { it.name }
     val description = varchar("description").bindTo { it.type.description }
-    val quantity = int("quantity").bindTo { it.quantity }
     val purchasePrice = int("purchase_price").bindTo { it.purchasePrice }
     val price = int("price").bindTo { it.price }
-    val type = int("type").references(ItemTypes) { it.type }
+    val type = int("item_type_id").references(ItemTypes) { it.type }
 }

@@ -9,6 +9,7 @@ interface Business: Entity<Business> {
     companion object : Entity.Factory<Business>()
     var id: Int
     var ownerEmail: String
+
 }
 
 object Businesses: Table<Business>("businesses") {

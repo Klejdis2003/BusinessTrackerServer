@@ -37,7 +37,7 @@ INSERT INTO items (business_id, name, description, purchase_price, price, item_t
 (3, 'Book', 'Book', 5.00, 10.00, 5),
 (4, 'Magazine', 'Magazine', 2.00, 5.00, 5);
 
-INSERT INTO orders (business_id, customer_id, order_date) VALUES
+INSERT INTO orders (business_id, customer_id, date) VALUES
 (1, 1, '2021-01-01'),
 (1, 2, '2021-01-02'),
 (2, 3, '2021-01-03'),

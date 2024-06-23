@@ -5,6 +5,7 @@ import com.klejdis.services.model.Session
 import com.klejdis.services.routes.accountsRoute
 import com.klejdis.services.routes.authRoute
 import com.klejdis.services.routes.businessesRoute
+import com.klejdis.services.routes.ordersRoute
 import com.klejdis.services.services.AuthenticationService
 import com.klejdis.services.services.BusinessService
 import com.klejdis.services.services.OAuthenticationService
@@ -37,6 +38,7 @@ fun Application.configureRouting() {
         }
 
         businessesRoute()
+        ordersRoute()
         get(HOME_ROUTE) {
             val userSession = call.getSession()
             if(userSession != null) {

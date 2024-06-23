@@ -33,7 +33,7 @@ CREATE TABLE IF NOT EXISTS ORDERS (
     id SERIAL PRIMARY KEY,
     customer_id INT NOT NULL,
     business_id INT NOT NULL,
-    order_date DATE NOT NULL DEFAULT CURRENT_DATE,
+    date DATE NOT NULL DEFAULT CURRENT_DATE,
     FOREIGN KEY (customer_id) REFERENCES customers(id),
     FOREIGN KEY (business_id) REFERENCES businesses(id)
 );

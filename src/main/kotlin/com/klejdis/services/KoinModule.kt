@@ -4,10 +4,9 @@ package com.klejdis.services
 import com.klejdis.services.config.JwtConfig
 import com.klejdis.services.config.postgresDatabase
 import com.klejdis.services.dto.BusinessMapper
-import com.klejdis.services.repositories.BusinessRepository
-import com.klejdis.services.repositories.BusinessRepositoryImpl
-import com.klejdis.services.repositories.ItemRepository
-import com.klejdis.services.repositories.ItemRepositoryImpl
+import com.klejdis.services.dto.ItemMapper
+import com.klejdis.services.dto.OrderMapper
+import com.klejdis.services.repositories.*
 import com.klejdis.services.services.AuthenticationService
 import com.klejdis.services.services.BusinessService
 import com.klejdis.services.services.OAuthenticationService
@@ -38,9 +37,11 @@ val appModule = module {
     //repositories
     single<BusinessRepository> { BusinessRepositoryImpl(postgresDatabase) }
     single<ItemRepository> { ItemRepositoryImpl(postgresDatabase) }
+    single<OrderRepository> { OrderRepositoryImpl(postgresDatabase) }
 
     //mappers
     single<BusinessMapper> { BusinessMapper() }
+    single<OrderMapper> { OrderMapper(ItemMapper()) }
 
     //services
 

@@ -3,8 +3,8 @@ package com.klejdis.services.config
 import com.klejdis.services.MODE
 import com.klejdis.services.Mode
 import com.klejdis.services.model.Businesses
+import com.klejdis.services.model.ItemTypes
 import com.klejdis.services.model.Items
-import com.klejdis.services.tables.ItemTypes
 
 import com.klejdis.services.util.parseSqlFile
 import io.ktor.server.application.*
