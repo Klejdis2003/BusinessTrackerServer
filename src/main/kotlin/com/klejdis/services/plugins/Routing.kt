@@ -1,12 +1,10 @@
 package com.klejdis.services.plugins
 
-import com.klejdis.services.model.ProfileInfo
 import com.klejdis.services.model.Session
 import com.klejdis.services.routes.accountsRoute
 import com.klejdis.services.routes.authRoute
 import com.klejdis.services.routes.businessesRoute
 import com.klejdis.services.routes.ordersRoute
-import com.klejdis.services.services.AuthenticationService
 import com.klejdis.services.services.BusinessService
 import com.klejdis.services.services.OAuthenticationService
 import io.ktor.http.*
@@ -65,19 +63,16 @@ fun Application.configureRouting() {
         }
         get ("/logout"){
             val authToken = call.getSession()?.token
-            if(authToken == null) {
-                call.respond(HttpStatusCode.Unauthorized, "You are not logged in.")
-                return@get
-            }
-
             oAuthenticationService.logout(authToken!!)
             call.sessions.clear<Session>()
-            call.respondRedirect(HOME_ROUTE)
         }
     }
 }
 
-
+/**
+ * Gets the session from the call. If the session is null, redirects to the login page.
+ * @return The session if it exists, null otherwise.
+ */
 suspend fun RoutingCall.getSession(): Session? {
     val session: Session? = sessions.get()
     if(session == null) {

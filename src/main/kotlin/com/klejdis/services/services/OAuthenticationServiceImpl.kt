@@ -28,7 +28,10 @@ class OAuthenticationServiceImpl(
      */
     override suspend fun getProfileInfoFromToken(token: String): ProfileInfo {
 
-        if(tokenProfileInfoMap.containsKey(token)) return tokenProfileInfoMap[token]!!
+        if(tokenProfileInfoMap.containsKey(token)) {
+            println("Profile Info CACHE HIT")
+            return tokenProfileInfoMap[token]!!
+        }
 
         val url = url {
             protocol = URLProtocol.HTTPS

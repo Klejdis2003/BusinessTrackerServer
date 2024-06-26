@@ -8,17 +8,21 @@ import io.ktor.server.application.*
 import io.ktor.server.auth.*
 import io.ktor.server.engine.*
 import io.ktor.server.netty.*
-import io.ktor.websocket.WebSocketDeflateExtension.Companion.install
 import org.koin.core.context.startKoin
 import org.koin.java.KoinJavaComponent.inject
-import org.slf4j.LoggerFactory
 import java.io.File
 
 val MODE = Mode.DEV
 
 fun main() {
     startKoin{ modules(appModule) }
-    embeddedServer(Netty, configure = { configureSSL() }, module = Application::module)
+    embeddedServer(
+        Netty,
+        configure = {
+            enableHttp2 = true
+            configureSSL()
+        },
+        module = Application::module)
         .start(wait = true)
 }
 
@@ -40,7 +44,7 @@ fun ApplicationEngine.Configuration.configureSSL() {
             domains = listOf("localhost")
         }
     }
-    keystore.saveToFile(keystoreFile, vault["KEYSTORE_PASSWORD"])
+
     sslConnector(
         keyStore = keystore,
         keyAlias = "ssl",
