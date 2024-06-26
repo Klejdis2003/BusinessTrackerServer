@@ -1,6 +1,5 @@
 package com.klejdis.services.dto
 
-import com.klejdis.services.model.Business
 import com.klejdis.services.model.Item
 import com.klejdis.services.model.ItemType
 import kotlinx.serialization.Serializable

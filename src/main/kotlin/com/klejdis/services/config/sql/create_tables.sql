@@ -8,7 +8,7 @@ CREATE TABLE businesses(
 CREATE TABLE IF NOT EXISTS customers (
     id SERIAL PRIMARY KEY,
     name VARCHAR(50) NOT NULL,
-    phone VARCHAR(20) NOT NULL
+    phone VARCHAR(10) NOT NULL
 );
 
 CREATE TABLE IF NOT EXISTS item_types (
@@ -25,11 +25,12 @@ CREATE TABLE IF NOT EXISTS items (
     purchase_price DECIMAL(8) NOT NULL,
     price DECIMAL(8) NOT NULL,
     item_type_id INT NOT NULL,
+    CONSTRAINT items_price_check CHECK (purchase_price > 0 AND price > purchase_price),
     FOREIGN KEY (business_id) REFERENCES businesses(id),
     FOREIGN KEY (item_type_id) REFERENCES item_types(id)
 );
 
-CREATE TABLE IF NOT EXISTS ORDERS (
+CREATE TABLE IF NOT EXISTS orders (
     id SERIAL PRIMARY KEY,
     customer_id INT NOT NULL,
     business_id INT NOT NULL,
@@ -38,11 +39,12 @@ CREATE TABLE IF NOT EXISTS ORDERS (
     FOREIGN KEY (business_id) REFERENCES businesses(id)
 );
 
-CREATE TABLE IF NOT EXISTS ORDER_ITEMS (
+CREATE TABLE IF NOT EXISTS order_items (
     id SERIAL PRIMARY KEY,
     order_id INT NOT NULL,
     item_id INT NOT NULL,
-    quantity INT NOT NULL,
+    quantity INT NOT NULL DEFAULT 1,
+    CONSTRAINT order_items_quantity_check CHECK (quantity > 0),
     FOREIGN KEY (order_id) REFERENCES orders(id),
     FOREIGN KEY (item_id) REFERENCES items(id)
 );

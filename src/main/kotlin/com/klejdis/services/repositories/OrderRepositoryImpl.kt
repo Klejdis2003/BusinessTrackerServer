@@ -24,7 +24,7 @@ class OrderRepositoryImpl(
     private fun fetchJoinedTablesWithConditions(
         conditions: List<() -> ColumnDeclaring<Boolean>>
     ): List<Order>{
-        val orderIdItemsMap = mutableMapOf<Int, MutableList<Item>>()
+        val orderIdItemsMap = mutableMapOf<Int, MutableList<OrderItem>>()
         val orderMap = mutableMapOf<Int, Order>()
         fetchJoinedTables()
             .whereWithConditions { conditions.forEach { condition ->
@@ -33,7 +33,10 @@ class OrderRepositoryImpl(
             .forEach {
                 val item = Items.createEntity(it)
                 val order = Orders.createEntity(it).apply { business = item.business }
-                orderIdItemsMap.getOrPut(order.id) { mutableListOf() }.add(item)
+                orderIdItemsMap
+                    .getOrPut(order.id) { mutableListOf() }
+                        .add(OrderItem(item, it[OrderItems.quantity] as Int))
+
                 orderMap.putIfAbsent(order.id, order)
             }
         return orderMap.map { (_, order) ->
@@ -68,6 +71,14 @@ class OrderRepositoryImpl(
 
     override suspend fun create(entity: Order): Order {
         val id = database.orders.add(entity)
+        database.batchInsert(OrderItems) {
+            entity.items.forEach { orderItem ->
+                item {
+                    set(it.itemId , orderItem.item.id)
+                    set(it.orderId, id)
+                }
+            }
+        }
         entity.id = id
         return entity
     }
