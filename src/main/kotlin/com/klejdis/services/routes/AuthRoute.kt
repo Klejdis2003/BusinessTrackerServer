@@ -3,6 +3,7 @@ package com.klejdis.services.routes
 import com.klejdis.services.model.ProfileInfo
 import com.klejdis.services.model.Session
 import com.klejdis.services.plugins.HOME_ROUTE
+import com.klejdis.services.plugins.getSession
 import com.klejdis.services.plugins.redirects
 import com.klejdis.services.services.AuthenticationService
 import com.klejdis.services.services.OAuthenticationService
@@ -39,6 +40,6 @@ fun Route.authRoute() {
 
 suspend fun RoutingCall.getProfileInfoFromSession(): ProfileInfo? {
     val authenticationService by inject<OAuthenticationService>()
-    val session = sessions.get<Session>()
+    val session = getSession()
     return session?.let { authenticationService.getProfileInfoFromToken(it.token) }
 }

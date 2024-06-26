@@ -37,7 +37,7 @@ class BusinessRepositoryImpl(
         return entity
     }
 
-    override suspend fun update(id: Int): Business {
+    override suspend fun update(entity: Business): Business {
         return Business()
     }
 

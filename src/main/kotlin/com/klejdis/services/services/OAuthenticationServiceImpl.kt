@@ -87,7 +87,6 @@ class OAuthenticationServiceImpl(
                 )
             )
         }
-        println(response.status )
         return response.status == HttpStatusCode.OK
     }
 

@@ -65,8 +65,10 @@ fun Application.configureRouting() {
         }
         get ("/logout"){
             val authToken = call.getSession()?.token
-            if(authToken == null)
+            if(authToken == null) {
                 call.respond(HttpStatusCode.Unauthorized, "You are not logged in.")
+                return@get
+            }
 
             oAuthenticationService.logout(authToken!!)
             call.sessions.clear<Session>()

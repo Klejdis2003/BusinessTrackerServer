@@ -5,6 +5,7 @@ import com.klejdis.services.Mode
 import com.klejdis.services.model.Businesses
 import com.klejdis.services.model.ItemTypes
 import com.klejdis.services.model.Items
+import com.klejdis.services.model.Orders
 
 import com.klejdis.services.util.parseSqlFile
 import io.ktor.server.application.*
@@ -28,6 +29,7 @@ val postgresDatabase: Database by lazy { configuredDB() }
 val Database.items get() = this.sequenceOf(Items)
 val Database.itemTypes get() = this.sequenceOf(ItemTypes)
 val Database.accounts get() = this.sequenceOf(Businesses)
+val Database.orders get() = this.sequenceOf(Orders)
 
 private object DBService {
     private fun executeSqlFile(fileName: String) {

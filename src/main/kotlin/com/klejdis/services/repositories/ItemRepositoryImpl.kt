@@ -43,7 +43,7 @@ class ItemRepositoryImpl(
         return entity
     }
 
-    override suspend fun update(id: Int): Item {
+    override suspend fun update(entity: Item): Item {
         return Item()
     }
 

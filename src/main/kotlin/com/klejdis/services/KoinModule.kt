@@ -7,10 +7,7 @@ import com.klejdis.services.dto.BusinessMapper
 import com.klejdis.services.dto.ItemMapper
 import com.klejdis.services.dto.OrderMapper
 import com.klejdis.services.repositories.*
-import com.klejdis.services.services.AuthenticationService
-import com.klejdis.services.services.BusinessService
-import com.klejdis.services.services.OAuthenticationService
-import com.klejdis.services.services.OAuthenticationServiceImpl
+import com.klejdis.services.services.*
 import io.github.cdimascio.dotenv.Dotenv
 import io.ktor.client.*
 import io.ktor.client.engine.cio.*
@@ -42,13 +39,15 @@ val appModule = module {
     //mappers
     single<BusinessMapper> { BusinessMapper() }
     single<OrderMapper> { OrderMapper(ItemMapper()) }
+    single<ItemMapper> { ItemMapper() }
 
     //services
 
-    single<BusinessService> { BusinessService(get(), get(), get()) }
+    single<BusinessService> { BusinessService(get(), get(), get(), get()) }
     single<OAuthenticationService> {
         OAuthenticationServiceImpl(get(), get(), get())
     }
+    single<OrderService> { OrderService(get(), get()) }
 
 
 }

@@ -6,12 +6,19 @@ import com.klejdis.services.model.ItemType
 import kotlinx.serialization.Serializable
 
 @Serializable
-class ItemDto(
+data class ItemDto(
     val id: Int,
     val name: String,
     val purchasePrice: Int,
     val price: Int,
-    val type: String
+    val type: ItemTypeDto
+)
+
+@Serializable
+data class ItemTypeDto(
+    val id: Int,
+    val name: String,
+    val description: String
 )
 
 class ItemMapper{
@@ -21,8 +28,27 @@ class ItemMapper{
             name = item.name,
             purchasePrice = item.purchasePrice,
             price = item.price,
-            type = item.type.name
+            type = ItemTypeDto(
+                id = item.type.id,
+                name = item.type.name,
+                description = item.type.description
+            )
         )
     }
+
+    fun toEntity(dto: ItemDto): Item {
+        return Item {
+            this.id = dto.id
+            this.name = dto.name
+            this.purchasePrice = dto.purchasePrice
+            this.price = dto.price
+            this.type = ItemType {
+                this.id = dto.type.id
+                this.name = dto.type.name
+                this.description = dto.type.description
+            }
+        }
+    }
+
 
 }

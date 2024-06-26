@@ -25,7 +25,6 @@ interface Item: Entity<Item> {
     var purchasePrice: Int
     var price: Int
     var type: ItemType
-    fun toDto(): ItemDto = ItemDto(id, name, purchasePrice, price, type.name)
 }
 
 object Items: Table<Item>("items") {

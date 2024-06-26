@@ -4,16 +4,16 @@ import com.klejdis.services.dto.BusinessMapper
 import com.klejdis.services.dto.BusinessDto
 import com.klejdis.services.model.Business
 import com.klejdis.services.dto.ItemDto
+import com.klejdis.services.dto.ItemMapper
 import com.klejdis.services.repositories.BusinessRepository
 import com.klejdis.services.repositories.ItemRepository
-import org.postgresql.util.PSQLException
-import org.postgresql.util.PSQLState
 
 class BusinessService(
     private val businessRepository: BusinessRepository,
     private val itemRepository: ItemRepository,
-    private val businessMapper: BusinessMapper
-)  {
+    private val businessMapper: BusinessMapper,
+    private val itemMapper: ItemMapper
+): Service<Business>("Business")  {
 
     suspend fun get(id: Int): BusinessDto? {
         val account = businessRepository.get(id)
@@ -29,23 +29,15 @@ class BusinessService(
 
     suspend fun getBusinessItems(ownerEmail: String): List<ItemDto> {
         val items = itemRepository.getByBusinessOwnerEmail(ownerEmail)
-        return items.map { it.toDto() }
+        return items.map { itemMapper.toItemDto(it) }
     }
 
     suspend fun create(ownerEmail: String): BusinessDto {
         val business = Business {
             this.ownerEmail = ownerEmail
         }
-        try {
-            val createdBusiness = businessRepository.create(business)
-            return businessMapper.toBusinessDto(createdBusiness)
-        }
-        catch (e: PSQLException) {
-            if (e.sqlState == PSQLState.UNIQUE_VIOLATION.state) {
-                throw IllegalArgumentException("Business with email $ownerEmail already exists")
-            }
-            throw e
-        }
+        val newBusiness = super.executeCreateBlock { businessRepository.create(business) }
+        return businessMapper.toBusinessDto(newBusiness)
     }
 
     suspend fun createIfNotExists(ownerEmail: String) {
@@ -53,7 +45,9 @@ class BusinessService(
             create(ownerEmail)
             println("NEW BUSINESS. Email=$ownerEmail")
         }
-        catch (_: IllegalArgumentException) { }
+        catch (_: EntityAlreadyExistsException) {
+            println("BUSINESS with email=$ownerEmail already exists. Skipping creation.")
+        }
     }
 
 

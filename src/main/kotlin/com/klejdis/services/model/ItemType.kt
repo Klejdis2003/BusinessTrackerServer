@@ -7,7 +7,7 @@ import org.ktorm.schema.varchar
 
 interface ItemType: Entity<ItemType> {
     companion object: Entity.Factory<ItemType>()
-    val id: Int
+    var id: Int
     var name: String
     var description: String
 }
