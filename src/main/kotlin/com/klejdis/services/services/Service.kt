@@ -64,15 +64,7 @@ open class Service<T: Entity<T>>(
     }
 }
 
-/**
- * A custom exception handler for Postgres exceptions.
- * @property uniqueViolation The exception to throw when a unique violation occurs.
- * @property notNullViolation The exception to throw when a not null violation occurs.
- * @property checkViolation The exception to throw when a check violation occurs.
- * @property foreignKeyViolation The exception to throw when a foreign key violation occurs.
- * @property default The default exception to throw when the SQL state is not recognized.
 
- */
 class PSQLExceptionHandler{
     private fun extractEntityName(e: PSQLException): String {
         return e.serverErrorMessage?.table?.let { it ->

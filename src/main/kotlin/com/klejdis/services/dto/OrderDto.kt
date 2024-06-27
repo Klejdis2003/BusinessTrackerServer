@@ -20,7 +20,13 @@ data class OrderCreationDto(
     val date: String,
     val customerPhone: String,
     val items: List<OrderItemDto>
-)
+) {
+    init {
+        require(items.isNotEmpty()) { "Order must have at least one item." }
+        require(customerPhone.length == 10) { "Customer phone number must be 10 digits long." }
+    }
+
+}
 
 @Serializable
 data class OrderItemDto(
