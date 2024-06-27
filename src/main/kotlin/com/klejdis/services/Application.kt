@@ -5,7 +5,6 @@ import com.klejdis.services.plugins.*
 import io.github.cdimascio.dotenv.Dotenv
 import io.ktor.network.tls.certificates.*
 import io.ktor.server.application.*
-import io.ktor.server.auth.*
 import io.ktor.server.engine.*
 import io.ktor.server.netty.*
 import org.koin.core.context.startKoin

@@ -17,7 +17,7 @@ class OrderRepositoryImpl(
             .from(Orders)
             .innerJoin(OrderItems, on = OrderItems.orderId eq Orders.id)
             .innerJoin(Items, on = OrderItems.itemId eq Items.id)
-            .innerJoin(Customers, on = Orders.customerId eq Customers.id)
+            .innerJoin(Customers, on = Orders.customerPhone eq Customers.phone)
             .innerJoin(Businesses, on = Orders.businessId eq Businesses.id)
             .innerJoin(ItemTypes, on = Items.type eq ItemTypes.id)
             .select()
@@ -81,7 +81,7 @@ class OrderRepositoryImpl(
                 }
             }
         }
-        return entity
+        return get(entity.id)!!
     }
 
     override suspend fun update(entity: Order): Order {

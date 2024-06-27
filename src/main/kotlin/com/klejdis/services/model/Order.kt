@@ -4,6 +4,7 @@ import org.ktorm.entity.Entity
 import org.ktorm.schema.Table
 import org.ktorm.schema.date
 import org.ktorm.schema.int
+import org.ktorm.schema.varchar
 import java.time.LocalDate
 
 interface Order: Entity<Order> {
@@ -18,7 +19,7 @@ interface Order: Entity<Order> {
 object Orders: Table<Order>("orders") {
     val id = int("id").primaryKey().bindTo { it.id }
     val businessId = int("business_id").references(Businesses) { it.business }
-    val customerId = int("customer_id").references(Customers) { it.customer }
+    val customerPhone = varchar("customer_phone").references(Customers) { it.customer }
     val date = date("date").bindTo { it.date }
 }
 

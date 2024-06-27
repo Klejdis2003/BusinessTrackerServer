@@ -11,7 +11,8 @@ class OrderService(
     private val orderRepository: OrderRepository,
     private val businessRepository: BusinessRepository,
     private val orderMapper: OrderMapper
-): Service<Order>("Order") {
+): Service<Order>(
+    "Order") {
     suspend fun get(id: Int) =
         orderRepository.get(id)?.let { orderMapper.toOrderDto(it) }
     suspend fun getByBusinessId(businessId: Int) =

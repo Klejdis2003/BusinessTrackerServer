@@ -1,6 +1,7 @@
 package com.klejdis.services.dto
 
 import com.klejdis.services.model.Business
+import com.klejdis.services.model.Customer
 import com.klejdis.services.model.Order
 import com.klejdis.services.model.OrderItem
 import kotlinx.serialization.Serializable
@@ -17,7 +18,7 @@ data class OrderDto(
 @Serializable
 data class OrderCreationDto(
     val date: String,
-    val customer: CustomerDto,
+    val customerPhone: String,
     val items: List<OrderItemDto>
 )
 
@@ -48,7 +49,7 @@ class OrderMapper(
     fun toOrderCreationDto(order: Order): OrderCreationDto {
         return OrderCreationDto(
             date = order.date.toString(),
-            customer = customerMapper.toCustomerDto(order.customer),
+            customerPhone = order.customer.phone,
             items = order.items.map {
                 OrderItemDto(
                     item = itemMapper.toItemDto(it.item),
@@ -67,7 +68,7 @@ class OrderMapper(
                     quantity = it.quantity
                 )
             }
-            this.customer = customerMapper.toEntity(dto.customer)
+            this.customer = Customer{phone = dto.customerPhone}
             this.business = business
         }
     }

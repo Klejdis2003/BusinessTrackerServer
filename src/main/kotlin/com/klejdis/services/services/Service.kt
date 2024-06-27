@@ -8,29 +8,20 @@ import kotlin.jvm.Throws
 /**
  * A general purpose service class for handling basic CRUD operations and exceptions.
  * Can be extended to provide more specific functionality.
+ * @param T The entity type to handle.
+ * @property entityName The name of the entity to handle.
+ * @property psqlExceptionHandler A custom exception handler for Postgres exceptions. Only set the fields that
+ * need to be customized, the rest will be automatically set to default values
+ * @constructor Creates a new service with the given entity name and an optional custom exception handler.
  */
 open class Service<T: Entity<T>>(
-    private val entityName : String
+    private val entityName : String,
+    private var psqlExceptionHandler: PSQLExceptionHandler = PSQLExceptionHandler()
 ) {
-    /**
-     * Handles Postgres exceptions and returns a more user-friendly error message.
-     * For more specific error messages and handling, it can be overridden in a subclass.
-     * @param e The Postgres exception to handle.
-     * @return The user-friendly exception.
-     */
-    open fun handlePSQLException(e: PSQLException): Exception {
-        e.printStackTraceIfInDevMode()
-        return when (e.sqlState) {
-            PSQLState.UNIQUE_VIOLATION.state -> EntityAlreadyExistsException("$entityName already exists. Cannot create a duplicate.")
-            PSQLState.NOT_NULL_VIOLATION.state -> IllegalArgumentException("Invalid input. Required fields are missing.")
-            PSQLState.CHECK_VIOLATION.state -> IllegalArgumentException("Invalid input. Check constraints failed.")
-            else -> e
-        }
-    }
 
     /**
      * Pass the code to create a new entity as a lambda. Error handling is done automatically through
-     * the [handlePSQLException] method. If you want to customize error handling, override that method.
+     * the [handlePSQLException] method.
      * @param block The code to create a new entity.
      * @return The created entity.
      * @throws EntityAlreadyExistsException If the entity already exists in the database.
@@ -42,7 +33,7 @@ open class Service<T: Entity<T>>(
         return try {
             block()
         } catch (e: PSQLException) {
-            throw handlePSQLException(e)
+            throw psqlExceptionHandler.handle(e)
         }
         catch (e: Exception) {
             e.printStackTrace()
@@ -56,7 +47,8 @@ open class Service<T: Entity<T>>(
      * Pass the code to update an entity as a lambda. Error handling is done automatically.
      * @param block The code to update an entity.
      * @return The updated entity
-     * @throws EntityNotFoundException If the entity does not exist in the database.
+     * @throws EntityNotFoundException If a related entity does not exist.
+     * @throws EntityAlreadyExistsException If the entity to be created already exists in the database.
      * @throws IllegalArgumentException If the input is invalid.
      * @throws PSQLException If a general database error occurs.
      * @throws Exception If an unknown error occurs.
@@ -65,10 +57,78 @@ open class Service<T: Entity<T>>(
         return try {
             block()
         } catch (e: PSQLException) {
-            throw handlePSQLException(e)
+            throw psqlExceptionHandler.handle(e)
         } catch (e: IllegalArgumentException) {
             throw e
         }
     }
+}
 
+/**
+ * A custom exception handler for Postgres exceptions.
+ * @property uniqueViolation The exception to throw when a unique violation occurs.
+ * @property notNullViolation The exception to throw when a not null violation occurs.
+ * @property checkViolation The exception to throw when a check violation occurs.
+ * @property foreignKeyViolation The exception to throw when a foreign key violation occurs.
+ * @property default The default exception to throw when the SQL state is not recognized.
+
+ */
+class PSQLExceptionHandler{
+    private fun extractEntityName(e: PSQLException): String {
+        return e.serverErrorMessage?.table?.let { it ->
+            val violation =  e.serverErrorMessage?.constraint?.replace(it, "") ?: ""
+            val entity = violation
+                .substringAfter("_")
+                .substringBefore("_")
+                .replaceFirstChar { it.uppercase() }
+            entity
+        } ?: ""
+    }
+
+    private fun convertViolationToVerb(e: PSQLException): String {
+        return when (e.sqlState) {
+            PSQLState.UNIQUE_VIOLATION.state -> "already exists"
+            PSQLState.NOT_NULL_VIOLATION.state -> "missing"
+            PSQLState.CHECK_VIOLATION.state -> "failed check constraint"
+            PSQLState.FOREIGN_KEY_VIOLATION.state -> "does not exist"
+            else -> "Unknown violation"
+        }
+    }
+
+    private fun extractField(e: PSQLException): String {
+        return e.serverErrorMessage?.detail
+            ?.substringAfter("(")
+            ?.substringBefore(")")
+            ?.replace("${extractEntityName(e).lowercase()}_", "")
+            ?: ""
+    }
+
+    private fun extractFieldValue(e: PSQLException): String {
+        return e.serverErrorMessage?.detail
+            ?.substringAfter("=(")
+            ?.substringBefore(")")
+            ?: ""
+    }
+
+    private fun structureErrorMessageData(e: PSQLException): String {
+        return "${extractEntityName(e)} with ${extractField(e)}=${extractFieldValue(e)} ${convertViolationToVerb(e)}."
+    }
+
+    /**
+     * Handles a Postgres exception by checking the SQL state and returning the appropriate exception.
+     * @param e The Postgres exception to handle.
+     * @return The appropriate exception to throw.
+     */
+    fun handle(e: PSQLException): Exception {
+        e.printStackTraceIfInDevMode()
+
+        val errorMessage = structureErrorMessageData(e)
+        return when (e.sqlState) {
+            PSQLState.UNIQUE_VIOLATION.state -> EntityAlreadyExistsException(errorMessage)
+            PSQLState.NOT_NULL_VIOLATION.state -> IllegalArgumentException(errorMessage)
+            PSQLState.CHECK_VIOLATION.state -> IllegalArgumentException(errorMessage)
+            PSQLState.FOREIGN_KEY_VIOLATION.state ->  EntityNotFoundException(errorMessage)
+            else -> Exception("An unknown database error occurred.")
+        }
+    }
 }
