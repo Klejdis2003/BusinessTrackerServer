@@ -4,6 +4,7 @@ package com.klejdis.services
 import com.klejdis.services.config.JwtConfig
 import com.klejdis.services.config.postgresDatabase
 import com.klejdis.services.dto.BusinessMapper
+import com.klejdis.services.dto.CustomerMapper
 import com.klejdis.services.dto.ItemMapper
 import com.klejdis.services.dto.OrderMapper
 import com.klejdis.services.repositories.*
@@ -19,14 +20,15 @@ import org.koin.dsl.module
 
 val appModule = module {
     //config
+    single<Json> { Json {
+        prettyPrint = true
+        ignoreUnknownKeys = true
+    } }
     single<Dotenv> { dotenvVault() }
     single<JwtConfig> { JwtConfig(get()) }
     single<HttpClient> { HttpClient(CIO){
         install(ContentNegotiation){
-            json(Json {
-                prettyPrint = true
-                ignoreUnknownKeys = true
-            })
+            json(get())
         } 
 
     }
@@ -38,8 +40,10 @@ val appModule = module {
 
     //mappers
     single<BusinessMapper> { BusinessMapper() }
-    single<OrderMapper> { OrderMapper(ItemMapper()) }
+    single<CustomerMapper> { CustomerMapper() }
     single<ItemMapper> { ItemMapper() }
+    single<OrderMapper> { OrderMapper(get(), get())}
+
 
     //services
 
@@ -47,7 +51,7 @@ val appModule = module {
     single<OAuthenticationService> {
         OAuthenticationServiceImpl(get(), get(), get())
     }
-    single<OrderService> { OrderService(get(), get()) }
+    single<OrderService> { OrderService(get(), get(), get()) }
 
 
 }

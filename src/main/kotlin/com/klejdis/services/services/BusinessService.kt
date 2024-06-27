@@ -36,7 +36,7 @@ class BusinessService(
         val business = Business {
             this.ownerEmail = ownerEmail
         }
-        val newBusiness = super.executeCreateBlock { businessRepository.create(business) }
+        val newBusiness = super.executeCreateBlockWithErrorHandling { businessRepository.create(business) }
         return businessMapper.toBusinessDto(newBusiness)
     }
 

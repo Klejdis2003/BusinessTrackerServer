@@ -12,8 +12,14 @@ import kotlin.jvm.Throws
 open class Service<T: Entity<T>>(
     private val entityName : String
 ) {
-    fun handlePSQLException(e: PSQLException, message: String = ""): Exception {
-        println(e.sqlState)
+    /**
+     * Handles Postgres exceptions and returns a more user-friendly error message.
+     * For more specific error messages and handling, it can be overridden in a subclass.
+     * @param e The Postgres exception to handle.
+     * @return The user-friendly exception.
+     */
+    open fun handlePSQLException(e: PSQLException): Exception {
+        e.printStackTraceIfInDevMode()
         return when (e.sqlState) {
             PSQLState.UNIQUE_VIOLATION.state -> EntityAlreadyExistsException("$entityName already exists. Cannot create a duplicate.")
             PSQLState.NOT_NULL_VIOLATION.state -> IllegalArgumentException("Invalid input. Required fields are missing.")
@@ -22,23 +28,24 @@ open class Service<T: Entity<T>>(
         }
     }
 
-    @Throws(EntityAlreadyExistsException::class)
     /**
-     * Pass the code to create a new entity as a lambda. Error handling is done automatically.
+     * Pass the code to create a new entity as a lambda. Error handling is done automatically through
+     * the [handlePSQLException] method. If you want to customize error handling, override that method.
      * @param block The code to create a new entity.
-     * @return The created entity
+     * @return The created entity.
      * @throws EntityAlreadyExistsException If the entity already exists in the database.
      * @throws IllegalArgumentException If the input is invalid.
      * @throws PSQLException If a general database error occurs.
      * @throws Exception If an unknown error occurs.
      */
-    suspend fun executeCreateBlock (block: suspend () -> T): T {
+    suspend fun executeCreateBlockWithErrorHandling (block: suspend () -> T): T {
         return try {
             block()
         } catch (e: PSQLException) {
             throw handlePSQLException(e)
         }
         catch (e: Exception) {
+            e.printStackTrace()
             throw Exception("An unknown error occurred.")
         }
 

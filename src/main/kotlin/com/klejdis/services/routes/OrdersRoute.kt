@@ -1,7 +1,11 @@
 package com.klejdis.services.routes
 
+import com.klejdis.services.dto.OrderCreationDto
+import com.klejdis.services.dto.OrderDto
+import com.klejdis.services.model.Order
 import com.klejdis.services.services.OrderService
 import io.ktor.http.*
+import io.ktor.server.request.*
 import io.ktor.server.response.*
 import io.ktor.server.routing.*
 import org.koin.ktor.ext.inject
@@ -13,6 +17,12 @@ fun Route.ordersRoute() {
             val business = call.getProfileInfoFromSession() ?: return@get call.respond(HttpStatusCode.Unauthorized)
             val orders = orderService.getByBusinessOwnerEmail(business.email)
             call.respond(orders)
+        }
+        post {
+            val business = call.getProfileInfoFromSession() ?: return@post call.respond(HttpStatusCode.Unauthorized)
+            val order = call.receive<OrderCreationDto>()
+            val newOrder = orderService.create(order, business.email)
+            call.respond(newOrder)
         }
         get("/{id}") {
             val id = call.parameters["id"]?.toIntOrNull()

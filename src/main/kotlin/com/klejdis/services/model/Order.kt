@@ -1,6 +1,5 @@
 package com.klejdis.services.model
 
-
 import org.ktorm.entity.Entity
 import org.ktorm.schema.Table
 import org.ktorm.schema.date
@@ -11,15 +10,15 @@ interface Order: Entity<Order> {
     companion object: Entity.Factory<Order>()
     var id: Int
     var business: Business
+    var customer: Customer
     var date: LocalDate
     var items: List<OrderItem>
 }
 
-
-
 object Orders: Table<Order>("orders") {
     val id = int("id").primaryKey().bindTo { it.id }
     val businessId = int("business_id").references(Businesses) { it.business }
+    val customerId = int("customer_id").references(Customers) { it.customer }
     val date = date("date").bindTo { it.date }
 }
 

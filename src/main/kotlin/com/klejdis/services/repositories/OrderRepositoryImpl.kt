@@ -17,6 +17,7 @@ class OrderRepositoryImpl(
             .from(Orders)
             .innerJoin(OrderItems, on = OrderItems.orderId eq Orders.id)
             .innerJoin(Items, on = OrderItems.itemId eq Items.id)
+            .innerJoin(Customers, on = Orders.customerId eq Customers.id)
             .innerJoin(Businesses, on = Orders.businessId eq Businesses.id)
             .innerJoin(ItemTypes, on = Items.type eq ItemTypes.id)
             .select()
@@ -70,16 +71,16 @@ class OrderRepositoryImpl(
     }
 
     override suspend fun create(entity: Order): Order {
-        val id = database.orders.add(entity)
+        val affectedRecords = database.orders.add(entity)
+        if (affectedRecords == 0) throw Exception("Failed to create order")
         database.batchInsert(OrderItems) {
             entity.items.forEach { orderItem ->
                 item {
                     set(it.itemId , orderItem.item.id)
-                    set(it.orderId, id)
+                    set(it.orderId, entity.id)
                 }
             }
         }
-        entity.id = id
         return entity
     }
 
