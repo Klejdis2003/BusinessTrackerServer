@@ -2,6 +2,7 @@ package com.klejdis.services.repositories
 
 
 import com.klejdis.services.config.orders
+import com.klejdis.services.filters.OrderFilterTransformer
 import com.klejdis.services.model.*
 import org.ktorm.database.Database
 import org.ktorm.dsl.*
@@ -10,9 +11,10 @@ import org.ktorm.entity.update
 import org.ktorm.schema.ColumnDeclaring
 
 class OrderRepositoryImpl(
-    private val database: Database
-): OrderRepository {
-    private fun fetchJoinedTables() : Query {
+    private val database: Database,
+    private val orderFilterTransformer: OrderFilterTransformer
+) : OrderRepository {
+    private fun fetchJoinedTables(): Query {
         return database
             .from(Orders)
             .innerJoin(OrderItems, on = OrderItems.orderId eq Orders.id)
@@ -22,31 +24,35 @@ class OrderRepositoryImpl(
             .innerJoin(ItemTypes, on = Items.type eq ItemTypes.id)
             .select()
     }
+
     private fun fetchJoinedTablesWithConditions(
         conditions: List<() -> ColumnDeclaring<Boolean>>
-    ): List<Order>{
+    ): List<Order> {
         val orderIdItemsMap = mutableMapOf<Int, MutableList<OrderItem>>()
         val orderMap = mutableMapOf<Int, Order>()
         fetchJoinedTables()
-            .whereWithConditions { conditions.forEach { condition ->
-                it += condition()
-            } }
+            .whereWithConditions {
+                conditions.forEach { condition ->
+                    it += condition()
+                }
+            }
             .forEach {
                 val item = Items.createEntity(it)
                 val order = Orders.createEntity(it).apply { business = item.business }
                 orderIdItemsMap
                     .getOrPut(order.id) { mutableListOf() }
-                        .add(OrderItem(item, it[OrderItems.quantity] as Int))
+                    .add(OrderItem(item, it[OrderItems.quantity] as Int))
 
                 orderMap.putIfAbsent(order.id, order)
             }
         return orderMap.map { (_, order) ->
-            order.apply { items = orderIdItemsMap[order.id] ?: emptyList() } }
+            order.apply { items = orderIdItemsMap[order.id] ?: emptyList() }
+        }
     }
 
     private fun fetchJoinedTablesWithCondition(
         condition: () -> ColumnDeclaring<Boolean>
-    ): List<Order>{
+    ): List<Order> {
         return fetchJoinedTablesWithConditions(listOf(condition))
     }
 
@@ -54,8 +60,11 @@ class OrderRepositoryImpl(
         return fetchJoinedTablesWithCondition { Orders.businessId eq businessId }
     }
 
-    override suspend fun getByBusinessOwnerEmail(email: String): List<Order> {
-        return fetchJoinedTablesWithCondition { Businesses.ownerEmail eq email }
+    override suspend fun getByBusinessOwnerEmail(email: String, filters: Map<String, String>): List<Order> {
+        val transformedFilters = orderFilterTransformer.generateTransformedFilters(filters)
+                    as MutableList<() -> ColumnDeclaring<Boolean>>
+        transformedFilters.add { Businesses.ownerEmail eq email }
+        return fetchJoinedTablesWithConditions(transformedFilters)
     }
 
     override suspend fun getByIdAndBusinessOwnerEmail(id: Int, email: String): Order? {
@@ -76,7 +85,7 @@ class OrderRepositoryImpl(
         database.batchInsert(OrderItems) {
             entity.items.forEach { orderItem ->
                 item {
-                    set(it.itemId , orderItem.item.id)
+                    set(it.itemId, orderItem.item.id)
                     set(it.orderId, entity.id)
                 }
             }
@@ -90,6 +99,6 @@ class OrderRepositoryImpl(
     }
 
     override suspend fun delete(id: Int): Boolean {
-        return database.delete(Orders){ it.id eq id } > 0
+        return database.delete(Orders) { it.id eq id } > 0
     }
 }

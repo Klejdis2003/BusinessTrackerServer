@@ -1,10 +1,10 @@
 package com.klejdis.services.services
 
-import com.klejdis.services.dto.BusinessMapper
 import com.klejdis.services.dto.BusinessDto
-import com.klejdis.services.model.Business
+import com.klejdis.services.dto.BusinessMapper
 import com.klejdis.services.dto.ItemDto
 import com.klejdis.services.dto.ItemMapper
+import com.klejdis.services.model.Business
 import com.klejdis.services.repositories.BusinessRepository
 import com.klejdis.services.repositories.ItemRepository
 
@@ -13,7 +13,7 @@ class BusinessService(
     private val itemRepository: ItemRepository,
     private val businessMapper: BusinessMapper,
     private val itemMapper: ItemMapper
-): Service<Business>("Business")  {
+) : Service<Business>("Business") {
 
     suspend fun get(id: Int): BusinessDto? {
         val account = businessRepository.get(id)
@@ -44,8 +44,7 @@ class BusinessService(
         try {
             create(ownerEmail)
             println("NEW BUSINESS. Email=$ownerEmail")
-        }
-        catch (_: EntityAlreadyExistsException) {
+        } catch (_: EntityAlreadyExistsException) {
             println("BUSINESS with email=$ownerEmail already exists. Skipping creation.")
         }
     }
@@ -55,7 +54,7 @@ class BusinessService(
         return businessMapper.toBusinessDto(Business())
     }
 
-     suspend fun delete(id: Int): Boolean {
+    suspend fun delete(id: Int): Boolean {
         return false
     }
 }

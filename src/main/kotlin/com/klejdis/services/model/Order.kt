@@ -7,8 +7,9 @@ import org.ktorm.schema.int
 import org.ktorm.schema.varchar
 import java.time.LocalDate
 
-interface Order: Entity<Order> {
-    companion object: Entity.Factory<Order>()
+interface Order : Entity<Order> {
+    companion object : Entity.Factory<Order>()
+
     var id: Int
     var business: Business
     var customer: Customer
@@ -16,7 +17,7 @@ interface Order: Entity<Order> {
     var items: List<OrderItem>
 }
 
-object Orders: Table<Order>("orders") {
+object Orders : Table<Order>("orders") {
     val id = int("id").primaryKey().bindTo { it.id }
     val businessId = int("business_id").references(Businesses) { it.business }
     val customerPhone = varchar("customer_phone").references(Customers) { it.customer }
@@ -28,7 +29,7 @@ data class OrderItem(
     val quantity: Int
 )
 
-object OrderItems: Table<Nothing>("order_items") {
+object OrderItems : Table<Nothing>("order_items") {
     val orderId = int("order_id")
     val itemId = int("item_id")
     val quantity = int("quantity")

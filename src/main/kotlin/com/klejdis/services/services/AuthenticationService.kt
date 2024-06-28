@@ -33,4 +33,5 @@ interface AuthenticationService<in K, out T> {
 }
 
 typealias OAuth2Response = OAuthAccessTokenResponse.OAuth2
-interface OAuthenticationService: AuthenticationService<OAuth2Response, ProfileInfo>
+
+interface OAuthenticationService : AuthenticationService<OAuth2Response, ProfileInfo>

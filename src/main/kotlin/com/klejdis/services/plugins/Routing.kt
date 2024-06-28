@@ -39,7 +39,7 @@ fun Application.configureRouting() {
         ordersRoute()
         get(HOME_ROUTE) {
             val userSession = call.getSession()
-            if(userSession != null) {
+            if (userSession != null) {
                 val user = oAuthenticationService.getProfileInfoFromToken(userSession.token)
                 val items = businessService.getBusinessItems(user.email)
                 call.respondHtml {
@@ -55,13 +55,13 @@ fun Application.configureRouting() {
             }
         }
         get("/login") {
-            if(call.sessions.get<Session>() != null)
+            if (call.sessions.get<Session>() != null)
                 call.respondRedirect(HOME_ROUTE)
             else
                 call.respondRedirect("/loginRedirect")
 
         }
-        get ("/logout"){
+        get("/logout") {
             val authToken = call.getSession()?.token
             oAuthenticationService.logout(authToken!!)
             call.sessions.clear<Session>()
@@ -75,8 +75,8 @@ fun Application.configureRouting() {
  */
 suspend fun RoutingCall.getSession(): Session? {
     val session: Session? = sessions.get()
-    if(session == null) {
-        val redirectUrl = url{
+    if (session == null) {
+        val redirectUrl = url {
             protocol = URLProtocol.HTTPS
             port = 8080
             path("/login")

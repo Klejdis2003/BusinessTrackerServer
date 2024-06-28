@@ -37,7 +37,7 @@ data class OrderItemDto(
 class OrderMapper(
     private val itemMapper: ItemMapper,
     private val customerMapper: CustomerMapper
-){
+) {
     fun toOrderDto(order: Order): OrderDto {
         return OrderDto(
             id = order.id,
@@ -74,7 +74,7 @@ class OrderMapper(
                     quantity = it.quantity
                 )
             }
-            this.customer = Customer{phone = dto.customerPhone}
+            this.customer = Customer { phone = dto.customerPhone }
             this.business = business
         }
     }

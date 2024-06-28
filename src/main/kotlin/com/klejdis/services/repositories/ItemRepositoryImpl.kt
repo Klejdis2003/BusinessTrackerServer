@@ -10,7 +10,7 @@ import org.ktorm.entity.add
 
 class ItemRepositoryImpl(
     private val database: Database
-): ItemRepository {
+) : ItemRepository {
 
     override suspend fun get(id: Int): Item? {
         return database
@@ -20,6 +20,7 @@ class ItemRepositoryImpl(
             .map { Items.createEntity(it) }
             .firstOrNull()
     }
+
     override suspend fun getByBusinessId(businessId: Int): List<Item> {
         return database
             .from(Items)
@@ -33,7 +34,7 @@ class ItemRepositoryImpl(
             .from(Items)
             .innerJoin(Businesses, on = Items.businessId eq Businesses.id)
             .select()
-            .where { Businesses.ownerEmail eq email}
+            .where { Businesses.ownerEmail eq email }
             .map { Items.createEntity(it) }
     }
 
@@ -48,6 +49,6 @@ class ItemRepositoryImpl(
     }
 
     override suspend fun delete(id: Int): Boolean {
-        return database.delete(Items){ it.id eq id } > 0
+        return database.delete(Items) { it.id eq id } > 0
     }
 }

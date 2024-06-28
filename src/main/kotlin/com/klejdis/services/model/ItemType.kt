@@ -5,8 +5,9 @@ import org.ktorm.schema.Table
 import org.ktorm.schema.int
 import org.ktorm.schema.varchar
 
-interface ItemType: Entity<ItemType> {
-    companion object: Entity.Factory<ItemType>()
+interface ItemType : Entity<ItemType> {
+    companion object : Entity.Factory<ItemType>()
+
     var id: Int
     var name: String
     var description: String

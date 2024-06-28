@@ -5,7 +5,6 @@ import io.ktor.client.*
 import io.ktor.http.*
 import io.ktor.server.application.*
 import io.ktor.server.auth.*
-import io.ktor.util.*
 import org.koin.ktor.ext.inject
 
 val redirects = mutableMapOf<String, String>()
@@ -35,13 +34,14 @@ fun Application.configureSecurity() {
                 )
 
             urlProvider = { "https://localhost:8080/callback" }
-            providerLookup = {oAuthServerSettings}
+            providerLookup = { oAuthServerSettings }
             client = httpClient
         }
     }
 
 
 }
+
 sealed class AuthMethod(val provider: String) {
     data object OAuth : AuthMethod("auth0-okta")
 }

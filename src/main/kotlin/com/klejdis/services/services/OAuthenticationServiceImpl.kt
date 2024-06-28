@@ -8,16 +8,14 @@ import io.ktor.client.*
 import io.ktor.client.call.*
 import io.ktor.client.request.*
 import io.ktor.http.*
-import io.ktor.server.auth.*
 import io.ktor.server.util.*
-
 
 
 class OAuthenticationServiceImpl(
     private val httpClient: HttpClient,
     private val businessService: BusinessService,
     private val vault: Dotenv
-): OAuthenticationService {
+) : OAuthenticationService {
     private val tokenProfileInfoMap: MutableMap<String, ProfileInfo> = HashMap()
     private val authTokenToTokenResponseMap: MutableMap<String, OAuth2Response> = HashMap()
 
@@ -28,7 +26,7 @@ class OAuthenticationServiceImpl(
      */
     override suspend fun getProfileInfoFromToken(token: String): ProfileInfo {
 
-        if(tokenProfileInfoMap.containsKey(token)) {
+        if (tokenProfileInfoMap.containsKey(token)) {
             println("Profile Info CACHE HIT")
             return tokenProfileInfoMap[token]!!
         }
@@ -62,7 +60,7 @@ class OAuthenticationServiceImpl(
     override suspend fun logout(authToken: String): Boolean {
         val tokenResponse = authTokenToTokenResponseMap[authToken]
         println(authTokenToTokenResponseMap)
-        if(tokenResponse?.refreshToken == null) {
+        if (tokenResponse?.refreshToken == null) {
             println("Logout request with no refresh token. Ignoring.")
             return false
         }
@@ -75,7 +73,7 @@ class OAuthenticationServiceImpl(
     }
 
     private suspend fun makeRevocationRequest(refreshToken: String): Boolean {
-        val response = httpClient.post{
+        val response = httpClient.post {
             url {
                 protocol = URLProtocol.HTTPS
                 host = OAUTH_DOMAIN

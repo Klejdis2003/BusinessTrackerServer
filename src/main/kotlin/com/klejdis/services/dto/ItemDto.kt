@@ -20,7 +20,7 @@ data class ItemTypeDto(
     val description: String
 )
 
-class ItemMapper{
+class ItemMapper {
     fun toItemDto(item: Item): ItemDto {
         return ItemDto(
             id = item.id,

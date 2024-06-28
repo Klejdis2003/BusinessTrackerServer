@@ -15,12 +15,12 @@ data class BusinessDto(
     val ownerEmail: String
 )
 
-class BusinessMapper{
+class BusinessMapper {
     fun toBusinessDto(business: Business): BusinessDto {
         return BusinessDto(
             id = business.id,
             ownerEmail = business.ownerEmail,
         )
     }
-    
+
 }

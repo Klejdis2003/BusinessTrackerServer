@@ -7,8 +7,12 @@ import com.klejdis.services.dto.BusinessMapper
 import com.klejdis.services.dto.CustomerMapper
 import com.klejdis.services.dto.ItemMapper
 import com.klejdis.services.dto.OrderMapper
+import com.klejdis.services.filters.OrderFilterTransformer
 import com.klejdis.services.repositories.*
-import com.klejdis.services.services.*
+import com.klejdis.services.services.BusinessService
+import com.klejdis.services.services.OAuthenticationService
+import com.klejdis.services.services.OAuthenticationServiceImpl
+import com.klejdis.services.services.OrderService
 import io.github.cdimascio.dotenv.Dotenv
 import io.ktor.client.*
 import io.ktor.client.engine.cio.*
@@ -20,29 +24,32 @@ import org.koin.dsl.module
 
 val appModule = module {
     //config
-    single<Json> { Json {
-        prettyPrint = true
-        ignoreUnknownKeys = true
-    } }
+    single<Json> {
+        Json {
+            prettyPrint = true
+            ignoreUnknownKeys = true
+        }
+    }
     single<Dotenv> { dotenvVault() }
     single<JwtConfig> { JwtConfig(get()) }
-    single<HttpClient> { HttpClient(CIO){
-        install(ContentNegotiation){
-            json(get())
-        } 
+    single<HttpClient> {
+        HttpClient(CIO) {
+            install(ContentNegotiation) {
+                json(get())
+            }
 
-    }
+        }
     }
     //repositories
     single<BusinessRepository> { BusinessRepositoryImpl(postgresDatabase) }
     single<ItemRepository> { ItemRepositoryImpl(postgresDatabase) }
-    single<OrderRepository> { OrderRepositoryImpl(postgresDatabase) }
+    single<OrderRepository> { OrderRepositoryImpl(postgresDatabase, get()) }
 
     //mappers
     single<BusinessMapper> { BusinessMapper() }
     single<CustomerMapper> { CustomerMapper() }
     single<ItemMapper> { ItemMapper() }
-    single<OrderMapper> { OrderMapper(get(), get())}
+    single<OrderMapper> { OrderMapper(get(), get()) }
 
 
     //services
@@ -52,6 +59,9 @@ val appModule = module {
         OAuthenticationServiceImpl(get(), get(), get())
     }
     single<OrderService> { OrderService(get(), get(), get()) }
+
+    //filters
+    single<OrderFilterTransformer> { OrderFilterTransformer() }
 
 
 }

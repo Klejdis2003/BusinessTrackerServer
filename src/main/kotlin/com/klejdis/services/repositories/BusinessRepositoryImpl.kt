@@ -5,16 +5,15 @@ import com.klejdis.services.model.Businesses
 import org.ktorm.database.Database
 import org.ktorm.dsl.*
 import org.postgresql.util.PSQLException
-import kotlin.jvm.Throws
 
 class BusinessRepositoryImpl(
     private val database: Database
-): BusinessRepository {
+) : BusinessRepository {
     override suspend fun getByEmail(email: String): Business? {
         return database
             .from(Businesses)
             .select()
-            .where { Businesses.ownerEmail eq email}
+            .where { Businesses.ownerEmail eq email }
             .map { row -> Businesses.createEntity(row) }
             .firstOrNull()
     }

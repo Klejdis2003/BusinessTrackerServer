@@ -5,7 +5,6 @@ import com.klejdis.services.model.Session
 import com.klejdis.services.plugins.HOME_ROUTE
 import com.klejdis.services.plugins.getSession
 import com.klejdis.services.plugins.redirects
-import com.klejdis.services.services.AuthenticationService
 import com.klejdis.services.services.OAuthenticationService
 import io.ktor.server.auth.*
 import io.ktor.server.response.*
@@ -19,8 +18,8 @@ fun Route.authRoute() {
         //Ktor automatically redirects to callback URL
     }
 
-    route("/callback"){
-        get{
+    route("/callback") {
+        get {
             val currentPrincipal: OAuthAccessTokenResponse.OAuth2? = call.principal()
             currentPrincipal?.let { principal ->
                 principal.state?.let { state ->

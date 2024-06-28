@@ -16,5 +16,5 @@ class InvalidUsernameException(
 ) : Exception(message)
 
 fun Exception.printStackTraceIfInDevMode() {
-    if(MODE == Mode.DEV) printStackTrace()
+    if (MODE == Mode.DEV) printStackTrace()
 }

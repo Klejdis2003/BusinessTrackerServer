@@ -1,6 +1,5 @@
 package com.klejdis.services.routes
 
-import com.klejdis.services.dto.AccountRequestDto
 import com.klejdis.services.dto.BusinessDto
 import com.klejdis.services.services.BusinessService
 import com.klejdis.services.services.EntityAlreadyExistsException

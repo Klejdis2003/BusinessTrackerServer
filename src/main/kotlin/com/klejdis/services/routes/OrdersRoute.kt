@@ -10,6 +10,7 @@ import io.ktor.server.plugins.*
 import io.ktor.server.request.*
 import io.ktor.server.response.*
 import io.ktor.server.routing.*
+import io.ktor.util.*
 import org.koin.ktor.ext.inject
 
 fun Route.ordersRoute() {
@@ -25,6 +26,7 @@ fun Route.ordersRoute() {
                 val message = e.cause?.message?.substringBefore("for") ?: e.message
                 call.respond(HttpStatusCode.BadRequest, message ?: "Missing required fields.")
             }
+
             else -> call.respond(HttpStatusCode.InternalServerError, "An unexpected error occurred.")
         }
 
@@ -33,7 +35,8 @@ fun Route.ordersRoute() {
     route("/orders") {
         get {
             val business = call.getProfileInfoFromSession() ?: return@get call.respond(HttpStatusCode.Unauthorized)
-            val orders = orderService.getByBusinessOwnerEmail(business.email)
+            val filters = call.request.queryParameters.toMap().mapValues {it.value.first()}
+            val orders = orderService.getByBusinessOwnerEmail(business.email, filters)
             call.respond(orders)
         }
         post {

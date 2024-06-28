@@ -3,7 +3,6 @@ package com.klejdis.services.services
 import org.ktorm.entity.Entity
 import org.postgresql.util.PSQLException
 import org.postgresql.util.PSQLState
-import kotlin.jvm.Throws
 
 /**
  * A general purpose service class for handling basic CRUD operations and exceptions.
@@ -14,8 +13,8 @@ import kotlin.jvm.Throws
  * need to be customized, the rest will be automatically set to default values
  * @constructor Creates a new service with the given entity name and an optional custom exception handler.
  */
-open class Service<T: Entity<T>>(
-    private val entityName : String,
+open class Service<T : Entity<T>>(
+    private val entityName: String,
     private var psqlExceptionHandler: PSQLExceptionHandler = PSQLExceptionHandler()
 ) {
 
@@ -29,13 +28,12 @@ open class Service<T: Entity<T>>(
      * @throws PSQLException If a general database error occurs.
      * @throws Exception If an unknown error occurs.
      */
-    suspend fun executeCreateBlockWithErrorHandling (block: suspend () -> T): T {
+    suspend fun executeCreateBlockWithErrorHandling(block: suspend () -> T): T {
         return try {
             block()
         } catch (e: PSQLException) {
             throw psqlExceptionHandler.handle(e)
-        }
-        catch (e: Exception) {
+        } catch (e: Exception) {
             e.printStackTrace()
             throw Exception("An unknown error occurred.")
         }
@@ -53,7 +51,7 @@ open class Service<T: Entity<T>>(
      * @throws PSQLException If a general database error occurs.
      * @throws Exception If an unknown error occurs.
      */
-    suspend fun executeUpdateBlock (block: suspend () -> T): T {
+    suspend fun executeUpdateBlock(block: suspend () -> T): T {
         return try {
             block()
         } catch (e: PSQLException) {
@@ -65,10 +63,10 @@ open class Service<T: Entity<T>>(
 }
 
 
-class PSQLExceptionHandler{
+class PSQLExceptionHandler {
     private fun extractEntityName(e: PSQLException): String {
         return e.serverErrorMessage?.table?.let { it ->
-            val violation =  e.serverErrorMessage?.constraint?.replace(it, "") ?: ""
+            val violation = e.serverErrorMessage?.constraint?.replace(it, "") ?: ""
             val entity = violation
                 .substringAfter("_")
                 .substringBefore("_")
@@ -119,7 +117,7 @@ class PSQLExceptionHandler{
             PSQLState.UNIQUE_VIOLATION.state -> EntityAlreadyExistsException(errorMessage)
             PSQLState.NOT_NULL_VIOLATION.state -> IllegalArgumentException(errorMessage)
             PSQLState.CHECK_VIOLATION.state -> IllegalArgumentException(errorMessage)
-            PSQLState.FOREIGN_KEY_VIOLATION.state ->  EntityNotFoundException(errorMessage)
+            PSQLState.FOREIGN_KEY_VIOLATION.state -> EntityNotFoundException(errorMessage)
             else -> Exception("An unknown database error occurred.")
         }
     }

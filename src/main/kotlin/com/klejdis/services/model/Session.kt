@@ -7,5 +7,5 @@ import kotlinx.serialization.Serializable
 data class Session(
     val id: String,
     val token: String,
-): Principal
+) : Principal
 

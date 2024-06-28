@@ -14,7 +14,7 @@ import java.io.File
 val MODE = Mode.DEV
 
 fun main() {
-    startKoin{ modules(appModule) }
+    startKoin { modules(appModule) }
     embeddedServer(
         Netty,
         configure = {
@@ -47,8 +47,8 @@ fun ApplicationEngine.Configuration.configureSSL() {
     sslConnector(
         keyStore = keystore,
         keyAlias = "ssl",
-        keyStorePassword = { vault["KEYSTORE_PASSWORD"].toCharArray()},
-        privateKeyPassword = { vault["PRIVATE_KEY_PASSWORD"].toCharArray()}
+        keyStorePassword = { vault["KEYSTORE_PASSWORD"].toCharArray() },
+        privateKeyPassword = { vault["PRIVATE_KEY_PASSWORD"].toCharArray() }
     ) {
         port = 8080
         keyStorePath = keystoreFile

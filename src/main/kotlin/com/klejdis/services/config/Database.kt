@@ -16,7 +16,7 @@ import org.ktorm.entity.sequenceOf
 private fun configuredDB(): Database {
     val dotenv = dotenvVault()
     val database = Database.connect(
-        url ="jdbc:postgresql://localhost:5432/business_tracker",
+        url = "jdbc:postgresql://localhost:5432/business_tracker",
         driver = "org.postgresql.Driver",
         user = dotenv["POSTGRES_USERNAME"],
         password = dotenv["POSTGRES_PASSWORD"]
@@ -38,14 +38,17 @@ private object DBService {
             conn.createStatement().execute(sql)
         }
     }
+
     fun createTables() {
         executeSqlFile("create_tables")
         println("Tables created successfully")
     }
+
     fun dropTables() {
         executeSqlFile("drop_tables")
         println("Tables dropped successfully")
     }
+
     fun populateTables() {
         executeSqlFile("populate_tables")
         println("Tables populated successfully")
@@ -58,7 +61,7 @@ private object DBService {
  * Always rebuilds the database.
  */
 fun Application.rebuildDatabase() {
-    if(MODE == Mode.PROD) return
+    if (MODE == Mode.PROD) return
     DBService.dropTables()
     DBService.createTables()
     DBService.populateTables()
