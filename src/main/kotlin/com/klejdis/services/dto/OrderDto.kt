@@ -12,7 +12,8 @@ data class OrderDto(
     val id: Int = 0,
     val date: String,
     val customer: CustomerDto,
-    val items: List<OrderItemDto>
+    val items: List<OrderItemDto>,
+    val total: Int
 )
 
 @Serializable
@@ -43,6 +44,7 @@ class OrderMapper(
             id = order.id,
             date = order.date.toString(),
             customer = customerMapper.toCustomerDto(order.customer),
+            total = order.total,
             items = order.items.map {
                 OrderItemDto(
                     item = itemMapper.toItemDto(it.item),
@@ -52,18 +54,6 @@ class OrderMapper(
         )
     }
 
-    fun toOrderCreationDto(order: Order): OrderCreationDto {
-        return OrderCreationDto(
-            date = order.date.toString(),
-            customerPhone = order.customer.phone,
-            items = order.items.map {
-                OrderItemDto(
-                    item = itemMapper.toItemDto(it.item),
-                    quantity = it.quantity
-                )
-            }
-        )
-    }
 
     fun toEntity(dto: OrderCreationDto, business: Business): Order {
         return Order {

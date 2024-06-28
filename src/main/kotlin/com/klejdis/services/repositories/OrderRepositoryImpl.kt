@@ -23,6 +23,7 @@ class OrderRepositoryImpl(
             .innerJoin(Businesses, on = Orders.businessId eq Businesses.id)
             .innerJoin(ItemTypes, on = Items.type eq ItemTypes.id)
             .select()
+
     }
 
     private fun fetchJoinedTablesWithConditions(
@@ -38,12 +39,15 @@ class OrderRepositoryImpl(
             }
             .forEach {
                 val item = Items.createEntity(it)
-                val order = Orders.createEntity(it).apply { business = item.business }
+                val order = Orders.createEntity(it).apply {
+                    business = item.business
+                }
                 orderIdItemsMap
                     .getOrPut(order.id) { mutableListOf() }
                     .add(OrderItem(item, it[OrderItems.quantity] as Int))
 
-                orderMap.putIfAbsent(order.id, order)
+                orderMap.getOrPut(order.id) { order }
+                    .total += item.price * (it[OrderItems.quantity] as Int)
             }
         return orderMap.map { (_, order) ->
             order.apply { items = orderIdItemsMap[order.id] ?: emptyList() }

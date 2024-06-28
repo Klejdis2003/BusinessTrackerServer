@@ -26,6 +26,7 @@ fun Route.ordersRoute() {
                 val message = e.cause?.message?.substringBefore("for") ?: e.message
                 call.respond(HttpStatusCode.BadRequest, message ?: "Missing required fields.")
             }
+            is NoSuchElementException -> call.respond(HttpStatusCode.BadRequest, e.message!!)
 
             else -> call.respond(HttpStatusCode.InternalServerError, "An unexpected error occurred.")
         }
@@ -36,8 +37,13 @@ fun Route.ordersRoute() {
         get {
             val business = call.getProfileInfoFromSession() ?: return@get call.respond(HttpStatusCode.Unauthorized)
             val filters = call.request.queryParameters.toMap().mapValues {it.value.first()}
-            val orders = orderService.getByBusinessOwnerEmail(business.email, filters)
-            call.respond(orders)
+            try{
+                val orders = orderService.getByBusinessOwnerEmail(business.email, filters)
+                call.respond(orders)
+            } catch (e: Exception) {
+                handleException(e, call)
+            }
+
         }
         post {
             val business = call.getProfileInfoFromSession() ?: return@post call.respond(HttpStatusCode.Unauthorized)

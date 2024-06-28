@@ -19,11 +19,12 @@ abstract class FilterTransformer<out R>(private val filterTypeClass: KClass<out 
      * Transforms a map of filters into a list of filters that can be applied to the persistence layer.
      * @param values a map of filters where the key is the name of the filter and the value is the value of the filter
      * @return a list of filters that can be applied to the persistence layer
+     * @throws NoSuchElementException if a filter is not found
      */
     fun generateTransformedFilters(values: Map<String, String>): List<R> {
         return values.map { (key, value) ->
             availableFilters[key]?.transform(value)
-                ?: throw NoSuchElementException("Filter $key not found")
+                ?: throw NoSuchElementException("Filter $key is invalid")
         }
     }
 }
