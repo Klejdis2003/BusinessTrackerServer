@@ -64,6 +64,25 @@ open class Service<T : Entity<T>>(
 
 
 class PSQLExceptionHandler {
+
+    /**
+     * Handles a Postgres exception by checking the SQL state and returning the appropriate exception.
+     * @param e The Postgres exception to handle.
+     * @return The appropriate exception to throw.
+     */
+    fun handle(e: PSQLException): Exception {
+        e.printStackTraceIfInDevMode()
+
+        val errorMessage = structureErrorMessageData(e)
+        return when (e.sqlState) {
+            PSQLState.UNIQUE_VIOLATION.state -> EntityAlreadyExistsException(errorMessage)
+            PSQLState.NOT_NULL_VIOLATION.state -> IllegalArgumentException(errorMessage)
+            PSQLState.CHECK_VIOLATION.state -> IllegalArgumentException(errorMessage)
+            PSQLState.FOREIGN_KEY_VIOLATION.state -> EntityNotFoundException(errorMessage)
+            else -> Exception("An unknown database error occurred.")
+        }
+    }
+
     private fun extractEntityName(e: PSQLException): String {
         return e.serverErrorMessage?.table?.let { it ->
             val violation = e.serverErrorMessage?.constraint?.replace(it, "") ?: ""
@@ -104,21 +123,5 @@ class PSQLExceptionHandler {
         return "${extractEntityName(e)} with ${extractField(e)}=${extractFieldValue(e)} ${convertViolationToVerb(e)}."
     }
 
-    /**
-     * Handles a Postgres exception by checking the SQL state and returning the appropriate exception.
-     * @param e The Postgres exception to handle.
-     * @return The appropriate exception to throw.
-     */
-    fun handle(e: PSQLException): Exception {
-        e.printStackTraceIfInDevMode()
 
-        val errorMessage = structureErrorMessageData(e)
-        return when (e.sqlState) {
-            PSQLState.UNIQUE_VIOLATION.state -> EntityAlreadyExistsException(errorMessage)
-            PSQLState.NOT_NULL_VIOLATION.state -> IllegalArgumentException(errorMessage)
-            PSQLState.CHECK_VIOLATION.state -> IllegalArgumentException(errorMessage)
-            PSQLState.FOREIGN_KEY_VIOLATION.state -> EntityNotFoundException(errorMessage)
-            else -> Exception("An unknown database error occurred.")
-        }
-    }
 }

@@ -24,6 +24,7 @@ interface Item : Entity<Item> {
     var business: Business
     var purchasePrice: Int
     var price: Int
+    var currency: String
     var type: ItemType
 }
 
@@ -34,5 +35,6 @@ object Items : Table<Item>("items") {
     val description = varchar("description").bindTo { it.type.description }
     val purchasePrice = int("purchase_price").bindTo { it.purchasePrice }
     val price = int("price").bindTo { it.price }
+    val currency = varchar("currency").bindTo { it.currency }
     val type = int("item_type_id").references(ItemTypes) { it.type }
 }

@@ -1,22 +1,30 @@
 package com.klejdis.services.filters
 
-import com.klejdis.services.model.Items
+import com.klejdis.services.model.Orders
+import org.ktorm.dsl.eq
 import org.ktorm.dsl.greaterEq
 import org.ktorm.dsl.lessEq
 import org.ktorm.schema.ColumnDeclaring
+import java.time.LocalDate
 
+/**
+ * [kotlin.reflect.KClass.properties]
+ */
 class OrderFilterTransformer: KtormFilterTransformer(Type::class) {
-    sealed class Type(name: String) : FilterType<() -> ColumnDeclaring<Boolean>>(name) {
-        data object MaxItemPrice: Type("maxItemPrice") {
+    sealed class Type: KtormFilterType() {
+        data object MaxTotal: Type() {
             override fun transform(value: String): () -> ColumnDeclaring<Boolean> {
-                val maxItemPrice = value.toInt()
-                return { Items.price lessEq maxItemPrice }
+                return { Orders.total lessEq value.toInt() }
             }
         }
-        data object MinItemPrice: Type("minItemPrice") {
+        data object MinTotal: Type() {
             override fun transform(value: String): () -> ColumnDeclaring<Boolean> {
-                val minItemPrice = value.toInt()
-                return { Items.price greaterEq  minItemPrice }
+                return { Orders.total greaterEq value.toInt() }
+            }
+        }
+        data object Date: Type() {
+            override fun transform(value: String): () -> ColumnDeclaring<Boolean> {
+                return { Orders.date eq LocalDate.parse(value) }
             }
         }
     }

@@ -3,6 +3,7 @@ package com.klejdis.services.services
 import com.klejdis.services.dto.OrderCreationDto
 import com.klejdis.services.dto.OrderDto
 import com.klejdis.services.dto.OrderMapper
+import com.klejdis.services.filters.Filter
 import com.klejdis.services.model.Order
 import com.klejdis.services.repositories.BusinessRepository
 import com.klejdis.services.repositories.OrderRepository
@@ -20,11 +21,14 @@ class OrderService(
     suspend fun getByBusinessId(businessId: Int) =
         orderRepository.getByBusinessId(businessId).map { orderMapper.toOrderDto(it) }
 
-    suspend fun getByBusinessOwnerEmail(email: String, filters: Map<String, String>) =
+    suspend fun getByBusinessOwnerEmail(email: String, filters: Iterable<Filter>) =
         orderRepository.getByBusinessOwnerEmail(email, filters).map { orderMapper.toOrderDto(it) }
 
     suspend fun getByIdAndBusinessOwnerEmail(id: Int, email: String) =
         orderRepository.getByIdAndBusinessOwnerEmail(id, email)?.let { orderMapper.toOrderDto(it) }
+
+    suspend fun getMostExpensiveOrder(email: String) =
+        orderRepository.getMostExpensiveByBusinessOwnerEmail(email)?.let { orderMapper.toOrderDto(it) }
 
     @Throws(EntityAlreadyExistsException::class)
     suspend fun create(dto: OrderCreationDto, businessEmail: String): OrderDto {

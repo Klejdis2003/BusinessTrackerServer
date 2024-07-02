@@ -12,6 +12,7 @@ import io.ktor.server.application.*
 import org.dotenv.vault.dotenvVault
 import org.ktorm.database.Database
 import org.ktorm.entity.sequenceOf
+import org.ktorm.support.postgresql.PostgreSqlDialect
 
 private fun configuredDB(): Database {
     val dotenv = dotenvVault()
@@ -19,7 +20,8 @@ private fun configuredDB(): Database {
         url = "jdbc:postgresql://localhost:5432/business_tracker",
         driver = "org.postgresql.Driver",
         user = dotenv["POSTGRES_USERNAME"],
-        password = dotenv["POSTGRES_PASSWORD"]
+        password = dotenv["POSTGRES_PASSWORD"],
+        dialect = PostgreSqlDialect()
     )
     return database
 }

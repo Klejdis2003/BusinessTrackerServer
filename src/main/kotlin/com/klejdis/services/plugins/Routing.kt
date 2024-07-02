@@ -71,6 +71,9 @@ fun Application.configureRouting() {
 
 /**
  * Gets the session from the call. If the session is null, redirects to the login page.
+ * It should be used whenever session needs to be accessed, instead of directly calling
+ * `call.sessions.get<Session>()`. That is because it features the automatic redirect to the login page,
+ * with no need to repeatedly check for the session's existence and knowing what needs to be done.
  * @return The session if it exists, null otherwise.
  */
 suspend fun RoutingCall.getSession(): Session? {

@@ -36,7 +36,7 @@ fun Route.ordersRoute() {
     route("/orders") {
         get {
             val business = call.getProfileInfoFromSession() ?: return@get call.respond(HttpStatusCode.Unauthorized)
-            val filters = call.request.queryParameters.toMap().mapValues {it.value.first()}
+            val filters = call.request.queryParameters.flattenEntries()
             try{
                 val orders = orderService.getByBusinessOwnerEmail(business.email, filters)
                 call.respond(orders)
@@ -64,6 +64,16 @@ fun Route.ordersRoute() {
                     HttpStatusCode.NotFound,
                     "Your business does not have an order with id=$id"
                 )
+        }
+        get("/top") {
+            val business = call.getProfileInfoFromSession() ?: return@get call.respond(HttpStatusCode.Unauthorized)
+            try {
+                val order = orderService.getMostExpensiveOrder(business.email)
+                order?.let { call.respond(order) }
+                    ?: call.respond(HttpStatusCode.NotFound, "Your business does not have any orders")
+            } catch (e: Exception) {
+                handleException(e, call)
+            }
         }
     }
 }

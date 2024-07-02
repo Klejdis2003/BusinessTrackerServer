@@ -59,7 +59,6 @@ class OAuthenticationServiceImpl(
 
     override suspend fun logout(authToken: String): Boolean {
         val tokenResponse = authTokenToTokenResponseMap[authToken]
-        println(authTokenToTokenResponseMap)
         if (tokenResponse?.refreshToken == null) {
             println("Logout request with no refresh token. Ignoring.")
             return false

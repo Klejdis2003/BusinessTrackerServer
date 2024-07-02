@@ -11,9 +11,9 @@ fun Route.businessesRoute() {
     route("/businesses") {
         get {
             val ownerEmail = call.getProfileInfoFromSession()?.email
-            if (ownerEmail == null) call.respond(HttpStatusCode.BadRequest, "Invalid token")
+                ?: return@get call.respond(HttpStatusCode.BadRequest, "Invalid token")
 
-            val business = businessService.getByEmail(ownerEmail!!)
+            val business = businessService.getByEmail(ownerEmail)
 
             if (business != null) call.respond(HttpStatusCode.OK, business)
             else

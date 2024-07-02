@@ -3,6 +3,7 @@ package com.klejdis.services.dto
 import com.klejdis.services.model.Item
 import com.klejdis.services.model.ItemType
 import kotlinx.serialization.Serializable
+import java.util.Currency
 
 @Serializable
 data class ItemDto(
@@ -10,6 +11,7 @@ data class ItemDto(
     val name: String,
     val purchasePrice: Int,
     val price: Int,
+    val currency: CurrencyDto,
     val type: ItemTypeDto
 )
 
@@ -27,6 +29,7 @@ class ItemMapper {
             name = item.name,
             purchasePrice = item.purchasePrice,
             price = item.price,
+            currency = CurrencyMapper.toDto(Currency.getInstance(item.currency)),
             type = ItemTypeDto(
                 id = item.type.id,
                 name = item.type.name,
@@ -41,6 +44,7 @@ class ItemMapper {
             this.name = dto.name
             this.purchasePrice = dto.purchasePrice
             this.price = dto.price
+            this.currency = dto.currency.code
             this.type = ItemType {
                 this.id = dto.type.id
                 this.name = dto.type.name

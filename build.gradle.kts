@@ -9,10 +9,19 @@ plugins {
     kotlin("jvm") version "2.0.0"
     id("io.ktor.plugin") version "3.0.0-beta-1"
     id("org.jetbrains.kotlin.plugin.serialization") version "2.0.0"
+    id("org.jetbrains.dokka") version "1.9.20"
 }
 
 group = "com.klejdis.services"
 version = "0.0.1"
+
+tasks.dokkaHtml {
+    outputDirectory.set(layout.buildDirectory.dir("documentation/html"))
+}
+
+tasks.dokkaGfm {
+    outputDirectory.set(layout.buildDirectory.dir("documentation/markdown"))
+}
 
 application {
     mainClass.set("com.klejdis.services.ApplicationKt")
@@ -43,8 +52,8 @@ dependencies {
     implementation("io.insert-koin:koin-ktor:$koin_version")
     implementation("org.postgresql:postgresql:$postgresql_driver_version")
     implementation("org.ktorm:ktorm-core:$ktorm_version")
+    implementation("org.ktorm:ktorm-support-postgresql:$ktorm_version")
     implementation("ch.qos.logback:logback-classic:$logback_version")
-    implementation("org.mindrot:jbcrypt:0.4")
     implementation("com.github.dotenv-org:dotenv-vault-kotlin:0.0.3")
     implementation("io.ktor:ktor-client-cio-jvm:3.0.0-beta-1")
     testImplementation("io.ktor:ktor-server-tests-jvm")
