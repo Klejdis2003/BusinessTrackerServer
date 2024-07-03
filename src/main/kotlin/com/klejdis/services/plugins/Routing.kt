@@ -2,13 +2,13 @@ package com.klejdis.services.plugins
 
 import com.klejdis.services.model.Session
 import com.klejdis.services.routes.*
-import com.klejdis.services.services.BusinessService
-import com.klejdis.services.services.OAuthenticationService
+import com.klejdis.services.services.*
 import io.ktor.http.*
 import io.ktor.server.application.*
 import io.ktor.server.auth.*
 import io.ktor.server.html.*
 import io.ktor.server.http.content.*
+import io.ktor.server.plugins.*
 import io.ktor.server.request.*
 import io.ktor.server.response.*
 import io.ktor.server.routing.*
@@ -89,3 +89,28 @@ suspend fun RoutingCall.getSession(): Session? {
     return session
 
 }
+
+suspend fun RoutingCall.handleException(e: Exception) {
+    e.printStackTraceIfInDevMode()
+    when (e) {
+        is EntityNotFoundException -> respond(HttpStatusCode.NotFound, e.message!!)
+        is EntityAlreadyExistsException -> respond(HttpStatusCode.Conflict, e.message!!)
+        is IllegalArgumentException -> respond(HttpStatusCode.BadRequest, e.message!!)
+        is BadRequestException -> {
+            val message = e.cause?.message?.substringBefore("for") ?: e.message
+            respond(HttpStatusCode.BadRequest, message ?: "Missing required fields.")
+        }
+        is NoSuchElementException -> respond(HttpStatusCode.BadRequest, e.message!!)
+        else -> respond(HttpStatusCode.InternalServerError, "An unexpected error occurred.")
+    }
+}
+
+suspend fun RoutingCall.executeWithExceptionHandling(block: suspend () -> Unit) {
+    try {
+        block()
+    } catch (e: Exception) {
+        handleException(e)
+    }
+}
+
+

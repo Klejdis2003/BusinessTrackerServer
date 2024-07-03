@@ -3,6 +3,7 @@ package com.klejdis.services.routes
 import com.klejdis.services.dto.ExpenseMapper
 import com.klejdis.services.filters.*
 import com.klejdis.services.model.Expense
+import com.klejdis.services.plugins.executeWithExceptionHandling
 import com.klejdis.services.repositories.BusinessRepository
 import com.klejdis.services.repositories.ExpenseRepository
 import com.klejdis.services.services.ExpenseService
@@ -18,8 +19,10 @@ fun Route.expenseRoutes() {
         get {
             val queryParameters: List<Filter> = call.request.queryParameters.flattenEntries()
             call.getProfileInfoFromSession()?.email?.let {
-                val expenses = expenseService.getAll(it, queryParameters)
-                call.respond(HttpStatusCode.OK, expenses)
+                call.executeWithExceptionHandling {
+                    val expenses = expenseService.getAll(it, queryParameters)
+                    call.respond(expenses)
+                }
             }
         }
     }

@@ -5,6 +5,8 @@ import kotlin.reflect.KClass
 
 typealias Filter = Pair<String, String>
 typealias TypeSafeFilter<T> = Pair<FilterType<T>, String>
+typealias KtormFilterTransformer = FilterTransformer<() -> ColumnDeclaring<Boolean>>
+typealias KtormFilterType = FilterType<() -> ColumnDeclaring<Boolean>>
 
 /**
  * Can transform a map of filters into a list of items of the desired type. Uses reflection to get all the available
@@ -71,9 +73,7 @@ abstract class FilterTransformer<R>(private val filterTypeClass: KClass<out Filt
  * @param R the type of filter that can be applied to the persistence layer
  */
 sealed class FilterType<out R>{
-    abstract fun transform(value : String) : R
     val typeName = this::class.simpleName!!.replaceFirstChar { char -> char.lowercase() }
+    abstract fun transform(value : String) : R
 }
 
-typealias KtormFilterTransformer = FilterTransformer<() -> ColumnDeclaring<Boolean>>
-typealias KtormFilterType = FilterType<() -> ColumnDeclaring<Boolean>>
