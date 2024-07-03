@@ -9,10 +9,7 @@ import com.klejdis.services.dto.ItemMapper
 import com.klejdis.services.dto.OrderMapper
 import com.klejdis.services.filters.OrderFilterTransformer
 import com.klejdis.services.repositories.*
-import com.klejdis.services.services.BusinessService
-import com.klejdis.services.services.OAuthenticationService
-import com.klejdis.services.services.OAuthenticationServiceImpl
-import com.klejdis.services.services.OrderService
+import com.klejdis.services.services.*
 import io.github.cdimascio.dotenv.Dotenv
 import io.ktor.client.*
 import io.ktor.client.engine.cio.*
@@ -44,6 +41,7 @@ val appModule = module {
     single<BusinessRepository> { BusinessRepositoryImpl(postgresDatabase) }
     single<ItemRepository> { ItemRepositoryImpl(postgresDatabase) }
     single<OrderRepository> { OrderRepositoryImpl(postgresDatabase, get()) }
+    single<ExpenseRepository> { ExpenseRepositoryImpl(postgresDatabase) }
 
     //mappers
     single<BusinessMapper> { BusinessMapper() }
@@ -59,6 +57,8 @@ val appModule = module {
         OAuthenticationServiceImpl(get(), get(), get())
     }
     single<OrderService> { OrderService(get(), get(), get()) }
+    single<ExpenseService> { ExpenseService(get(), get()) }
+
 
     //filters
     single<OrderFilterTransformer> { OrderFilterTransformer() }

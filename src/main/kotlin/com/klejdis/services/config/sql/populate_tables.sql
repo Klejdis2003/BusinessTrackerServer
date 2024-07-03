@@ -42,6 +42,21 @@ VALUES (1, 1, 2),
        (2, 3, 3),
        (2, 4, 2);
 
+INSERT INTO expense_categories (name)
+VALUES ('Advertising'),
+       ('Rent'),
+       ('Utilities'),
+       ('Salaries'),
+       ('Marketing'),
+       ('Office supplies');
+
+INSERT INTO expenses (category, business_id, date, amount, currency, comment)
+VALUES ('Advertising', 1, '2022-01-01', 1000.00, 'USD', 'Rent payment'),
+       ('Advertising', 1, '2022-01-02', 200.00, 'USD', 'Electricity bill'),
+         ('Advertising', 1, '2022-01-03', 500.00, 'USD', 'Employee salaries'),
+         ('Advertising', 1, '2022-01-04', 300.00, 'USD', 'Marketing campaign'),
+         ('Advertising', 1, '2022-01-05', 100.00, 'USD', 'Office supplies');
+
 
 
 -- End of file

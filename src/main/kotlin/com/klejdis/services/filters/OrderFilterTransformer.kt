@@ -7,9 +7,7 @@ import org.ktorm.dsl.lessEq
 import org.ktorm.schema.ColumnDeclaring
 import java.time.LocalDate
 
-/**
- * [kotlin.reflect.KClass.properties]
- */
+
 class OrderFilterTransformer: KtormFilterTransformer(Type::class) {
     sealed class Type: KtormFilterType() {
         data object MaxTotal: Type() {

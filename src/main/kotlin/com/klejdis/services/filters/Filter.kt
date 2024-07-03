@@ -4,19 +4,20 @@ import org.ktorm.schema.ColumnDeclaring
 import kotlin.reflect.KClass
 
 typealias Filter = Pair<String, String>
+typealias TypeSafeFilter<T> = Pair<FilterType<T>, String>
 
 /**
  * Can transform a map of filters into a list of items of the desired type. Uses reflection to get all the available
  * filters from the passed sealed class. All filter types under FilterType extension must be objects or data
  * objects that extend FilterType.
- * @param T type to be transformed into
+ * @param R type to be transformed into
  * @property filterTypeClass the sealed class that extends FilterType and contains the available filters
  */
-abstract class FilterTransformer<T>(private val filterTypeClass: KClass<out FilterType<T>>){
+abstract class FilterTransformer<R>(private val filterTypeClass: KClass<out FilterType<R>>){
     /**
      * Uses reflection to get all the available filters from the sealed class.
      */
-    private val availableFilters: Map<String, FilterType<T>> =
+    private val availableFilters: Map<String, FilterType<R>> =
         filterTypeClass.sealedSubclasses
             .associate {
                 it.simpleName!!.replaceFirstChar{
@@ -29,7 +30,7 @@ abstract class FilterTransformer<T>(private val filterTypeClass: KClass<out Filt
      * @return a list of filters that can be applied to the persistence layer
      * @throws NoSuchElementException if a filter is not found
      */
-    fun generateTransformedFilters(values: Map<String, String>): List<T> {
+    fun generateTransformedFilters(values: Map<String, String>): List<R> {
         return values.map { (key, value) ->
             availableFilters[key]?.transform(value)
                 ?: throw NoSuchElementException("Filter $key is invalid")
@@ -42,10 +43,22 @@ abstract class FilterTransformer<T>(private val filterTypeClass: KClass<out Filt
      * @return a list of filters that can be applied to the persistence layer
      * @throws NoSuchElementException if a filter is not found
      */
-    fun generateTransformedFilters(filters: Iterable<Filter>): Iterable<T> {
+    fun generateTransformedFilters(filters: Iterable<Filter>): Iterable<R> {
         return filters.map { (name, value) ->
             availableFilters[name]?.transform(value)
                 ?: throw NoSuchElementException("Filter $name is invalid")
+        }
+    }
+
+    /**
+     * Transforms a list of filters into a list of filters that can be applied to the persistence layer.
+     * @param filters a list of [filters][Filter], which is just an alias for a [Pair] of 2 strings.
+     * @return a list of filters that can be applied to the persistence layer
+     * @throws NoSuchElementException if a filter is not found
+     */
+    fun generateTransformedFilters(filters: Iterable<TypeSafeFilter<R>>): List<R> {
+        return filters.map { (filterType, value) ->
+            filterType.transform(value)
         }
     }
 
@@ -59,6 +72,7 @@ abstract class FilterTransformer<T>(private val filterTypeClass: KClass<out Filt
  */
 sealed class FilterType<out R>{
     abstract fun transform(value : String) : R
+    val typeName = this::class.simpleName!!.replaceFirstChar { char -> char.lowercase() }
 }
 
 typealias KtormFilterTransformer = FilterTransformer<() -> ColumnDeclaring<Boolean>>
