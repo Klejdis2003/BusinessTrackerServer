@@ -10,9 +10,6 @@ import org.ktorm.schema.ColumnDeclaring
 import java.time.LocalDate
 import java.time.format.DateTimeParseException
 
-typealias ExpenseFilter = TypeSafeFilter<() -> ColumnDeclaring<Boolean>>
-
-
 object ExpenseFilterTransformer: KtormFilterTransformer(ExpenseFilterType::class)
 
 sealed class ExpenseFilterType: KtormFilterType() {

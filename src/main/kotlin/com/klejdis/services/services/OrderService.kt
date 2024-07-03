@@ -15,17 +15,22 @@ class OrderService(
 ) : Service<Order>(
     "Order"
 ) {
-    suspend fun get(id: Int) =
-        orderRepository.get(id)?.let { orderMapper.toOrderDto(it) }
-
+    /**
+     * @param id Order id
+     * @param email The email of the business owner whose order is being fetched
+     * @return OrderDto if the order exists and belongs to the business owner, null otherwise
+     */
+    suspend fun get(id: Int, email: String): OrderDto? {
+        val order = orderRepository.get(id)
+        return order?.takeIf { it.business.ownerEmail == email }?.let { orderMapper.toOrderDto(it) }
+    }
     suspend fun getByBusinessId(businessId: Int) =
-        orderRepository.getByBusinessId(businessId).map { orderMapper.toOrderDto(it) }
+        orderRepository.filterByBusinessId(businessId).map { orderMapper.toOrderDto(it) }
 
     suspend fun getByBusinessOwnerEmail(email: String, filters: Iterable<Filter>) =
-        orderRepository.getByBusinessOwnerEmail(email, filters).map { orderMapper.toOrderDto(it) }
+        orderRepository.filterByBusinessOwnerEmail(email, filters).map { orderMapper.toOrderDto(it) }
 
-    suspend fun getByIdAndBusinessOwnerEmail(id: Int, email: String) =
-        orderRepository.getByIdAndBusinessOwnerEmail(id, email)?.let { orderMapper.toOrderDto(it) }
+
 
     suspend fun getMostExpensiveOrder(email: String) =
         orderRepository.getMostExpensiveByBusinessOwnerEmail(email)?.let { orderMapper.toOrderDto(it) }

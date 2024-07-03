@@ -1,6 +1,7 @@
 package com.klejdis.services.repositories
 
 import com.klejdis.services.config.items
+import com.klejdis.services.filters.Filter
 import com.klejdis.services.model.Businesses
 import com.klejdis.services.model.Item
 import com.klejdis.services.model.Items
@@ -35,6 +36,13 @@ class ItemRepositoryImpl(
             .innerJoin(Businesses, on = Items.businessId eq Businesses.id)
             .select()
             .where { Businesses.ownerEmail eq email }
+            .map { Items.createEntity(it) }
+    }
+
+    override suspend fun getAll(filters: Iterable<Filter>): List<Item> {
+        return database
+            .from(Items)
+            .select()
             .map { Items.createEntity(it) }
     }
 

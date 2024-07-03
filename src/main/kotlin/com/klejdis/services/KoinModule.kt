@@ -40,7 +40,7 @@ val appModule = module {
     //repositories
     single<BusinessRepository> { BusinessRepositoryImpl(postgresDatabase) }
     single<ItemRepository> { ItemRepositoryImpl(postgresDatabase) }
-    single<OrderRepository> { OrderRepositoryImpl(postgresDatabase, get()) }
+    single<OrderRepository> { OrderRepositoryImpl(postgresDatabase) }
     single<ExpenseRepository> { ExpenseRepositoryImpl(postgresDatabase) }
 
     //mappers
@@ -58,10 +58,6 @@ val appModule = module {
     }
     single<OrderService> { OrderService(get(), get(), get()) }
     single<ExpenseService> { ExpenseService(get(), get()) }
-
-
-    //filters
-    single<OrderFilterTransformer> { OrderFilterTransformer() }
 
 
 }

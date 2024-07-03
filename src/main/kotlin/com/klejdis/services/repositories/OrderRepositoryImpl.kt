@@ -1,6 +1,4 @@
 package com.klejdis.services.repositories
-
-
 import com.klejdis.services.config.orders
 import com.klejdis.services.filters.Filter
 import com.klejdis.services.filters.OrderFilterTransformer
@@ -8,16 +6,14 @@ import com.klejdis.services.model.*
 import org.ktorm.database.Database
 import org.ktorm.dsl.*
 import org.ktorm.entity.add
-import org.ktorm.entity.filter
 import org.ktorm.entity.update
 import org.ktorm.schema.ColumnDeclaring
 
 class OrderRepositoryImpl(
-    private val database: Database,
-    private val orderFilterTransformer: OrderFilterTransformer
+    private val database: Database
 ) : OrderRepository {
     private fun buildJoinedTablesQuery(
-        conditions: List<() -> ColumnDeclaring<Boolean>> = emptyList()
+        conditions: List<() -> ColumnDeclaring<Boolean>>
     ): Query {
         return database
             .from(Orders)
@@ -30,12 +26,6 @@ class OrderRepositoryImpl(
             .whereWithConditions { conditions.forEach { condition -> it += condition() } }
     }
 
-    private fun buildJoinedTablesQueryWIthAggCondition(
-        conditions: List<() -> ColumnDeclaring<Boolean>>,
-        aggregateCondition: ColumnDeclaring<Boolean>
-    ) = buildJoinedTablesQuery(conditions)
-        .groupBy(Orders.id)
-        .having { aggregateCondition }
 
     private fun fetchQuery(query: Query): List<Order> {
         val orderIdItemsMap = mutableMapOf<Int, MutableList<OrderItem>>()
@@ -57,44 +47,31 @@ class OrderRepositoryImpl(
     }
 
     private fun fetchJoinedTablesWithConditions(
-        conditions: List<() -> ColumnDeclaring<Boolean>>
+        filters: Iterable<Filter> = emptyList(),
+        additionalConditions: List<() -> ColumnDeclaring<Boolean>> = emptyList()
     ): List<Order> {
+        val conditions = OrderFilterTransformer.generateTransformedFilters(filters) + additionalConditions
         return fetchQuery(buildJoinedTablesQuery(conditions))
     }
 
-    private fun fetchJoinedTablesWithAggCondition(
-        conditions: List<() -> ColumnDeclaring<Boolean>>,
-        aggregateCondition: ColumnDeclaring<Boolean>
-    ): List<Order> {
-        return fetchQuery(buildJoinedTablesQueryWIthAggCondition(conditions, aggregateCondition))
-    }
-
     private fun fetchJoinedTablesWithCondition(
+        filters: Iterable<Filter> = emptyList(),
         condition: () -> ColumnDeclaring<Boolean>
-    ): List<Order> {
-        return fetchJoinedTablesWithConditions(listOf(condition))
-    }
+    ): List<Order> =
+        fetchJoinedTablesWithConditions(filters, additionalConditions = listOf(condition))
 
-    override suspend fun getByBusinessId(businessId: Int): List<Order> {
+
+    override suspend fun filterByBusinessId(businessId: Int): List<Order> {
         return fetchJoinedTablesWithCondition { Orders.businessId eq businessId }
     }
 
-    override suspend fun getByBusinessOwnerEmail(
+    override suspend fun filterByBusinessOwnerEmail(
         email: String,
         filters: Iterable<Filter>
     ): List<Order> {
-        val transformedFilters = orderFilterTransformer.generateTransformedFilters(filters)
-                    as MutableList<() -> ColumnDeclaring<Boolean>>
-        transformedFilters.add { Businesses.ownerEmail eq email }
-        return fetchJoinedTablesWithConditions(transformedFilters)
-    }
-
-    override suspend fun getByIdAndBusinessOwnerEmail(id: Int, email: String): Order? {
-        val conditions = listOf(
-            { Orders.id eq id },
-            { Businesses.ownerEmail eq email }
-        )
-        return fetchJoinedTablesWithConditions(conditions).firstOrNull() //it is known that there is only one or zero orders with a given id
+        return fetchJoinedTablesWithCondition(filters) {
+            Businesses.ownerEmail eq email
+        }
     }
 
     override suspend fun getMostExpensiveByBusinessOwnerEmail(email: String): Order? {
@@ -115,6 +92,10 @@ class OrderRepositoryImpl(
 
 
         return get(maxOrderId)
+    }
+
+    override suspend fun getAll(filters: Iterable<Filter>): List<Order> {
+        return fetchJoinedTablesWithConditions(filters)
     }
 
     override suspend fun get(id: Int): Order? {

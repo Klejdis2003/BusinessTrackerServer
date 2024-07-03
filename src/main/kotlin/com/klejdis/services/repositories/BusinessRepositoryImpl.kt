@@ -1,5 +1,6 @@
 package com.klejdis.services.repositories
 
+import com.klejdis.services.filters.Filter
 import com.klejdis.services.model.Business
 import com.klejdis.services.model.Businesses
 import org.ktorm.database.Database
@@ -16,6 +17,13 @@ class BusinessRepositoryImpl(
             .where { Businesses.ownerEmail eq email }
             .map { row -> Businesses.createEntity(row) }
             .firstOrNull()
+    }
+
+    override suspend fun getAll(filters: Iterable<Filter>): List<Business> {
+        return database
+            .from(Businesses)
+            .select()
+            .map { row -> Businesses.createEntity(row) }
     }
 
     override suspend fun get(id: Int): Business? {
