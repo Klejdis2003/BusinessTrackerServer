@@ -7,7 +7,7 @@ import org.ktorm.database.Database
 import org.ktorm.dsl.*
 import org.postgresql.util.PSQLException
 
-class BusinessRepositoryImpl(
+class BusinessRepositoryKtorm(
     private val database: Database
 ) : BusinessRepository {
     override suspend fun getByEmail(email: String): Business? {

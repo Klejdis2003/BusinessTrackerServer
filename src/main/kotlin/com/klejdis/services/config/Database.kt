@@ -2,10 +2,7 @@ package com.klejdis.services.config
 
 import com.klejdis.services.MODE
 import com.klejdis.services.Mode
-import com.klejdis.services.model.Businesses
-import com.klejdis.services.model.ItemTypes
-import com.klejdis.services.model.Items
-import com.klejdis.services.model.Orders
+import com.klejdis.services.model.*
 
 import com.klejdis.services.util.parseSqlFile
 import io.ktor.server.application.*
@@ -32,6 +29,7 @@ val Database.items get() = this.sequenceOf(Items)
 val Database.itemTypes get() = this.sequenceOf(ItemTypes)
 val Database.accounts get() = this.sequenceOf(Businesses)
 val Database.orders get() = this.sequenceOf(Orders)
+val Database.expenses get() = this.sequenceOf(Expenses)
 
 private object DBService {
     private fun executeSqlFile(fileName: String) {

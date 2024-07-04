@@ -9,7 +9,7 @@ import org.ktorm.database.Database
 import org.ktorm.dsl.*
 import org.ktorm.entity.add
 
-class ItemRepositoryImpl(
+class ItemRepositoryKtorm(
     private val database: Database
 ) : ItemRepository {
 

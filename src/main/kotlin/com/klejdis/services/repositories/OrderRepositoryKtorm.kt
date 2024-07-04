@@ -4,12 +4,14 @@ import com.klejdis.services.filters.Filter
 import com.klejdis.services.filters.OrderFilterTransformer
 import com.klejdis.services.model.*
 import org.ktorm.database.Database
+import org.ktorm.database.asIterable
 import org.ktorm.dsl.*
 import org.ktorm.entity.add
 import org.ktorm.entity.update
 import org.ktorm.schema.ColumnDeclaring
+import java.sql.ResultSet
 
-class OrderRepositoryImpl(
+class OrderRepositoryKtorm(
     private val database: Database
 ) : OrderRepository {
     private fun buildJoinedTablesQuery(
@@ -39,11 +41,32 @@ class OrderRepositoryImpl(
                 .getOrPut(order.id) { mutableListOf() }
                 .add(OrderItem(item, it[OrderItems.quantity] as Int))
 
-            orderMap.getOrPut(order.id) { order }
+            orderMap
+                .getOrPut(order.id) { order }
+                .apply { total += item.price * it[OrderItems.quantity] as Int }
         }
         return orderMap.map { (_, order) ->
             order.apply { items = orderIdItemsMap[order.id] ?: emptyList() }
         }
+    }
+
+    private fun fetchOrderFromRawResultSet(resultSet: ResultSet): Order {
+        val order =  resultSet.asIterable().map {
+            Order {
+                id = it.getInt("id")
+                date = it.getDate("date").toLocalDate()
+                customer = Customer {
+                    phone = it.getString("phone")
+                    name = it.getString("name")
+                }
+                total = it.getInt("total")
+                business = Business {
+                    id = it.getInt("business_id")
+                    ownerEmail = it.getString("owner_email")
+                }
+            }
+        }
+        return order.first()
     }
 
     private fun fetchJoinedTablesWithConditions(
@@ -75,23 +98,31 @@ class OrderRepositoryImpl(
     }
 
     override suspend fun getMostExpensiveByBusinessOwnerEmail(email: String): Order? {
-        val maxOrderPrice = database
-            .from(Orders)
-            .innerJoin(Businesses, on = Orders.businessId eq Businesses.id)
-            .select(max(Orders.total))
-            .where { Businesses.ownerEmail eq email }
-            .map { it.getInt(1) }
-            .firstOrNull() ?: return null
+        val mostExpensiveOrderId = database.useConnection { conn ->
+            val sql = """
+                WITH
+                    order_totals AS (
+                    SELECT orders.id, SUM(order_items.quantity * items.price) AS total
+                    FROM orders
+                    INNER JOIN order_items ON orders.id = order_items.order_id
+                    INNER JOIN items ON order_items.item_id = items.id
+                    INNER JOIN businesses ON orders.business_id = businesses.id
+                    INNER JOIN customers ON orders.customer_phone = customers.phone
+                    WHERE businesses.owner_email = ?
+                    GROUP BY orders.id, businesses.id, customers.phone
+                )
 
-        val maxOrderId = database
-            .from(Orders)
-            .select(Orders.id)
-            .where { Orders.total eq maxOrderPrice }
-            .map { it.getInt(1) }
-            .firstOrNull() ?: return null
+                SELECT order_totals.*
+                FROM order_totals
+                WHERE order_totals.total = (SELECT MAX(total) FROM order_totals)
 
-
-        return get(maxOrderId)
+            """.trimIndent()
+            conn.prepareStatement(sql).use{
+                it.setString(1, email)
+                it.executeQuery().apply{next()}.getInt("id")
+            }
+        }
+        return get(mostExpensiveOrderId)
     }
 
     override suspend fun getAll(filters: Iterable<Filter>): List<Order> {
@@ -103,7 +134,7 @@ class OrderRepositoryImpl(
     }
 
     override suspend fun create(entity: Order): Order {
-        entity.total = entity.items.sumOf { it.item.price * it.quantity }
+        var total = 0
         val affectedRecords = database.orders.add(entity)
         if (affectedRecords == 0) throw Exception("Failed to create order")
         database.batchInsert(OrderItems) {

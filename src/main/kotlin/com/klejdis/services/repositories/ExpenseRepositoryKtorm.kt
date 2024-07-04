@@ -1,5 +1,6 @@
 package com.klejdis.services.repositories
 
+import com.klejdis.services.config.expenses
 import com.klejdis.services.filters.ExpenseFilterTransformer
 import com.klejdis.services.filters.Filter
 import com.klejdis.services.model.Businesses
@@ -7,9 +8,11 @@ import com.klejdis.services.model.Expense
 import com.klejdis.services.model.Expenses
 import org.ktorm.database.Database
 import org.ktorm.dsl.*
+import org.ktorm.entity.add
+import org.ktorm.entity.update
 import org.ktorm.schema.ColumnDeclaring
 
-class ExpenseRepositoryImpl(
+class ExpenseRepositoryKtorm(
     private val database: Database
 ): ExpenseRepository{
     private fun buildJoinedTablesQuery(
@@ -32,11 +35,13 @@ class ExpenseRepositoryImpl(
   }
 
     override suspend fun create(entity: Expense): Expense {
-        TODO("Not yet implemented")
+        database.expenses.add(entity)
+        return entity
     }
 
     override suspend fun update(entity: Expense): Expense {
-        TODO("Not yet implemented")
+        database.expenses.update(entity)
+        return entity
     }
 
     override suspend fun delete(id: Int): Boolean {

@@ -9,7 +9,8 @@ import org.ktorm.entity.Entity
  * @param T the type of the entity
  * @see Entity
  */
-interface CrudRepository<PK, T: Entity<T>> {
+interface CrudRepository<PK, T> {
+
     /**
      * Gets all entities that match the filters
      * @param filters a list of filters that can be applied to the persistence layer

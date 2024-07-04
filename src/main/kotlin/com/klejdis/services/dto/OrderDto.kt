@@ -1,9 +1,6 @@
 package com.klejdis.services.dto
 
-import com.klejdis.services.model.Business
-import com.klejdis.services.model.Customer
-import com.klejdis.services.model.Order
-import com.klejdis.services.model.OrderItem
+import com.klejdis.services.model.*
 import kotlinx.serialization.Serializable
 import java.time.LocalDate
 
@@ -20,7 +17,7 @@ data class OrderDto(
 data class OrderCreationDto(
     val date: String,
     val customerPhone: String,
-    val items: List<OrderItemDto>
+    val items: List<OrderCreationItemDto>
 ) {
     init {
         require(items.isNotEmpty()) { "Order must have at least one item." }
@@ -32,6 +29,12 @@ data class OrderCreationDto(
 @Serializable
 data class OrderItemDto(
     val item: ItemDto,
+    val quantity: Int
+)
+
+@Serializable
+data class OrderCreationItemDto(
+    val itemId: Int,
     val quantity: Int
 )
 
@@ -60,7 +63,7 @@ class OrderMapper(
             this.date = LocalDate.parse(dto.date)
             this.items = dto.items.map {
                 OrderItem(
-                    item = itemMapper.toEntity(it.item),
+                    item = Item{ id = it.itemId },
                     quantity = it.quantity
                 )
             }
@@ -75,7 +78,7 @@ class OrderMapper(
             this.date = LocalDate.parse(dto.date)
             this.items = dto.items.map {
                 OrderItem(
-                    item = itemMapper.toEntity(it.item),
+                    item = Item{ id = it.item.id },
                     quantity = it.quantity
                 )
             }

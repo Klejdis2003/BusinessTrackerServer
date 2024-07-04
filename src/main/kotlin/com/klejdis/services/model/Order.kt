@@ -26,7 +26,6 @@ object Orders : Table<Order>("orders") {
     val businessId = int("business_id").references(Businesses) { it.business }
     val customerPhone = varchar("customer_phone").references(Customers) { it.customer }
     val date = date("date").bindTo { it.date }
-    val total = int("total").bindTo { it.total }
 }
 
 data class OrderItem(

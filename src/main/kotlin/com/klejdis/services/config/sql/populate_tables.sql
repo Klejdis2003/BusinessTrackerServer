@@ -30,10 +30,10 @@ VALUES (2, 'Laptop', 'Laptop computer', 500.00, 800.00, 'USD', 1),
        (3, 'Book', 'Book', 5.00, 10.00, 'USD', 5),
        (4, 'Magazine', 'Magazine', 2.00, 5.00, 'USD', 5);
 
-INSERT INTO orders (business_id, customer_phone, date, total) -- 1000 orders for business 1
+INSERT INTO orders (business_id, customer_phone, date) -- 1000 orders for business 1
 VALUES
-    (1, '1111111111', '2022-01-01', 100.00),
-    (1, '2222222222', '2022-01-02', 200.00);
+    (1, '1111111111', '2022-01-01'),
+    (1, '2222222222', '2022-01-02');
 
 
 INSERT INTO order_items (order_id, item_id, quantity) -- 1000 items for order 1

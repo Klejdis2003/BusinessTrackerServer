@@ -11,16 +11,16 @@ import java.time.LocalDate
 object OrderFilterTransformer: KtormFilterTransformer(OrderFilterType::class)
 
 sealed class OrderFilterType: KtormFilterType() {
-    data object MaxTotal: OrderFilterType() {
-        override fun transform(value: String): () -> ColumnDeclaring<Boolean> {
-            return { Orders.total lessEq value.toInt() }
-        }
-    }
-    data object MinTotal: OrderFilterType() {
-        override fun transform(value: String): () -> ColumnDeclaring<Boolean> {
-            return { Orders.total greaterEq value.toInt() }
-        }
-    }
+//    data object MaxTotal: OrderFilterType() {
+//        override fun transform(value: String): () -> ColumnDeclaring<Boolean> {
+//            return { Orders.total lessEq value.toInt() }
+//        }
+//    }
+//    data object MinTotal: OrderFilterType() {
+//        override fun transform(value: String): () -> ColumnDeclaring<Boolean> {
+//            return { Orders.total greaterEq value.toInt() }
+//        }
+//    }
     data object Date: OrderFilterType() {
         override fun transform(value: String): () -> ColumnDeclaring<Boolean> {
             return { Orders.date eq LocalDate.parse(value) }
