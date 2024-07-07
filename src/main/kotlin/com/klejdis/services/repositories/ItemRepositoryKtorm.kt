@@ -8,42 +8,55 @@ import com.klejdis.services.model.Items
 import org.ktorm.database.Database
 import org.ktorm.dsl.*
 import org.ktorm.entity.add
+import org.ktorm.entity.update
+import org.ktorm.schema.ColumnDeclaring
 
 class ItemRepositoryKtorm(
     private val database: Database
 ) : ItemRepository {
 
-    override suspend fun get(id: Int): Item? {
-        return database
-            .from(Items)
-            .select()
-            .where { Items.id eq id }
-            .map { Items.createEntity(it) }
-            .firstOrNull()
-    }
-
-    override suspend fun getByBusinessId(businessId: Int): List<Item> {
-        return database
-            .from(Items)
-            .select()
-            .where { Items.businessId eq businessId }
-            .map { Items.createEntity(it) }
-    }
-
-    override suspend fun getByBusinessOwnerEmail(email: String): List<Item> {
+    private fun buildJoinedTablesQuery(
+        conditions: List<() -> ColumnDeclaring<Boolean>> = emptyList(),
+        aggregateConditions: List<ColumnDeclaring<Boolean>> = emptyList()
+    ): Query {
         return database
             .from(Items)
             .innerJoin(Businesses, on = Items.businessId eq Businesses.id)
-            .select()
-            .where { Businesses.ownerEmail eq email }
-            .map { Items.createEntity(it) }
+            .select(
+                Items.columns +
+                        Businesses.columns
+            )
+            .whereWithConditions { conditions.forEach { condition -> it += condition() } }
+    }
+
+    private fun fetchQuery(query: Query): List<Item> {
+        return query.map { Items.createEntity(it) }
+    }
+
+    private fun fetchMainQueryWithConditions(conditions: List<() -> ColumnDeclaring<Boolean>> = emptyList()) =
+        fetchQuery(buildJoinedTablesQuery(conditions))
+
+    private fun fetchMainQueryWithCondition(condition: () -> ColumnDeclaring<Boolean>) =
+        fetchMainQueryWithConditions(listOf(condition))
+
+    override suspend fun get(id: Int): Item? {
+        return fetchMainQueryWithCondition { Items.id eq id }.firstOrNull()
+    }
+
+    override suspend fun getBatch(ids: List<Int>): List<Item> {
+        return fetchMainQueryWithCondition { Items.id inList ids }
+    }
+
+    override suspend fun getByBusinessId(businessId: Int): List<Item> {
+        return fetchMainQueryWithCondition { Items.businessId eq businessId }
+    }
+
+    override suspend fun getByBusinessOwnerEmail(email: String): List<Item> {
+        return fetchMainQueryWithConditions(listOf { Businesses.ownerEmail eq email })
     }
 
     override suspend fun getAll(filters: Iterable<Filter>): List<Item> {
-        return database
-            .from(Items)
-            .select()
-            .map { Items.createEntity(it) }
+        return fetchMainQueryWithConditions()
     }
 
     override suspend fun create(entity: Item): Item {
@@ -53,7 +66,8 @@ class ItemRepositoryKtorm(
     }
 
     override suspend fun update(entity: Item): Item {
-        return Item()
+        database.items.update(entity)
+        return entity
     }
 
     override suspend fun delete(id: Int): Boolean {

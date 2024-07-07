@@ -5,12 +5,15 @@ import com.klejdis.services.dto.OrderDto
 import com.klejdis.services.dto.OrderMapper
 import com.klejdis.services.filters.Filter
 import com.klejdis.services.model.Order
+import com.klejdis.services.model.OrderItem
 import com.klejdis.services.repositories.BusinessRepository
+import com.klejdis.services.repositories.ItemRepository
 import com.klejdis.services.repositories.OrderRepository
 
 class OrderService(
     private val orderRepository: OrderRepository,
     private val businessRepository: BusinessRepository,
+    private val itemRepository: ItemRepository,
     private val orderMapper: OrderMapper
 ) : Service<Order>(
     "Order"
@@ -37,10 +40,25 @@ class OrderService(
 
     @Throws(EntityAlreadyExistsException::class)
     suspend fun create(dto: OrderCreationDto, businessEmail: String): OrderDto {
+
+        //make necessary checks and get needed values
         val business = businessRepository.getByEmail(businessEmail)
             ?: throw EntityNotFoundException("Business with email=$businessEmail does not exist")
-        val order = super.executeCreateBlockWithErrorHandling {
-            orderRepository.create(orderMapper.toEntity(dto, business))
+        val dto = dto.copy(business = business)
+        var order = OrderCreationDto.toEntity(dto)
+
+        //get items from their ids and create OrderItem objects
+        val itemIds = dto.items.map { it.itemId }
+        order.items = itemRepository.getBatch(itemIds).map { item ->
+            OrderItem(
+                item = item,
+                quantity = dto.items.first { it.itemId == item.id }.quantity
+            )
+        }
+
+        //create the order and return the OrderDto
+        order = super.executeCreateBlockWithErrorHandling {
+            orderRepository.create(order)
         }
         return orderMapper.toOrderDto(order)
     }

@@ -1,1 +1,1 @@
-rootProject.name = "BusinessTracker"
+rootProject.name = "BusinessTrackerServer"

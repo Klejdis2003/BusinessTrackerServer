@@ -4,24 +4,26 @@ import org.ktorm.schema.ColumnDeclaring
 import kotlin.reflect.KClass
 
 typealias Filter = Pair<String, String>
-typealias TypeSafeFilter<T> = Pair<FilterType<T>, String>
-typealias KtormFilterTransformer = FilterTransformer<() -> ColumnDeclaring<Boolean>>
-typealias KtormFilterType = FilterType<() -> ColumnDeclaring<Boolean>>
+typealias TypeSafeFilter<T> = Pair<FilterCategory<T>, String>
+typealias KtormSimpleFilterTransformer = FilterTransformer<() -> ColumnDeclaring<Boolean>>
+typealias KtormFilterTransformer = FilterTransformer<KtormFilter>
+typealias KtormSimpleFilterCategory = FilterCategory<() -> ColumnDeclaring<Boolean>>
+typealias KtormFilterCategory = FilterCategory<KtormFilter>
 
 /**
  * Can transform a map of filters into a list of items of the desired type. Uses reflection to get all the available
  * filters from the passed sealed class. All filter types under FilterType extension must be objects or data
  * objects that extend FilterType.
  * @param R type to be transformed into
- * @property filterTypeClass the sealed class that extends FilterType and contains the available filters
+ * @property filterCategoryClass the sealed class that extends FilterType and contains the available filters
  */
-abstract class FilterTransformer<R>(private val filterTypeClass: KClass<out FilterType<R>>){
+abstract class FilterTransformer<R>(private val filterCategoryClass: KClass<out FilterCategory<R>>){
 
     /**
      * Uses reflection to get all the available filters from the sealed class.
      */
-    private val availableFilters: Map<String, FilterType<R>> =
-        filterTypeClass.sealedSubclasses
+    private val availableFilters: Map<String, FilterCategory<R>> =
+        filterCategoryClass.sealedSubclasses
             .associate {
                 it.simpleName!!.replaceFirstChar{
                     char -> char.lowercase() } to it.objectInstance!!
@@ -61,8 +63,17 @@ abstract class FilterTransformer<R>(private val filterTypeClass: KClass<out Filt
  * for a filter into a filter that can be applied to the persistence layer.
  * @param R the type of filter that can be applied to the persistence layer
  */
-sealed class FilterType<out R>{
+sealed class FilterCategory<out R>{
     val typeName = this::class.simpleName!!.replaceFirstChar { char -> char.lowercase() }
     abstract fun transform(value : String) : R
 }
 
+data class KtormFilter(
+    val condition: () -> ColumnDeclaring<Boolean>,
+    val type: FilterType = FilterType.SIMPLE
+)
+
+enum class FilterType{
+    SIMPLE,
+    AGGREGATE
+}

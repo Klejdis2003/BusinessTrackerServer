@@ -1,0 +1,410 @@
+openapi: "3.1.0"
+info:
+  title: "BusinessTrackerServer API"
+  description: "BusinessTrackerServer API"
+  version: "1.0.0"
+servers:
+- url: "https://BusinessTrackerServer"
+paths:
+  /:
+    get:
+      description: ""
+      responses:
+        "302":
+          description: "Found <br> Redirect"
+          content:
+            text/plain:
+              schema:
+                type: "string"
+        "200":
+          description: "OK"
+          content:
+            text/plain:
+              schema:
+                $ref: "#/components/schemas/Function1_? super HTML"
+              examples:
+                text/html:
+                  description: "HTML document"
+                  value: ""
+  /accounts:
+    post:
+      description: ""
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/BusinessDto"
+        required: true
+      responses:
+        "201":
+          description: "Created"
+          content:
+            '*/*':
+              schema:
+                $ref: "#/components/schemas/BusinessDto"
+        "409":
+          description: "Conflict"
+          content:
+            '*/*':
+              schema:
+                type: "string"
+  /businesses:
+    get:
+      description: ""
+      responses:
+        "302":
+          description: "Found <br> Redirect"
+          content:
+            text/plain:
+              schema:
+                type: "string"
+        "400":
+          description: "Bad Request"
+          content:
+            '*/*':
+              schema:
+                type: "string"
+              examples:
+                Example#1:
+                  value: "Invalid token"
+        "200":
+          description: "OK"
+          content:
+            '*/*':
+              schema:
+                $ref: "#/components/schemas/BusinessDto"
+        "404":
+          description: "Not Found"
+          content:
+            '*/*':
+              schema:
+                type: "string"
+              examples:
+                Example#1:
+                  value: ""
+  /callback:
+    get:
+      description: ""
+      responses:
+        "302":
+          description: "Found <br> Redirect"
+          content:
+            text/plain:
+              schema:
+                type: "string"
+              examples:
+                Example#1:
+                  description: ""
+                  value: "/"
+  /expenses:
+    get:
+      description: ""
+      responses:
+        "302":
+          description: "Found <br> Redirect"
+          content:
+            text/plain:
+              schema:
+                type: "string"
+        "200":
+          description: "OK"
+          content:
+            '*/*':
+              schema:
+                type: "array"
+                items:
+                  $ref: "#/components/schemas/ExpenseDto"
+  /login:
+    get:
+      description: ""
+      responses:
+        "302":
+          description: "Found <br> Redirect"
+          content:
+            text/plain:
+              schema:
+                type: "string"
+              examples:
+                Example#1:
+                  value: "/loginRedirect"
+                Example#2:
+                  description: ""
+                  value: "/"
+  /logout:
+    get:
+      description: ""
+      responses:
+        "302":
+          description: "Found <br> Redirect"
+          content:
+            text/plain:
+              schema:
+                type: "string"
+  /orders:
+    get:
+      description: ""
+      responses:
+        "302":
+          description: "Found <br> Redirect"
+          content:
+            text/plain:
+              schema:
+                type: "string"
+        "401":
+          description: "Unauthorized"
+          content:
+            '*/*':
+              schema:
+                type: "object"
+        "200":
+          description: "OK"
+          content:
+            '*/*':
+              schema:
+                type: "array"
+                items:
+                  $ref: "#/components/schemas/OrderDto"
+    post:
+      description: ""
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/OrderCreationDto"
+        required: true
+      responses:
+        "302":
+          description: "Found <br> Redirect"
+          content:
+            text/plain:
+              schema:
+                type: "string"
+        "401":
+          description: "Unauthorized"
+          content:
+            '*/*':
+              schema:
+                type: "object"
+        "200":
+          description: "OK"
+          content:
+            '*/*':
+              schema:
+                $ref: "#/components/schemas/OrderDto"
+  /orders/{id}:
+    get:
+      description: ""
+      parameters:
+      - name: "id"
+        in: "path"
+        required: true
+        schema:
+          type: "integer"
+      responses:
+        "302":
+          description: "Found <br> Redirect"
+          content:
+            text/plain:
+              schema:
+                type: "string"
+        "401":
+          description: "Unauthorized"
+          content:
+            '*/*':
+              schema:
+                type: "object"
+        "200":
+          description: "OK"
+          content:
+            '*/*':
+              schema:
+                $ref: "#/components/schemas/OrderDto"
+        "404":
+          description: "Not Found"
+          content:
+            '*/*':
+              schema:
+                type: "string"
+              examples:
+                Example#1:
+                  value: ""
+  /orders/top:
+    get:
+      description: ""
+      responses:
+        "302":
+          description: "Found <br> Redirect"
+          content:
+            text/plain:
+              schema:
+                type: "string"
+        "401":
+          description: "Unauthorized"
+          content:
+            '*/*':
+              schema:
+                type: "object"
+        "200":
+          description: "OK"
+          content:
+            '*/*':
+              schema:
+                $ref: "#/components/schemas/OrderDto"
+        "404":
+          description: "Not Found"
+          content:
+            '*/*':
+              schema:
+                type: "string"
+              examples:
+                Example#1:
+                  value: "Your business does not have any orders"
+components:
+  schemas:
+    Function1:
+      type: "object"
+      properties: {}
+    Function1_? super HTML:
+      type: "object"
+    BusinessDto:
+      type: "object"
+      properties:
+        id:
+          type: "integer"
+          format: "int32"
+        ownerEmail:
+          type: "string"
+      required:
+      - "ownerEmail"
+    CurrencyDto:
+      type: "object"
+      properties:
+        code:
+          type: "string"
+        name:
+          type: "string"
+        symbol:
+          type: "string"
+      required:
+      - "code"
+      - "name"
+      - "symbol"
+    ExpenseDto:
+      type: "object"
+      properties:
+        id:
+          type: "integer"
+          format: "int32"
+        amount:
+          type: "integer"
+          format: "int32"
+        currency:
+          $ref: "#/components/schemas/CurrencyDto"
+        date:
+          type: "string"
+        comment:
+          type: "string"
+      required:
+      - "currency"
+      - "date"
+      - "comment"
+    CustomerDto:
+      type: "object"
+      properties:
+        phone:
+          type: "string"
+        name:
+          type: "string"
+      required:
+      - "phone"
+      - "name"
+    ItemTypeDto:
+      type: "object"
+      properties:
+        id:
+          type: "integer"
+          format: "int32"
+        name:
+          type: "string"
+        description:
+          type: "string"
+      required:
+      - "name"
+      - "description"
+    ItemDto:
+      type: "object"
+      properties:
+        id:
+          type: "integer"
+          format: "int32"
+        name:
+          type: "string"
+        purchasePrice:
+          type: "integer"
+          format: "int32"
+        price:
+          type: "integer"
+          format: "int32"
+        currency:
+          $ref: "#/components/schemas/CurrencyDto"
+        type:
+          $ref: "#/components/schemas/ItemTypeDto"
+      required:
+      - "name"
+      - "currency"
+      - "type"
+    OrderItemDto:
+      type: "object"
+      properties:
+        item:
+          $ref: "#/components/schemas/ItemDto"
+        quantity:
+          type: "integer"
+          format: "int32"
+      required:
+      - "item"
+    OrderDto:
+      type: "object"
+      properties:
+        id:
+          type: "integer"
+          format: "int32"
+        date:
+          type: "string"
+        customer:
+          $ref: "#/components/schemas/CustomerDto"
+        items:
+          type: "array"
+          items:
+            $ref: "#/components/schemas/OrderItemDto"
+        total:
+          type: "integer"
+          format: "int32"
+      required:
+      - "date"
+      - "customer"
+      - "items"
+    OrderCreationItemDto:
+      type: "object"
+      properties:
+        itemId:
+          type: "integer"
+          format: "int32"
+        quantity:
+          type: "integer"
+          format: "int32"
+    OrderCreationDto:
+      type: "object"
+      properties:
+        date:
+          type: "string"
+        customerPhone:
+          type: "string"
+        items:
+          type: "array"
+          items:
+            $ref: "#/components/schemas/OrderCreationItemDto"
+      required:
+      - "date"
+      - "customerPhone"
+      - "items"

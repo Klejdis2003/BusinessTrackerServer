@@ -9,11 +9,14 @@ import io.ktor.server.auth.*
 import io.ktor.server.html.*
 import io.ktor.server.http.content.*
 import io.ktor.server.plugins.*
+import io.ktor.server.plugins.openapi.*
+import io.ktor.server.plugins.swagger.*
 import io.ktor.server.request.*
 import io.ktor.server.response.*
 import io.ktor.server.routing.*
 import io.ktor.server.sessions.*
 import io.ktor.server.util.*
+import io.swagger.codegen.v3.generators.html.StaticHtmlCodegen
 import kotlinx.html.body
 import kotlinx.html.h1
 import kotlinx.html.li
@@ -64,6 +67,8 @@ fun Application.configureRouting() {
             oAuthenticationService.logout(authToken!!)
             call.sessions.clear<Session>()
         }
+        openAPI(path = "openapi", swaggerFile = "src/main/resources/openapi/documentation.yaml")
+        swaggerUI(path="swagger", swaggerFile = "src/main/resources/openapi/documentation.yaml")
     }
 }
 

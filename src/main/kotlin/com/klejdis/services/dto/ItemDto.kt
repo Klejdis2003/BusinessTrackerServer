@@ -13,7 +13,24 @@ data class ItemDto(
     val price: Int,
     val currency: CurrencyDto,
     val type: ItemTypeDto
-)
+) {
+    companion object {
+        fun fromEntity(item: Item): ItemDto {
+            return ItemDto(
+                id = item.id,
+                name = item.name,
+                purchasePrice = item.purchasePrice,
+                price = item.price,
+                currency = CurrencyDto.fromCurrency(Currency.getInstance(item.currency)),
+                type = ItemTypeDto(
+                    id = item.type.id,
+                    name = item.type.name,
+                    description = item.type.description
+                )
+            )
+        }
+    }
+}
 
 @Serializable
 data class ItemTypeDto(

@@ -1,6 +1,8 @@
 package com.klejdis.services.repositories
 import com.klejdis.services.config.orders
 import com.klejdis.services.filters.Filter
+import com.klejdis.services.filters.FilterType
+import com.klejdis.services.filters.KtormFilter
 import com.klejdis.services.filters.OrderFilterTransformer
 import com.klejdis.services.model.*
 import org.ktorm.database.Database
@@ -14,10 +16,12 @@ import java.sql.ResultSet
 class OrderRepositoryKtorm(
     private val database: Database
 ) : OrderRepository {
+
     private fun buildJoinedTablesQuery(
-        conditions: List<() -> ColumnDeclaring<Boolean>>
+        conditions: List<() -> ColumnDeclaring<Boolean>>,
+        aggregateConditions: List<ColumnDeclaring<Boolean>> = emptyList()
     ): Query {
-        return database
+        var query = database
             .from(Orders)
             .innerJoin(OrderItems, on = OrderItems.orderId eq Orders.id)
             .innerJoin(Items, on = OrderItems.itemId eq Items.id)
@@ -26,6 +30,12 @@ class OrderRepositoryKtorm(
             .innerJoin(ItemTypes, on = Items.type eq ItemTypes.id)
             .select()
             .whereWithConditions { conditions.forEach { condition -> it += condition() } }
+        if(aggregateConditions.isNotEmpty()) {
+            query = query.having {
+                aggregateConditions.reduce { acc, columnDeclaring -> acc and columnDeclaring }
+            }
+        }
+        return query
     }
 
 
@@ -41,40 +51,31 @@ class OrderRepositoryKtorm(
                 .getOrPut(order.id) { mutableListOf() }
                 .add(OrderItem(item, it[OrderItems.quantity] as Int))
 
-            orderMap
-                .getOrPut(order.id) { order }
-                .apply { total += item.price * it[OrderItems.quantity] as Int }
+            orderMap.getOrPut(order.id) { order }
         }
         return orderMap.map { (_, order) ->
             order.apply { items = orderIdItemsMap[order.id] ?: emptyList() }
         }
     }
 
-    private fun fetchOrderFromRawResultSet(resultSet: ResultSet): Order {
-        val order =  resultSet.asIterable().map {
-            Order {
-                id = it.getInt("id")
-                date = it.getDate("date").toLocalDate()
-                customer = Customer {
-                    phone = it.getString("phone")
-                    name = it.getString("name")
-                }
-                total = it.getInt("total")
-                business = Business {
-                    id = it.getInt("business_id")
-                    ownerEmail = it.getString("owner_email")
-                }
-            }
-        }
-        return order.first()
-    }
 
     private fun fetchJoinedTablesWithConditions(
         filters: Iterable<Filter> = emptyList(),
-        additionalConditions: List<() -> ColumnDeclaring<Boolean>> = emptyList()
+        additionalConditions: List<() -> ColumnDeclaring<Boolean>> = emptyList(),
     ): List<Order> {
-        val conditions = OrderFilterTransformer.generateTransformedFilters(filters) + additionalConditions
-        return fetchQuery(buildJoinedTablesQuery(conditions))
+        val conditions = OrderFilterTransformer.generateTransformedFilters(filters) as
+                MutableList<KtormFilter>
+        val aggregateConditions = mutableListOf<ColumnDeclaring<Boolean>>()
+        conditions.forEach { filter ->
+            if (filter.type == FilterType.AGGREGATE) {
+                aggregateConditions.add(filter.condition())
+            }
+        }
+        conditions.removeAll { it.type == FilterType.AGGREGATE }
+        return fetchQuery(buildJoinedTablesQuery(
+            conditions.map { it.condition } + additionalConditions,
+            aggregateConditions
+        ))
     }
 
     private fun fetchJoinedTablesWithCondition(
@@ -134,7 +135,8 @@ class OrderRepositoryKtorm(
     }
 
     override suspend fun create(entity: Order): Order {
-        var total = 0
+        entity.total = entity.items.sumOf { it.item.price * it.quantity }
+
         val affectedRecords = database.orders.add(entity)
         if (affectedRecords == 0) throw Exception("Failed to create order")
         database.batchInsert(OrderItems) {
@@ -151,7 +153,7 @@ class OrderRepositoryKtorm(
     override suspend fun update(entity: Order): Order {
         entity.total = entity.items.sumOf { it.item.price * it.quantity }
         database.orders.update(entity)
-        return entity
+        return get(entity.id)!!
     }
 
     override suspend fun delete(id: Int): Boolean {

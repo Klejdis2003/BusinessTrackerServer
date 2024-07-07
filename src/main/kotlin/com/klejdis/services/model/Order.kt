@@ -18,14 +18,12 @@ interface Order : Entity<Order> {
     var total: Int
 }
 
-/**
- * [kotlin.reflect.full.memberProperties]
- */
 object Orders : Table<Order>("orders") {
     val id = int("id").primaryKey().bindTo { it.id }
     val businessId = int("business_id").references(Businesses) { it.business }
     val customerPhone = varchar("customer_phone").references(Customers) { it.customer }
     val date = date("date").bindTo { it.date }
+    val total = int("total").bindTo { it.total }
 }
 
 data class OrderItem(
@@ -34,6 +32,7 @@ data class OrderItem(
 )
 
 object OrderItems : Table<Nothing>("order_items") {
+    val id = int("id").primaryKey()
     val orderId = int("order_id")
     val itemId = int("item_id")
     val quantity = int("quantity")

@@ -55,7 +55,7 @@ val appModule = module {
     single<OAuthenticationService> {
         OAuthenticationServiceImpl(get(), get(), get())
     }
-    single<OrderService> { OrderService(get(), get(), get()) }
+    single<OrderService> { OrderService(get(), get(), get(), get()) }
     single<ExpenseService> { ExpenseService(get(), get()) }
 
 

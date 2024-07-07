@@ -10,9 +10,9 @@ import org.ktorm.schema.ColumnDeclaring
 import java.time.LocalDate
 import java.time.format.DateTimeParseException
 
-object ExpenseFilterTransformer: KtormFilterTransformer(ExpenseFilterType::class)
+object ExpenseFilterTransformer: KtormSimpleFilterTransformer(ExpenseFilterCategory::class)
 
-sealed class ExpenseFilterType: KtormFilterType() {
+sealed class ExpenseFilterCategory: KtormSimpleFilterCategory() {
 
     /**
      * @param filterName the name of the filter, used to construct the error message
@@ -53,44 +53,44 @@ sealed class ExpenseFilterType: KtormFilterType() {
             throw handleException(filterName, e)
         }
     }
-    data object BusinessOwnerEmail: ExpenseFilterType() {
+    data object BusinessOwnerEmail: ExpenseFilterCategory() {
         override fun transform(value: String): () -> ColumnDeclaring<Boolean> {
             return { Businesses.ownerEmail eq value }
         }
 
     }
-    data object MaxAmount: ExpenseFilterType() {
+    data object MaxAmount: ExpenseFilterCategory() {
         override fun transform(value: String): () -> ColumnDeclaring<Boolean> {
             val amount = convertWithExceptionHandling(typeName) { value.toInt() }
             return { Expenses.amount lessEq amount }
         }
     }
-    data object MinAmount: ExpenseFilterType() {
+    data object MinAmount: ExpenseFilterCategory() {
         override fun transform(value: String): () -> ColumnDeclaring<Boolean> {
             val amount = convertWithExceptionHandling(typeName) { value.toInt() }
             return { Expenses.amount greaterEq amount }
         }
     }
-    data object Date: ExpenseFilterType() {
+    data object Date: ExpenseFilterCategory() {
         override fun transform(value: String): () -> ColumnDeclaring<Boolean> {
             val date = convertWithExceptionHandling(typeName) { LocalDate.parse(value) }
             return { Expenses.date eq date }
         }
     }
-    data object EarlierThan: ExpenseFilterType() {
+    data object EarlierThan: ExpenseFilterCategory() {
         override fun transform(value: String): () -> ColumnDeclaring<Boolean> {
             val date = convertWithExceptionHandling(typeName) { LocalDate.parse(value) }
             return { Expenses.date lessEq date }
         }
     }
-    data object LaterThan: ExpenseFilterType() {
+    data object LaterThan: ExpenseFilterCategory() {
         override fun transform(value: String): () -> ColumnDeclaring<Boolean> {
             val date = convertWithExceptionHandling(typeName) { LocalDate.parse(value) }
             return { Expenses.date greaterEq date }
         }
     }
 
-    data object Month: ExpenseFilterType() {
+    data object Month: ExpenseFilterCategory() {
         override fun transform(value: String): () -> ColumnDeclaring<Boolean> {
             return {
                 val date = convertWithExceptionHandling(typeName) { LocalDate.parse(value) }

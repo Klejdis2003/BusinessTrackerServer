@@ -68,6 +68,7 @@ CREATE TABLE IF NOT EXISTS orders
     customer_phone VARCHAR(10) NOT NULL,
     business_id    INT         NOT NULL,
     date           DATE        NOT NULL DEFAULT CURRENT_DATE,
+    total          DECIMAL(8)  NOT NULL DEFAULT 2000,
     FOREIGN KEY (customer_phone) REFERENCES customers (phone),
     FOREIGN KEY (business_id) REFERENCES businesses (id)
 );
