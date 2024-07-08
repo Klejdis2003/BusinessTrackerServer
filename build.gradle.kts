@@ -17,7 +17,7 @@ group = "com.klejdis.services"
 version = "0.0.1"
 
 tasks.dokkaHtml {
-    outputDirectory.set(layout.buildDirectory.dir("documentation/html"))
+    outputDirectory.set(File("src/main/resources/documentation/code"))
 }
 
 tasks.dokkaGfm {

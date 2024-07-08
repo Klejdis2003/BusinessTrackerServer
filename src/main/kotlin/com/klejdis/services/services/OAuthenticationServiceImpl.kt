@@ -2,13 +2,18 @@ package com.klejdis.services.services
 
 import com.klejdis.services.model.ProfileInfo
 import com.klejdis.services.plugins.OAUTH_DOMAIN
+import com.klejdis.services.plugins.sessionMaxAgeInSeconds
 import com.klejdis.services.request.OAuthTokenRevocationRequest
+import com.klejdis.services.util.BackgroundTasksUtil
 import io.github.cdimascio.dotenv.Dotenv
 import io.ktor.client.*
 import io.ktor.client.call.*
 import io.ktor.client.request.*
 import io.ktor.http.*
 import io.ktor.server.util.*
+import kotlinx.coroutines.Job
+import java.time.LocalDateTime
+import java.util.concurrent.ConcurrentHashMap
 
 
 class OAuthenticationServiceImpl(
@@ -16,8 +21,14 @@ class OAuthenticationServiceImpl(
     private val businessService: BusinessService,
     private val vault: Dotenv
 ) : OAuthenticationService {
-    private val tokenProfileInfoMap: MutableMap<String, ProfileInfo> = HashMap()
-    private val authTokenToTokenResponseMap: MutableMap<String, OAuth2Response> = HashMap()
+    private val tokenProfileInfoMap: MutableMap<String, ProfileInfo> = ConcurrentHashMap()
+    private val authTokenToTokenResponseMap: MutableMap<String, OAuth2Response> = ConcurrentHashMap()
+    private val authTokenToCreationTimeMap: MutableMap<String, LocalDateTime> = ConcurrentHashMap()
+    private val job = invalidateExpiredSessions()
+
+    init{
+        job.start()
+    }
 
     /**
      * Gets the profile information from the token.
@@ -42,6 +53,10 @@ class OAuthenticationServiceImpl(
         }
         val profileInfo: ProfileInfo = response.body()
         return profileInfo
+    }
+
+    override fun destroy() {
+        job.cancel()
     }
 
     /**
@@ -93,11 +108,29 @@ class OAuthenticationServiceImpl(
     private fun cacheData(tokenResponse: OAuth2Response, profileInfo: ProfileInfo) {
         tokenProfileInfoMap[tokenResponse.accessToken] = profileInfo
         authTokenToTokenResponseMap[tokenResponse.accessToken] = tokenResponse
+        authTokenToCreationTimeMap[tokenResponse.accessToken] = LocalDateTime.now()
     }
 
     private fun removeFromCache(token: String) {
         tokenProfileInfoMap.remove(token)
         authTokenToTokenResponseMap.remove(token)
+        authTokenToCreationTimeMap.remove(token)
+    }
+
+    /**
+     * Runs every minute and checks the cache for expired tokens. If a token is expired, it is removed from the cache.
+     */
+    private fun invalidateExpiredSessions(): Job {
+        return BackgroundTasksUtil.run(60) {
+            println("Checking for expired tokens...")
+            authTokenToCreationTimeMap.forEach { (token, creationTime) ->
+                if (LocalDateTime.now() > creationTime.plusSeconds(sessionMaxAgeInSeconds)) {
+                    println("Removing expired token: $token for user ${tokenProfileInfoMap[token]?.email}")
+                    logout(token)
+                    removeFromCache(token)
+                }
+            }
+        }
     }
 
 }

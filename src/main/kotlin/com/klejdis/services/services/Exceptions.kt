@@ -15,6 +15,8 @@ class InvalidUsernameException(
     message: String = "Invalid username."
 ) : Exception(message)
 
+class UnauthorizedException(message: String = "You are not authorized to perform this action") : Exception()
+
 fun Exception.printStackTraceIfInDevMode() {
     if (MODE == Mode.DEV) printStackTrace()
 }

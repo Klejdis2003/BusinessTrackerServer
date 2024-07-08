@@ -19,7 +19,7 @@ interface CrudRepository<PK, T> {
     suspend fun getAll(filters: Iterable<Filter> = emptySet()): List<T>
 
     /**
-     * Gets an entity by its id(primary key)
+     * Gets an entity by its id(primary key). The id could be of any type, depending on the implementation.
      * @param id the id of the entity
      * @return the entity if it exists, null otherwise
      */

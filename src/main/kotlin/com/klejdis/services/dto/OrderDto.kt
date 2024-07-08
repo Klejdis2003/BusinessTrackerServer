@@ -4,6 +4,16 @@ import com.klejdis.services.model.*
 import kotlinx.serialization.Serializable
 import java.time.LocalDate
 
+/**
+ * Represents an order.
+ * @param id The id of the order
+ * @param date The date of the order, in the format "yyyy-MM-dd"
+ * @param customer The customer who placed the order
+ * @param items The items in the order
+ * @param total The total cost of the order
+ * @param business This field is only used when converting the dto to an entity, and should be set before calling the toEntity method. When
+ * sending a response to the client, this field should be null.
+ */
 @Serializable
 data class OrderDto(
     val id: Int = 0,
@@ -47,6 +57,16 @@ data class OrderDto(
         }
     }
 }
+
+/**
+ * Represents the data needed to create an order.
+ * @param date The date of the order, in the format "yyyy-MM-dd"
+ * @param customerPhone The phone number of the customer, 10 digits long
+ * @param items The items in the order
+ * @param business This field is only used when converting the dto to an entity, and should be set before calling the toEntity method. When
+ * sending a response to the client, this field should be null.
+ * @throws IllegalArgumentException if the items list is empty or if the customer phone number is not 10 digits long
+ */
 
 @Serializable
 data class OrderCreationDto(
@@ -104,12 +124,22 @@ data class OrderCreationDto(
     }
 }
 
+/**
+ * Represents an item in an order.
+ * @param item The item
+ * @param quantity The quantity of the item in the order
+ */
 @Serializable
 data class OrderItemDto(
     val item: ItemDto,
     val quantity: Int
 )
 
+/**
+ * Represents an item in an order, with only the item id and quantity.
+ * @param itemId The id of the item
+ * @param quantity The quantity of the item in the order
+ */
 @Serializable
 data class OrderCreationItemDto(
     val itemId: Int,

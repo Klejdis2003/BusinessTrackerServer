@@ -23,13 +23,17 @@ interface AuthenticationService<in K, out T> {
      */
     suspend fun logout(authToken: String): Boolean
 
-
     /**
      * Uses the received token to grab the user's profile information.
      * @param token The token received from Auth provider.
      * @return Defined by the implementation.
      */
     suspend fun getProfileInfoFromToken(token: String): T
+
+    /**
+     * Destroys the service and all its background processes.
+     */
+    fun destroy()
 }
 
 typealias OAuth2Response = OAuthAccessTokenResponse.OAuth2

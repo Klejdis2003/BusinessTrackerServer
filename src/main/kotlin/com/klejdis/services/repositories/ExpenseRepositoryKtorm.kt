@@ -25,13 +25,25 @@ class ExpenseRepositoryKtorm(
             .whereWithConditions { conditions.forEach { condition -> it += condition() } }
     }
 
+    private fun fetchQuery(query: Query): List<Expense> {
+        return query.map { Expenses.createEntity(it) }
+    }
+    private fun fetchMainQueryWithConditions(
+        filters: Iterable<Filter> = emptyList(),
+        additionalConditions: List<() -> ColumnDeclaring<Boolean>> = emptyList()
+    ): List<Expense> {
+        val allConditions = ExpenseFilterTransformer.generateTransformedFilters(filters) + additionalConditions
+        return fetchQuery(buildJoinedTablesQuery(allConditions))
+    }
+    private fun fetchMainQueryWithCondition(condition: () -> ColumnDeclaring<Boolean>): List<Expense> {
+        return fetchMainQueryWithConditions(additionalConditions = listOf(condition))
+    }
+
     override suspend fun getAll(filters: Iterable<Filter>): List<Expense> {
-        val filters = ExpenseFilterTransformer.generateTransformedFilters(filters)
-        return buildJoinedTablesQuery(filters)
-            .map { Expenses.createEntity(it) }
+        return fetchMainQueryWithConditions(filters)
     }
     override suspend fun get(id: Int): Expense? {
-        TODO("Not yet implemented")
+        return fetchMainQueryWithCondition { Expenses.id eq id }.firstOrNull()
   }
 
     override suspend fun create(entity: Expense): Expense {
@@ -45,6 +57,6 @@ class ExpenseRepositoryKtorm(
     }
 
     override suspend fun delete(id: Int): Boolean {
-        TODO("Not yet implemented")
+        return database.delete(Expenses) { Expenses.id eq id } > 0
     }
 }

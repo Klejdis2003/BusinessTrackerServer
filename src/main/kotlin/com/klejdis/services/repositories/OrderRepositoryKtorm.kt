@@ -112,12 +112,10 @@ class OrderRepositoryKtorm(
                     WHERE businesses.owner_email = ?
                     GROUP BY orders.id, businesses.id, customers.phone
                 )
-
                 SELECT order_totals.*
                 FROM order_totals
                 WHERE order_totals.total = (SELECT MAX(total) FROM order_totals)
-
-            """.trimIndent()
+                """.trimIndent()
             conn.prepareStatement(sql).use{
                 it.setString(1, email)
                 it.executeQuery().apply{next()}.getInt("id")
@@ -144,10 +142,11 @@ class OrderRepositoryKtorm(
                 item {
                     set(it.itemId, orderItem.item.id)
                     set(it.orderId, entity.id)
+                    set(it.quantity, orderItem.quantity)
                 }
             }
         }
-        return get(entity.id)!!
+        return entity
     }
 
     override suspend fun update(entity: Order): Order {

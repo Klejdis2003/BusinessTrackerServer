@@ -1,6 +1,5 @@
 package com.klejdis.services.model
 
-import kotlinx.serialization.Serializable
 import org.ktorm.entity.Entity
 import org.ktorm.schema.Table
 import org.ktorm.schema.date
@@ -12,7 +11,7 @@ interface Expense: Entity<Expense> {
     companion object: Entity.Factory<Expense>()
     var id: Int
     var amount: Int
-    var currency: String
+    var currencyCode: String
     var date: LocalDate
     var comment : String
     var business: Business
@@ -31,7 +30,7 @@ object Expenses: Table<Expense>("expenses") {
     val id = int("id").primaryKey().bindTo { it.id }
     val amount = int("amount").bindTo { it.amount }
     val businessId = int("business_id").references(Businesses) { it.business }
-    val currency = varchar("currency").bindTo { it.currency }
+    val currency = varchar("currency").bindTo { it.currencyCode }
     val date = date("date").bindTo { it.date }
     val comment = varchar("comment").bindTo { it.comment }
 }

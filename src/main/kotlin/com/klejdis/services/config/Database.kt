@@ -24,12 +24,12 @@ private fun configuredDB(): Database {
 }
 
 val postgresDatabase: Database by lazy { configuredDB() }
-
 val Database.items get() = this.sequenceOf(Items)
 val Database.itemTypes get() = this.sequenceOf(ItemTypes)
 val Database.accounts get() = this.sequenceOf(Businesses)
 val Database.orders get() = this.sequenceOf(Orders)
 val Database.expenses get() = this.sequenceOf(Expenses)
+val Database.customers get() = this.sequenceOf(Customers)
 
 private object DBService {
     private fun executeSqlFile(fileName: String) {

@@ -17,6 +17,7 @@ import io.ktor.serialization.kotlinx.json.*
 import kotlinx.serialization.json.Json
 import org.dotenv.vault.dotenvVault
 import org.koin.dsl.module
+import org.koin.ktor.plugin.RequestScope
 
 val appModule = module {
     //config
@@ -51,12 +52,14 @@ val appModule = module {
 
     //services
 
+
     single<BusinessService> { BusinessService(get(), get(), get(), get()) }
     single<OAuthenticationService> {
         OAuthenticationServiceImpl(get(), get(), get())
     }
     single<OrderService> { OrderService(get(), get(), get(), get()) }
     single<ExpenseService> { ExpenseService(get(), get()) }
+
 
 
 }

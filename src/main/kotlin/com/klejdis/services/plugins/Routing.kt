@@ -22,6 +22,8 @@ import kotlinx.html.h1
 import kotlinx.html.li
 import kotlinx.html.ul
 import org.koin.ktor.ext.inject
+import java.io.File
+import java.time.LocalDateTime
 
 const val HOME_ROUTE = "/"
 
@@ -67,6 +69,7 @@ fun Application.configureRouting() {
             oAuthenticationService.logout(authToken!!)
             call.sessions.clear<Session>()
         }
+        staticFiles(remotePath = "/code_documentation", File("src/main/resources/documentation/code"))
         openAPI(path = "openapi", swaggerFile = "src/main/resources/openapi/documentation.yaml")
         swaggerUI(path="swagger", swaggerFile = "src/main/resources/openapi/documentation.yaml")
     }
@@ -91,6 +94,13 @@ suspend fun RoutingCall.getSession(): Session? {
         respondRedirect(redirectUrl)
         return null
     }
+    val sessionCreationTime = LocalDateTime.parse(session.creationTime)
+    val currentTime = LocalDateTime.now()
+    if (currentTime > sessionCreationTime.plusSeconds(sessionMaxAgeInSeconds)){
+        sessions.clear<Session>()
+        return null
+    }
+
     return session
 
 }

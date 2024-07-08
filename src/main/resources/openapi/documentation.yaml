@@ -130,6 +130,9 @@ paths:
                 Example#2:
                   description: ""
                   value: "/"
+  /loginRedirect:
+    get:
+      description: ""
   /logout:
     get:
       description: ""
@@ -363,6 +366,9 @@ components:
           format: "int32"
       required:
       - "item"
+    Business:
+      type: "object"
+      properties: {}
     OrderDto:
       type: "object"
       properties:
@@ -380,6 +386,8 @@ components:
         total:
           type: "integer"
           format: "int32"
+        business:
+          $ref: "#/components/schemas/Business"
       required:
       - "date"
       - "customer"
@@ -404,6 +412,8 @@ components:
           type: "array"
           items:
             $ref: "#/components/schemas/OrderCreationItemDto"
+        business:
+          $ref: "#/components/schemas/Business"
       required:
       - "date"
       - "customerPhone"

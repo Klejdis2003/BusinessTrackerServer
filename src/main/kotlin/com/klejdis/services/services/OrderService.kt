@@ -63,11 +63,16 @@ class OrderService(
         return orderMapper.toOrderDto(order)
     }
 
-    suspend fun update(dto: OrderDto, businessEmail: String) {
-        val business = businessRepository.getByEmail(businessEmail)
-            ?: throw EntityNotFoundException("Business with email=$businessEmail does not exist")
-        orderRepository.update(orderMapper.toEntity(dto, business)).let { orderMapper.toOrderDto(it) }
+    suspend fun addOrderItems(orderId: Int, items: List<OrderItem>, email: String): OrderDto {
+        val order = orderRepository.get(orderId)
+            ?: throw EntityNotFoundException("Order with id=$orderId does not exist")
+        if (order.business.ownerEmail != email) throw UnauthorizedException("Unauthorized action! Order with id=$orderId does not belong to the business with email=$email.")
+        order.items += items
+        orderRepository.update(order)
+        return orderMapper.toOrderDto(order)
     }
+
+
 
     suspend fun delete(id: Int) = orderRepository.delete(id)
 }

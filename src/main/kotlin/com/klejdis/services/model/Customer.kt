@@ -6,7 +6,6 @@ import org.ktorm.schema.varchar
 
 interface Customer : Entity<Customer> {
     companion object : Entity.Factory<Customer>()
-
     var phone: String
     var name: String
 
