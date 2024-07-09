@@ -1,4 +1,5 @@
 package com.klejdis.services.repositories
+import com.klejdis.services.config.customers
 import com.klejdis.services.config.orders
 import com.klejdis.services.filters.Filter
 import com.klejdis.services.filters.FilterType
@@ -6,12 +7,12 @@ import com.klejdis.services.filters.KtormFilter
 import com.klejdis.services.filters.OrderFilterTransformer
 import com.klejdis.services.model.*
 import org.ktorm.database.Database
-import org.ktorm.database.asIterable
 import org.ktorm.dsl.*
 import org.ktorm.entity.add
+import org.ktorm.entity.find
 import org.ktorm.entity.update
 import org.ktorm.schema.ColumnDeclaring
-import java.sql.ResultSet
+import org.ktorm.support.postgresql.bulkInsert
 
 class OrderRepositoryKtorm(
     private val database: Database
@@ -132,20 +133,37 @@ class OrderRepositoryKtorm(
         return fetchJoinedTablesWithCondition { Orders.id eq id }.firstOrNull()
     }
 
-    override suspend fun create(entity: Order): Order {
-        entity.total = entity.items.sumOf { it.item.price * it.quantity }
 
-        val affectedRecords = database.orders.add(entity)
-        if (affectedRecords == 0) throw Exception("Failed to create order")
-        database.batchInsert(OrderItems) {
-            entity.items.forEach { orderItem ->
+    private fun persistCustomerIfNotExists(order: Order) {
+        val customer = order.customer
+        val actualCustomer = database.customers.find { it.phone eq customer.phone }
+        if (actualCustomer == null) {
+            if(customer.name.isEmpty()) throw IllegalArgumentException("Customer name must be provided for non-existing customers")
+            database.customers.add(customer)
+        }
+        else order.customer = actualCustomer
+    }
+
+    private fun persistOrderItems(order: Order) {
+        database.bulkInsert(OrderItems) {
+            order.items.forEach { orderItem ->
                 item {
                     set(it.itemId, orderItem.item.id)
-                    set(it.orderId, entity.id)
+                    set(it.orderId, order.id)
                     set(it.quantity, orderItem.quantity)
                 }
             }
         }
+    }
+
+    override suspend fun create(entity: Order): Order {
+        entity.total = entity.items.sumOf { it.item.price * it.quantity }
+        persistCustomerIfNotExists(entity)
+
+        val affectedRecords = database.orders.add(entity)
+        if (affectedRecords == 0) throw Exception("Failed to create order")
+        persistOrderItems(entity)
+
         return entity
     }
 

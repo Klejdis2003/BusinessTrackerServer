@@ -70,14 +70,14 @@ data class OrderDto(
 
 @Serializable
 data class OrderCreationDto(
-    val date: String,
-    val customerPhone: String,
+    val customer: CustomerDto,
     val items: List<OrderCreationItemDto>,
+    val date: String = LocalDate.now().toString(),
     val business: Business? = null
 ) {
     init {
         require(items.isNotEmpty()) { "Order must have at least one item." }
-        require(customerPhone.length == 10) { "Customer phone number must be 10 digits long." }
+        require(customer.phone.length == 10) { "Customer phone number must be 10 digits long." }
     }
 
     companion object: Mappable<Order, OrderCreationDto>{
@@ -90,7 +90,7 @@ data class OrderCreationDto(
         override fun fromEntity(entity: Order): OrderCreationDto {
             return OrderCreationDto(
                 date = entity.date.toString(),
-                customerPhone = entity.customer.phone,
+                customer = CustomerDto.fromEntity(entity.customer),
                 items = entity.items.map {
                     OrderCreationItemDto(
                         itemId = it.item.id,
@@ -116,7 +116,7 @@ data class OrderCreationDto(
                         quantity = it.quantity
                     )
                 }
-                this.customer = Customer { phone = dto.customerPhone }
+                this.customer = CustomerDto.toEntity(dto.customer)
                 this.business = dto.business
             }
         }
@@ -175,7 +175,7 @@ class OrderMapper(
                     quantity = it.quantity
                 )
             }
-            this.customer = Customer { phone = dto.customerPhone }
+            this.customer = CustomerDto.toEntity(dto.customer)
             this.business = business
         }
     }

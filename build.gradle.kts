@@ -16,6 +16,20 @@ plugins {
 group = "com.klejdis.services"
 version = "0.0.1"
 
+//add a task to run in prod mode
+tasks.register("run_prod") {
+    project.ext.set("development", false)
+}
+
+//add a task to run in dev mode
+tasks.register("run_dev") {
+    project.ext.set("development", true)
+}
+
+
+
+
+
 tasks.dokkaHtml {
     outputDirectory.set(File("src/main/resources/documentation/code"))
 }
@@ -47,7 +61,6 @@ dependencies {
     implementation("io.ktor:ktor-server-html-builder:$ktor_version")
     implementation("io.ktor:ktor-server-swagger:$ktor_version")
     implementation("io.ktor:ktor-server-openapi:$ktor_version")
-    implementation("io.swagger.codegen.v3:swagger-codegen-generators:$swagger_codegen_version")
     implementation("io.ktor:ktor-serialization-kotlinx-json")
     implementation("io.ktor:ktor-server-host-common")
     implementation("io.ktor:ktor-server-netty")

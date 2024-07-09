@@ -9,13 +9,13 @@ import java.time.LocalDate
 
 interface Order : Entity<Order> {
     companion object : Entity.Factory<Order>()
-
     var id: Int
     var business: Business
     var customer: Customer
     var date: LocalDate
     var items: List<OrderItem>
     var total: Int
+
 }
 
 object Orders : Table<Order>("orders") {

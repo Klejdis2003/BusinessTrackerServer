@@ -2,23 +2,19 @@ package com.klejdis.services
 
 import com.klejdis.services.config.rebuildDatabase
 import com.klejdis.services.plugins.*
-import com.klejdis.services.services.OAuthenticationService
 import io.ktor.network.tls.certificates.*
 import io.ktor.server.application.*
 import io.ktor.server.engine.*
 import io.ktor.server.netty.*
 import org.dotenv.vault.dotenvVault
 import org.koin.core.context.startKoin
-import org.koin.mp.KoinPlatform.getKoin
 import java.io.File
 
 val MODE = Mode.DEV
 
+
 fun main() {
-    startKoin {
-        modules(appModule)
-        getKoin().get<OAuthenticationService>() // initialize the service
-    }
+    startKoin { modules(appModule) }
     embeddedServer(
         Netty,
         configure = {
@@ -55,7 +51,7 @@ fun ApplicationEngine.Configuration.configureSSL() {
         keyStorePassword = { vault["KEYSTORE_PASSWORD"].toCharArray() },
         privateKeyPassword = { vault["PRIVATE_KEY_PASSWORD"].toCharArray() }
     ) {
-        port = 8080
+        port = System.getenv("PORT")?.toInt() ?: 8080
         keyStorePath = keystoreFile
     }
 }

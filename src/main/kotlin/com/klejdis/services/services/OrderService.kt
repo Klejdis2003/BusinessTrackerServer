@@ -54,7 +54,7 @@ class OrderService(
                 item = item,
                 quantity = dto.items.first { it.itemId == item.id }.quantity
             )
-        }
+        }.run { if (size != itemIds.size) throw EntityNotFoundException("One or more items do not exist") else this}
 
         //create the order and return the OrderDto
         order = super.executeCreateBlockWithErrorHandling {

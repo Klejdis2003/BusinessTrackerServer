@@ -19,7 +19,8 @@ CREATE TABLE IF NOT EXISTS business_preferences
 CREATE TABLE IF NOT EXISTS customers
 (
     phone VARCHAR(10) NOT NULL PRIMARY KEY,
-    name  VARCHAR(50) NOT NULL
+    name  VARCHAR(50) NOT NULL,
+    CONSTRAINT customers_name_check CHECK (name ~* '^[a-zA-Z ]+$')
 );
 
 CREATE TABLE IF NOT EXISTS item_types

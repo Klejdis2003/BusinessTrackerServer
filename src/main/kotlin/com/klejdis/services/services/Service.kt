@@ -15,7 +15,8 @@ import org.postgresql.util.PSQLState
  */
 open class Service<T : Entity<T>>(
     private val entityName: String,
-    private var psqlExceptionHandler: PSQLExceptionHandler = PSQLExceptionHandler()
+    private var psqlExceptionHandler: PSQLExceptionHandler = PSQLExceptionHandler(),
+    protected val loggedInBusinessEmail : String = "",
 ) {
 
     /**
@@ -33,6 +34,11 @@ open class Service<T : Entity<T>>(
             block()
         } catch (e: PSQLException) {
             throw psqlExceptionHandler.handle(e)
+        } catch (e: IllegalArgumentException) {
+            throw e
+        } catch (e: Exception) {
+            e.printStackTrace()
+            throw Exception("An unknown error occurred.")
         } catch (e: Exception) {
             e.printStackTrace()
             throw Exception("An unknown error occurred.")

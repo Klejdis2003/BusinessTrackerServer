@@ -6,7 +6,7 @@ import kotlinx.serialization.Serializable
 @Serializable
 data class AccountRequestDto(
     val username: String,
-    val password: String,
+    val password: String
 )
 
 @Serializable

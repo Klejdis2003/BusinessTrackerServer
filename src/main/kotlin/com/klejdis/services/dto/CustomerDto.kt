@@ -6,7 +6,7 @@ import kotlinx.serialization.Serializable
 @Serializable
 data class CustomerDto(
     val phone: String,
-    val name: String,
+    val name: String = "",
 ) {
     companion object {
         fun fromEntity(customer: Customer): CustomerDto {

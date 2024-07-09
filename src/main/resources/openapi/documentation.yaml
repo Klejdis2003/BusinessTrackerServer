@@ -6,48 +6,6 @@ info:
 servers:
 - url: "https://BusinessTrackerServer"
 paths:
-  /:
-    get:
-      description: ""
-      responses:
-        "302":
-          description: "Found <br> Redirect"
-          content:
-            text/plain:
-              schema:
-                type: "string"
-        "200":
-          description: "OK, when the user is authenticated"
-          content:
-            text/plain:
-              schema:
-                $ref: "#/components/schemas/Function1_? super HTML"
-              examples:
-                text/html:
-                  description: "HTML document"
-                  value: ""
-  /accounts:
-    post:
-      description: ""
-      requestBody:
-        content:
-          application/json:
-            schema:
-              $ref: "#/components/schemas/BusinessDto"
-        required: true
-      responses:
-        "201":
-          description: "Created"
-          content:
-            '*/*':
-              schema:
-                $ref: "#/components/schemas/BusinessDto"
-        "409":
-          description: "Conflict"
-          content:
-            '*/*':
-              schema:
-                type: "string"
   /businesses:
     get:
       description: ""
@@ -95,7 +53,7 @@ paths:
               examples:
                 Example#1:
                   description: ""
-                  value: "/"
+                  value: "/orders"
   /expenses:
     get:
       description: ""
@@ -150,10 +108,18 @@ paths:
                   value: "/loginRedirect"
                 Example#2:
                   description: ""
-                  value: "/"
+                  value: "/orders"
   /loginRedirect:
     get:
       description: ""
+      responses:
+        "302":
+          description: "Found <br> Redirect"
+          content:
+              text/plain:
+                schema:
+                    type: "string"
+
   /logout:
     get:
       description: ""
@@ -285,11 +251,6 @@ paths:
                   value: "Your business does not have any orders"
 components:
   schemas:
-    Function1:
-      type: "object"
-      properties: {}
-    Function1_? super HTML:
-      type: "object"
     BusinessDto:
       type: "object"
       properties:
@@ -300,6 +261,9 @@ components:
           type: "string"
       required:
       - "ownerEmail"
+    Function1:
+      type: "object"
+      properties: {}
     CurrencyDto:
       type: "object"
       properties:
@@ -326,11 +290,14 @@ components:
           $ref: "#/components/schemas/CurrencyDto"
         date:
           type: "string"
+        category:
+          type: "string"
         comment:
           type: "string"
       required:
       - "currency"
       - "date"
+      - "category"
       - "comment"
     ExpenseCreationDto:
       type: "object"
@@ -340,11 +307,13 @@ components:
           format: "int32"
         currencyCode:
           type: "string"
+        category:
+          type: "string"
         comment:
           type: "string"
       required:
-      - "amount"
       - "currencyCode"
+      - "category"
       - "comment"
     CustomerDto:
       type: "object"
@@ -421,12 +390,12 @@ components:
         total:
           type: "integer"
           format: "int32"
+        business:
+          $ref: "#/components/schemas/Business"
       required:
-      - "id"
       - "date"
       - "customer"
       - "items"
-      - "total"
     OrderCreationItemDto:
       type: "object"
       properties:

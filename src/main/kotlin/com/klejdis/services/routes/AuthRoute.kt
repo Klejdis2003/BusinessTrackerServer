@@ -11,9 +11,10 @@ import io.ktor.server.response.*
 import io.ktor.server.routing.*
 import io.ktor.server.sessions.*
 import org.koin.ktor.ext.inject
+import org.koin.ktor.ext.get as koinGet
 
 fun Route.authRoute() {
-    val authenticationService by inject<OAuthenticationService>()
+    val authenticationService = koinGet<OAuthenticationService>()
 
     get("/login") {
         if (call.sessions.get<Session>() != null)

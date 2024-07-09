@@ -1,6 +1,7 @@
 package com.klejdis.services.repositories
 
 import com.klejdis.services.config.customers
+import com.klejdis.services.filters.CustomerFilterTransformer
 import com.klejdis.services.filters.Filter
 import com.klejdis.services.model.Customer
 import com.klejdis.services.model.Customers
@@ -10,7 +11,7 @@ import org.ktorm.entity.add
 import org.ktorm.entity.update
 import org.ktorm.schema.ColumnDeclaring
 
-class CustomersRepositoryKtorm(private val database: Database): CustomersRepository {
+class CustomerRepositoryKtorm(private val database: Database): CustomerRepository {
     private fun buildQuery(conditions: List<() -> ColumnDeclaring<Boolean>>): Query {
         return database
             .from(Customers)
@@ -21,12 +22,13 @@ class CustomersRepositoryKtorm(private val database: Database): CustomersReposit
     private fun fetchQuery(query: Query): List<Customer> {
         return query.map { Customers.createEntity(it) }
     }
-    private fun fetchMainQueryWithConditions(conditions: List<() -> ColumnDeclaring<Boolean>> = emptyList()): List<Customer> {
-        return fetchQuery(buildQuery(conditions))
+    private fun fetchMainQueryWithConditions(filters: Iterable<Filter> = listOf(), additionalConditions : List<() -> ColumnDeclaring<Boolean>> = listOf()): List<Customer> {
+        val conditions = CustomerFilterTransformer.generateTransformedFilters(filters)
+        return fetchQuery(buildQuery(conditions + additionalConditions))
     }
 
     private fun fetchMainQueryWithCondition(condition: () -> ColumnDeclaring<Boolean>): List<Customer> {
-        return fetchMainQueryWithConditions(listOf(condition))
+        return fetchMainQueryWithConditions(additionalConditions = listOf(condition))
     }
 
     override fun searchByName(name: String): List<Customer> {
@@ -38,7 +40,7 @@ class CustomersRepositoryKtorm(private val database: Database): CustomersReposit
     }
 
     override suspend fun getAll(filters: Iterable<Filter>): List<Customer> {
-        return fetchMainQueryWithConditions()
+        return fetchMainQueryWithConditions(filters)
     }
 
     override suspend fun get(id: String): Customer? {

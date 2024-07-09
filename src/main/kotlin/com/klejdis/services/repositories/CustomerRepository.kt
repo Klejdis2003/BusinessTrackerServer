@@ -2,7 +2,7 @@ package com.klejdis.services.repositories
 
 import com.klejdis.services.model.Customer
 
-interface CustomersRepository: CrudRepository<String, Customer> {
+interface CustomerRepository: CrudRepository<String, Customer> {
     /**
      * Searches for customers by name.
      * @param name The name to search for

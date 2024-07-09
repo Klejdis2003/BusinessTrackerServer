@@ -8,11 +8,9 @@ interface Customer : Entity<Customer> {
     companion object : Entity.Factory<Customer>()
     var phone: String
     var name: String
-
 }
 
 object Customers : Table<Customer>("customers") {
     val phone = varchar("phone").primaryKey().bindTo { it.phone }
     val name = varchar("name").bindTo { it.name }
-
 }
