@@ -1,13 +1,11 @@
 package com.klejdis.services.routes
 
-import com.klejdis.services.dto.ExpenseMapper
-import com.klejdis.services.filters.*
-import com.klejdis.services.model.Expense
+import com.klejdis.services.dto.ExpenseCreationDto
+import com.klejdis.services.filters.Filter
 import com.klejdis.services.plugins.executeWithExceptionHandling
-import com.klejdis.services.repositories.BusinessRepository
-import com.klejdis.services.repositories.ExpenseRepository
 import com.klejdis.services.services.ExpenseService
 import io.ktor.http.*
+import io.ktor.server.request.*
 import io.ktor.server.response.*
 import io.ktor.server.routing.*
 import io.ktor.util.*
@@ -22,6 +20,15 @@ fun Route.expenseRoutes() {
                 call.executeWithExceptionHandling {
                     val expenses = expenseService.getAll(it, queryParameters)
                     call.respond(expenses)
+                }
+            }
+        }
+        post {
+            call.getProfileInfoFromSession()?.email?.let { email ->
+                call.executeWithExceptionHandling {
+                    val expense = call.receive<ExpenseCreationDto>()
+                    val createdExpense = expenseService.create(expense, email)
+                    call.respond(HttpStatusCode.Created, createdExpense)
                 }
             }
         }

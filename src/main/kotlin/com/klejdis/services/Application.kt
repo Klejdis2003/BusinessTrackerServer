@@ -3,15 +3,12 @@ package com.klejdis.services
 import com.klejdis.services.config.rebuildDatabase
 import com.klejdis.services.plugins.*
 import com.klejdis.services.services.OAuthenticationService
-import io.github.cdimascio.dotenv.Dotenv
 import io.ktor.network.tls.certificates.*
 import io.ktor.server.application.*
 import io.ktor.server.engine.*
 import io.ktor.server.netty.*
-import org.dotenv.vault.DotenvVault
 import org.dotenv.vault.dotenvVault
 import org.koin.core.context.startKoin
-import org.koin.java.KoinJavaComponent.inject
 import org.koin.mp.KoinPlatform.getKoin
 import java.io.File
 
@@ -33,7 +30,6 @@ fun main() {
 }
 
 fun Application.module() {
-    //configureKoin()
     configureHTTPSRedirect()
     configureSecurity()
     configureSerialization()

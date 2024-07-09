@@ -1,4 +1,4 @@
-openapi: "3.1.0"
+openapi: "3.0.0"
 info:
   title: "BusinessTrackerServer API"
   description: "BusinessTrackerServer API"
@@ -17,7 +17,7 @@ paths:
               schema:
                 type: "string"
         "200":
-          description: "OK"
+          description: "OK, when the user is authenticated"
           content:
             text/plain:
               schema:
@@ -114,6 +114,27 @@ paths:
                 type: "array"
                 items:
                   $ref: "#/components/schemas/ExpenseDto"
+    post:
+      description: ""
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/ExpenseCreationDto"
+        required: true
+      responses:
+        "302":
+          description: "Found <br> Redirect"
+          content:
+            text/plain:
+              schema:
+                type: "string"
+        "201":
+          description: "Created"
+          content:
+            '*/*':
+              schema:
+                $ref: "#/components/schemas/ExpenseDto"
   /login:
     get:
       description: ""
@@ -311,6 +332,20 @@ components:
       - "currency"
       - "date"
       - "comment"
+    ExpenseCreationDto:
+      type: "object"
+      properties:
+        amount:
+          type: "integer"
+          format: "int32"
+        currencyCode:
+          type: "string"
+        comment:
+          type: "string"
+      required:
+      - "amount"
+      - "currencyCode"
+      - "comment"
     CustomerDto:
       type: "object"
       properties:
@@ -386,12 +421,12 @@ components:
         total:
           type: "integer"
           format: "int32"
-        business:
-          $ref: "#/components/schemas/Business"
       required:
+      - "id"
       - "date"
       - "customer"
       - "items"
+      - "total"
     OrderCreationItemDto:
       type: "object"
       properties:

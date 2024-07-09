@@ -14,6 +14,20 @@ import org.koin.ktor.ext.inject
 
 fun Route.authRoute() {
     val authenticationService by inject<OAuthenticationService>()
+
+    get("/login") {
+        if (call.sessions.get<Session>() != null)
+            call.respondRedirect(HOME_ROUTE)
+        else
+            call.respondRedirect("/loginRedirect")
+
+    }
+    get("/logout") {
+        val authToken = call.getSession()?.token
+        authenticationService.logout(authToken!!)
+        call.sessions.clear<Session>()
+    }
+
     get("/loginRedirect") {
         //Ktor automatically redirects to callback URL
     }

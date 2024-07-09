@@ -11,18 +11,20 @@ data class ExpenseDto(
     val amount: Int,
     val currency: CurrencyDto,
     val date: String,
+    val category: String,
     val comment: String
 ) {
     companion object : Mappable<Expense, ExpenseDto> {
-        override fun fromEntity(expense: Expense): ExpenseDto {
+        override fun fromEntity(entity: Expense): ExpenseDto {
             return ExpenseDto(
-                id = expense.id,
-                amount = expense.amount,
+                id = entity.id,
+                amount = entity.amount,
                 currency = CurrencyDto.fromCurrency(
-                    Currency.getInstance(expense.currencyCode)
+                    Currency.getInstance(entity.currencyCode)
                 ),
-                date = expense.date.toString(),
-                comment = expense.comment,
+                date = entity.date.toString(),
+                category = entity.category,
+                comment = entity.comment,
             )
         }
 
@@ -33,23 +35,26 @@ data class ExpenseDto(
                 currencyCode = dto.currency.code
                 date = LocalDate.parse(dto.date)
                 comment = dto.comment
-
+                category = dto.category
             }
         }
     }
 }
 
+@Serializable
 data class ExpenseCreationDto(
     val amount: Int,
     val currencyCode: String,
-    val comment: String
+    val category: String,
+    val comment: String = ""
 ) {
     companion object : Mappable<Expense, ExpenseCreationDto> {
         override fun fromEntity(entity: Expense): ExpenseCreationDto {
             return ExpenseCreationDto(
                 amount = entity.amount,
                 currencyCode = entity.currencyCode,
-                comment = entity.comment
+                comment = entity.comment,
+                category = entity.category
             )
         }
 
@@ -59,6 +64,7 @@ data class ExpenseCreationDto(
                 amount = dto.amount
                 currencyCode = dto.currencyCode
                 comment = dto.comment
+                category = dto.category
             }
         }
     }
@@ -74,6 +80,7 @@ object ExpenseMapper {
             currency = CurrencyMapper.toDto(Currency.getInstance(expense.currencyCode)),
             date = expense.date.toString(),
             comment = expense.comment,
+            category = expense.category
         )
     }
 }

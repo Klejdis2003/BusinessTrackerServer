@@ -1,5 +1,11 @@
 package com.klejdis.services.model
 
+import com.klejdis.services.model.Expenses.amount
+import com.klejdis.services.model.Expenses.businessId
+import com.klejdis.services.model.Expenses.comment
+import com.klejdis.services.model.Expenses.currency
+import com.klejdis.services.model.Expenses.date
+import com.klejdis.services.model.Expenses.id
 import org.ktorm.entity.Entity
 import org.ktorm.schema.Table
 import org.ktorm.schema.date
@@ -15,6 +21,7 @@ interface Expense: Entity<Expense> {
     var date: LocalDate
     var comment : String
     var business: Business
+    var category: String
 }
 
 /**
@@ -33,4 +40,5 @@ object Expenses: Table<Expense>("expenses") {
     val currency = varchar("currency").bindTo { it.currencyCode }
     val date = date("date").bindTo { it.date }
     val comment = varchar("comment").bindTo { it.comment }
+    val category = varchar("category").bindTo { it.category }
 }
