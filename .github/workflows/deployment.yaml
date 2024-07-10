@@ -35,13 +35,13 @@ jobs:
         run: ./gradlew build
 
       - name: Log in to Azure Container Registry
-        run: echo ${{ secrets.ACR_PASSWORD }} | docker login ${{environment.REGISTRY_NAME}}.azurecr.io -u ${{ secrets.ACR_USERNAME }} --password-stdin
+        run: echo ${{ secrets.ACR_PASSWORD }} | docker login ${{vars.REGISTRY_NAME}}.azurecr.io -u ${{ secrets.ACR_USERNAME }} --password-stdin
 
       - name: Build Docker image with Ktor plugin
         run: ./gradlew publishImage
 
       - name: Push Docker image to ACR
-        run: docker push ${{environment.REGISTRY_NAME}}.azurecr.io/klejdis-business-analytics-service:latest
+        run: docker push ${{vars.REGISTRY_NAME}}.azurecr.io/klejdis-business-analytics-service:latest
 
   deploy:
     needs: build-and-push
@@ -59,5 +59,5 @@ jobs:
       - name: Azure WebApp Deploy
         uses: azure/webapps-deploy@v2
         with:
-          app-name: ${{environment.APP_NAME}}
-          images: ${{environment.REGISTRY_NAME}}.azurecr.io/klejdis-business-analytics-service:latest
+          app-name: ${{vars.APP_NAME}}
+          images: ${{vars.REGISTRY_NAME}}.azurecr.io/klejdis-business-analytics-service:latest
