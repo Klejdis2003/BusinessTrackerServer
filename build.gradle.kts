@@ -30,6 +30,13 @@ ktor {
     docker {
         localImageName = "klejdis-business-analytics-service"
         jreVersion.set(JavaVersion.VERSION_21)
+        externalRegistry.set(
+            io.ktor.plugin.features.DockerImageRegistry.dockerHub(
+                appName = provider {"business-analytics-klejdis"},
+                username = providers.environmentVariable("DOCKER_USERNAME"),
+                password = providers.environmentVariable("DOCKER_PASSWORD")
+            )
+        )
     }
 }
 
