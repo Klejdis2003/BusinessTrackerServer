@@ -32,7 +32,7 @@ ktor {
     docker {
         localImageName = "klejdis-business-analytics-service"
         jreVersion.set(JavaVersion.VERSION_21)
-
+        jib.to.image = System.getenv("DOCKER_PROJECT")
         externalRegistry.set(
             DockerImageRegistry.externalRegistry(
                 username = provider { System.getenv("DOCKER_USERNAME") },
