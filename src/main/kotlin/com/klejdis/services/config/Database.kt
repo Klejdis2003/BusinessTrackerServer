@@ -14,7 +14,7 @@ import org.ktorm.support.postgresql.PostgreSqlDialect
 private fun configuredDB(): Database {
     val dotenv = dotenvVault()
     val database = Database.connect(
-        url = "jdbc:postgresql://localhost:5432/business_tracker",
+        url = "jdbc:postgresql://${dotenv["POSTGRES_HOST"]}:${dotenv["POSTGRES_PORT"]}/${dotenv["POSTGRES_DATABASE"]}",
         driver = "org.postgresql.Driver",
         user = dotenv["POSTGRES_USERNAME"],
         password = dotenv["POSTGRES_PASSWORD"],

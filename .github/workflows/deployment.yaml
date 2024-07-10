@@ -1,0 +1,63 @@
+
+
+name: Build and Deploy Ktor App to Azure
+
+on:
+  push:
+    branches:
+      - main
+
+jobs:
+  build-and-push:
+    runs-on: ubuntu-latest
+    env:
+      POSTGRES_DATABASE: ${{ secrets.POSTGRES_DATABASE }}
+      POSTGRES_HOST: ${{ secrets.POSTGRES_HOST }}
+      POSTGRES_PORT: ${{ secrets.POSTGRES_PORT }}
+      POSTGRES_USERNAME: ${{ secrets.POSTGRES_USERNAME }}
+      POSTGRES_PASSWORD: ${{ secrets.POSTGRES_PASSWORD }}
+      AUTH0_CLIENT_ID: ${{ secrets.AUTH0_CLIENT_ID }}
+      KEYSTORE_PASSWORD: ${{ secrets.KEYSTORE_PASSWORD }}
+      PRIVATE_KEY_PASSWORD: ${{ secrets.PRIVATE_KEY_PASSWORD }}
+      AUTH0_CLIENT_SECRET: ${{ secrets.AUTH0_CLIENT_SECRET }}
+      AUTH0_AUDIENCE: ${{ secrets.AUTH0_AUDIENCE }}
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v2
+      - name: Set up Java
+        uses: actions/setup-java@v3
+        with:
+          distribution: 'temurin'
+          java-version: '21'
+
+      - name: Build with Gradle
+        run: ./gradlew build
+
+      - name: Log in to Azure Container Registry
+        run: echo ${{ secrets.ACR_PASSWORD }} | docker login ${{environment.REGISTRY_NAME}}.azurecr.io -u ${{ secrets.ACR_USERNAME }} --password-stdin
+
+      - name: Build Docker image with Ktor plugin
+        run: ./gradlew publishImage
+
+      - name: Push Docker image to ACR
+        run: docker push ${{environment.REGISTRY_NAME}}.azurecr.io/klejdis-business-analytics-service:latest
+
+  deploy:
+    needs: build-and-push
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v2
+
+      - name: Azure WebApp Login
+        uses: azure/login@v1
+        with:
+          creds: ${{ secrets.AZURE_CREDENTIALS }}
+
+      - name: Azure WebApp Deploy
+        uses: azure/webapps-deploy@v2
+        with:
+          app-name: ${{environment.APP_NAME}}
+          images: ${{environment.REGISTRY_NAME}}.azurecr.io/klejdis-business-analytics-service:latest

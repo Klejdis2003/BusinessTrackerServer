@@ -26,7 +26,12 @@ tasks.register("run_dev") {
     project.ext.set("development", true)
 }
 
-
+ktor {
+    docker {
+        localImageName = "klejdis-business-analytics-service"
+        jreVersion.set(JavaVersion.VERSION_21)
+    }
+}
 
 
 
