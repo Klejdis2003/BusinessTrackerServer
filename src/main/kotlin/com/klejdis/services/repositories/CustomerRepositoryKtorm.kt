@@ -3,8 +3,10 @@ package com.klejdis.services.repositories
 import com.klejdis.services.config.customers
 import com.klejdis.services.filters.CustomerFilterTransformer
 import com.klejdis.services.filters.Filter
+import com.klejdis.services.model.Businesses
 import com.klejdis.services.model.Customer
 import com.klejdis.services.model.Customers
+import com.klejdis.services.model.Orders
 import org.ktorm.database.Database
 import org.ktorm.dsl.*
 import org.ktorm.entity.add
@@ -30,6 +32,18 @@ class CustomerRepositoryKtorm(private val database: Database): CustomerRepositor
     private fun fetchMainQueryWithCondition(condition: () -> ColumnDeclaring<Boolean>): List<Customer> {
         return fetchMainQueryWithConditions(additionalConditions = listOf(condition))
     }
+
+    override suspend fun getByBusiness(businessEmail: String): List<Customer> {
+        val query = database
+            .from(Customers)
+            .innerJoin(Orders, on = Orders.customerPhone eq Customers.phone)
+            .innerJoin(Businesses , on = Orders.businessId eq Businesses.id)
+            .select()
+            .where { Businesses.ownerEmail eq businessEmail }
+
+        return fetchQuery(query)
+    }
+
 
     override fun searchByName(name: String): List<Customer> {
         return fetchMainQueryWithCondition { Customers.name like "%$name%" }

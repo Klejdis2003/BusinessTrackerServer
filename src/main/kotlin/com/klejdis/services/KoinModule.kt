@@ -9,14 +9,12 @@ import com.klejdis.services.dto.ItemMapper
 import com.klejdis.services.dto.OrderMapper
 import com.klejdis.services.model.Session
 import com.klejdis.services.repositories.*
-import com.klejdis.services.routes.getProfileInfoFromSession
 import com.klejdis.services.services.*
 import io.github.cdimascio.dotenv.Dotenv
 import io.ktor.client.*
 import io.ktor.client.engine.cio.*
 import io.ktor.client.plugins.contentnegotiation.*
 import io.ktor.serialization.kotlinx.json.*
-import io.ktor.server.routing.*
 import kotlinx.serialization.json.Json
 import org.dotenv.vault.dotenvVault
 import org.koin.core.parameter.parametersOf
@@ -68,7 +66,7 @@ val businessServicesModule = module {
         }
         scoped<BusinessService> {
             (loggedInEmail: String) ->
-            BusinessService(get(), get(), get(), get(), loggedInEmail)
+            BusinessService(get(), get(), get(), get(), get(), loggedInEmail)
         }
 
         scoped<ExpenseService> {
@@ -99,12 +97,3 @@ fun endKoinBusinessScope(loggedInEmail: String) {
     }
 }
 
-suspend inline fun<reified T: Service<*>> RoutingCall.getScopedService(): T {
-    val loggedInEmail = getProfileInfoFromSession()?.email ?: throw Exception("No email in session")
-    return getKoin().getOrCreateScope<Session>(loggedInEmail).get<T> { parametersOf(loggedInEmail) }
-}
-
-inline fun<reified T: Service<*>> getScopedService(loggedInEmail: String): T {
-    val scope = getKoin().getOrCreateScope<Session>(loggedInEmail)
-    return scope.get<T> { parametersOf(loggedInEmail) }
-}

@@ -7,11 +7,14 @@ import com.klejdis.services.plugins.HOME_ROUTE
 import com.klejdis.services.plugins.getSession
 import com.klejdis.services.plugins.redirects
 import com.klejdis.services.services.OAuthenticationService
+import com.klejdis.services.services.Service
 import io.ktor.server.auth.*
 import io.ktor.server.response.*
 import io.ktor.server.routing.*
 import io.ktor.server.sessions.*
+import org.koin.core.parameter.parametersOf
 import org.koin.ktor.ext.inject
+import org.koin.mp.KoinPlatform.getKoin
 import org.koin.ktor.ext.get as koinGet
 
 fun Route.authRoute() {
@@ -54,9 +57,33 @@ fun Route.authRoute() {
 
 }
 
-
+/**
+ * Uses the current session data to fetch the profile info of the logged in business user from the OAuth provider or local cache.
+ * The [getSession] method is used to retrieve the session data, so if the session is null, it is up to it to decide what happens.
+ * @return ProfileInfo object if the user is logged in, null otherwise.
+ * @see getSession For more info on how the session is retrieved
+ * @see OAuthenticationService.getProfileInfoFromToken For more info on how the profile info is fetched
+ */
 suspend fun RoutingCall.getProfileInfoFromSession(): ProfileInfo? {
     val authenticationService by inject<OAuthenticationService>()
     val session = getSession()
     return session?.let { authenticationService.getProfileInfoFromToken(it.token) }
+}
+
+/**
+ * Gets the requested service from the current session scope. If the session is not found, an exception is thrown.
+ * Additionally, the session is received through the call's [getProfileInfoFromSession] method. It redirects to the login page if the
+ * session is not found.
+ * @return The requested service
+ * @throws Exception if the session is not found
+ * @see getProfileInfoFromSession
+ */
+suspend inline fun<reified T: Service<*>> RoutingCall.getScopedService(): T {
+    val loggedInEmail = getProfileInfoFromSession()?.email ?: throw Exception("No email in session")
+    return getKoin().getOrCreateScope<Session>(loggedInEmail).get<T> { parametersOf(loggedInEmail) }
+}
+
+inline fun<reified T: Service<*>> getScopedService(loggedInEmail: String): T {
+    val scope = getKoin().getOrCreateScope<Session>(loggedInEmail)
+    return scope.get<T> { parametersOf(loggedInEmail) }
 }

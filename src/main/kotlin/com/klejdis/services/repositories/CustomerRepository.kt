@@ -3,6 +3,15 @@ package com.klejdis.services.repositories
 import com.klejdis.services.model.Customer
 
 interface CustomerRepository: CrudRepository<String, Customer> {
+
+    /**
+     * Retrieves all customers that belong to the given business. A customer belongs to a business if they
+     * have at least made one order with that business.
+     * @param businessEmail The email of the business to get customers for
+     * @return A list of customers that belong to the given business
+     */
+    suspend fun getByBusiness(businessEmail: String): List<Customer>
+
     /**
      * Searches for customers by name.
      * @param name The name to search for

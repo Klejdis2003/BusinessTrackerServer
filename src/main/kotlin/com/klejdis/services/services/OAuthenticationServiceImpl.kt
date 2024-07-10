@@ -1,11 +1,11 @@
 package com.klejdis.services.services
 
 import com.klejdis.services.endKoinBusinessScope
-import com.klejdis.services.getScopedService
 import com.klejdis.services.model.ProfileInfo
 import com.klejdis.services.plugins.OAUTH_DOMAIN
 import com.klejdis.services.plugins.sessionMaxAgeInSeconds
 import com.klejdis.services.request.OAuthTokenRevocationRequest
+import com.klejdis.services.routes.getScopedService
 import com.klejdis.services.startKoinBusinessScope
 import com.klejdis.services.util.BackgroundTasksUtil
 import io.github.cdimascio.dotenv.Dotenv

@@ -1,16 +1,15 @@
 package com.klejdis.services.services
 
-import com.klejdis.services.dto.BusinessDto
-import com.klejdis.services.dto.BusinessMapper
-import com.klejdis.services.dto.ItemDto
-import com.klejdis.services.dto.ItemMapper
+import com.klejdis.services.dto.*
 import com.klejdis.services.model.Business
 import com.klejdis.services.repositories.BusinessRepository
+import com.klejdis.services.repositories.CustomerRepository
 import com.klejdis.services.repositories.ItemRepository
 
 class BusinessService(
     private val businessRepository: BusinessRepository,
     private val itemRepository: ItemRepository,
+    private val customerRepository: CustomerRepository,
     private val businessMapper: BusinessMapper,
     private val itemMapper: ItemMapper,
     loggedInEmail: String
@@ -30,6 +29,11 @@ class BusinessService(
     suspend fun getBusinessItems(ownerEmail: String): List<ItemDto> {
         val items = itemRepository.getByBusinessOwnerEmail(ownerEmail)
         return items.map { itemMapper.toItemDto(it) }
+    }
+
+    suspend fun getCustomers(): List<CustomerDto> {
+        val customers = customerRepository.getByBusiness(loggedInEmail)
+        return customers.map { CustomerDto.fromEntity(it) }
     }
 
     suspend fun create(ownerEmail: String): BusinessDto {

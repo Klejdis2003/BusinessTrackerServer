@@ -19,6 +19,7 @@ class BusinessRepositoryKtorm(
             .firstOrNull()
     }
 
+
     override suspend fun getAll(filters: Iterable<Filter>): List<Business> {
         return database
             .from(Businesses)

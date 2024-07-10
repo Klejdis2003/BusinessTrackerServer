@@ -2,7 +2,6 @@ package com.klejdis.services.routes
 
 import com.klejdis.services.dto.ExpenseCreationDto
 import com.klejdis.services.filters.Filter
-import com.klejdis.services.getScopedService
 import com.klejdis.services.plugins.executeWithExceptionHandling
 import com.klejdis.services.services.ExpenseService
 import io.ktor.http.*
@@ -17,11 +16,10 @@ fun Route.expenseRoutes() {
         get {
             val expenseService = call.getScopedService<ExpenseService>()
             val queryParameters: List<Filter> = call.request.queryParameters.flattenEntries()
-            call.getProfileInfoFromSession()?.email?.let {
-                call.executeWithExceptionHandling {
-                    val expenses = expenseService.getAll(queryParameters)
-                    call.respond(expenses)
-                }
+            call.executeWithExceptionHandling {
+                val expenses = expenseService.getAll(queryParameters)
+                call.respond(expenses)
+
             }
         }
         post {

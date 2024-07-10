@@ -1,7 +1,6 @@
 package com.klejdis.services.routes
 
 import com.klejdis.services.dto.OrderCreationDto
-import com.klejdis.services.getScopedService
 import com.klejdis.services.plugins.executeWithExceptionHandling
 import com.klejdis.services.services.OrderService
 import io.ktor.http.*
@@ -14,7 +13,6 @@ fun Route.ordersRoute() {
     route("/orders") {
         get {
             val orderService =  call.getScopedService<OrderService>()
-            val business = call.getProfileInfoFromSession() ?: return@get call.respond(HttpStatusCode.Unauthorized)
             val filters = call.request.queryParameters.flattenEntries()
             call.executeWithExceptionHandling {
                 val orders = orderService.getAllBusinessOrders(filters)
@@ -23,7 +21,6 @@ fun Route.ordersRoute() {
         }
         post {
             val orderService =  call.getScopedService<OrderService>()
-            val business = call.getProfileInfoFromSession() ?: return@post call.respond(HttpStatusCode.Unauthorized)
             call.executeWithExceptionHandling {
                 val order = call.receive<OrderCreationDto>()
                 val newOrder = orderService.create(order)
@@ -43,7 +40,6 @@ fun Route.ordersRoute() {
         }
         get("/top") {
             val orderService =  call.getScopedService<OrderService>()
-            val business = call.getProfileInfoFromSession() ?: return@get call.respond(HttpStatusCode.Unauthorized)
             call.executeWithExceptionHandling {
                 val order = orderService.getMostExpensiveOrder()
                 order?.let { call.respond(order) }
