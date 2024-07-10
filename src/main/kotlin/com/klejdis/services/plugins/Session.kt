@@ -20,6 +20,7 @@ fun Application.configureSessions() {
             cookie.maxAgeInSeconds = sessionMaxAgeInSeconds
             cookie.secure = true
             cookie.httpOnly = true
+            cookie.extensions["SameSite"] = "Lax"
         }
     }
     monitor.subscribe(ApplicationStopping) {

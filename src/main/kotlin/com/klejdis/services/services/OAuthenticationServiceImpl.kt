@@ -79,9 +79,9 @@ class OAuthenticationServiceImpl(
 
     override suspend fun logout(authToken: String, onSuccessfulLogout: suspend () -> Unit): Boolean {
         val tokenResponse = authTokenToTokenResponseMap[authToken]
-        val email = tokenProfileInfoMap[authToken]?.email
+        val email = getProfileInfoFromToken(authToken).email
         println("Logging out user $email with token $authToken")
-        email?.let { endKoinBusinessScope(it) }
+        endKoinBusinessScope(email)
         if (tokenResponse?.refreshToken == null) {
             println("Logout request with no refresh token. Ignoring.")
             return false

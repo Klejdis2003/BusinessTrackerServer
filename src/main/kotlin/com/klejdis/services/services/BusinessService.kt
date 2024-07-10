@@ -6,6 +6,7 @@ import com.klejdis.services.repositories.BusinessRepository
 import com.klejdis.services.repositories.CustomerRepository
 import com.klejdis.services.repositories.ItemRepository
 
+
 class BusinessService(
     private val businessRepository: BusinessRepository,
     private val itemRepository: ItemRepository,
@@ -16,14 +17,12 @@ class BusinessService(
 ) : Service<Business>("Business", loggedInEmail = loggedInEmail) {
     suspend fun get(id: Int): BusinessDto? {
         val account = businessRepository.get(id)
-        account?.let { return businessMapper.toBusinessDto(it) }
-        return null
+        return account?.let { businessMapper.toBusinessDto(it) }
     }
 
     suspend fun getByEmail(email: String): BusinessDto? {
         val account = businessRepository.getByEmail(email)
-        account?.let { return businessMapper.toBusinessDto(it) }
-        return null
+        return account?.let {businessMapper.toBusinessDto(it) }
     }
 
     suspend fun getBusinessItems(ownerEmail: String): List<ItemDto> {

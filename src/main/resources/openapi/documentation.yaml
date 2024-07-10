@@ -1,4 +1,4 @@
-openapi: "3.0.0"
+openapi: "3.1.0"
 info:
   title: "BusinessTrackerServer API"
   description: "BusinessTrackerServer API"
@@ -6,40 +6,9 @@ info:
 servers:
 - url: "https://BusinessTrackerServer"
 paths:
-  /businesses:
+  /:
     get:
       description: ""
-      responses:
-        "302":
-          description: "Found <br> Redirect"
-          content:
-            text/plain:
-              schema:
-                type: "string"
-        "400":
-          description: "Bad Request"
-          content:
-            '*/*':
-              schema:
-                type: "string"
-              examples:
-                Example#1:
-                  value: "Invalid token"
-        "200":
-          description: "OK"
-          content:
-            '*/*':
-              schema:
-                $ref: "#/components/schemas/BusinessDto"
-        "404":
-          description: "Not Found"
-          content:
-            '*/*':
-              schema:
-                type: "string"
-              examples:
-                Example#1:
-                  value: ""
   /callback:
     get:
       description: ""
@@ -54,6 +23,24 @@ paths:
                 Example#1:
                   description: ""
                   value: "/orders"
+  /customers:
+    get:
+      description: ""
+      responses:
+        "302":
+          description: "Found <br> Redirect"
+          content:
+            text/plain:
+              schema:
+                type: "string"
+        "200":
+          description: "OK"
+          content:
+            '*/*':
+              schema:
+                type: "array"
+                items:
+                  $ref: "#/components/schemas/CustomerDto"
   /expenses:
     get:
       description: ""
@@ -112,14 +99,6 @@ paths:
   /loginRedirect:
     get:
       description: ""
-      responses:
-        "302":
-          description: "Found <br> Redirect"
-          content:
-              text/plain:
-                schema:
-                    type: "string"
-
   /logout:
     get:
       description: ""
@@ -140,12 +119,6 @@ paths:
             text/plain:
               schema:
                 type: "string"
-        "401":
-          description: "Unauthorized"
-          content:
-            '*/*':
-              schema:
-                type: "object"
         "200":
           description: "OK"
           content:
@@ -169,12 +142,6 @@ paths:
             text/plain:
               schema:
                 type: "string"
-        "401":
-          description: "Unauthorized"
-          content:
-            '*/*':
-              schema:
-                type: "object"
         "200":
           description: "OK"
           content:
@@ -228,12 +195,6 @@ paths:
             text/plain:
               schema:
                 type: "string"
-        "401":
-          description: "Unauthorized"
-          content:
-            '*/*':
-              schema:
-                type: "object"
         "200":
           description: "OK"
           content:
@@ -251,19 +212,19 @@ paths:
                   value: "Your business does not have any orders"
 components:
   schemas:
-    BusinessDto:
-      type: "object"
-      properties:
-        id:
-          type: "integer"
-          format: "int32"
-        ownerEmail:
-          type: "string"
-      required:
-      - "ownerEmail"
     Function1:
       type: "object"
       properties: {}
+    CustomerDto:
+      type: "object"
+      properties:
+        phone:
+          type: "string"
+        name:
+          type: "string"
+      required:
+      - "phone"
+      - "name"
     CurrencyDto:
       type: "object"
       properties:
@@ -315,16 +276,6 @@ components:
       - "currencyCode"
       - "category"
       - "comment"
-    CustomerDto:
-      type: "object"
-      properties:
-        phone:
-          type: "string"
-        name:
-          type: "string"
-      required:
-      - "phone"
-      - "name"
     ItemTypeDto:
       type: "object"
       properties:
@@ -408,17 +359,17 @@ components:
     OrderCreationDto:
       type: "object"
       properties:
-        date:
-          type: "string"
-        customerPhone:
-          type: "string"
+        customer:
+          $ref: "#/components/schemas/CustomerDto"
         items:
           type: "array"
           items:
             $ref: "#/components/schemas/OrderCreationItemDto"
+        date:
+          type: "string"
         business:
           $ref: "#/components/schemas/Business"
       required:
-      - "date"
-      - "customerPhone"
+      - "customer"
       - "items"
+      - "date"

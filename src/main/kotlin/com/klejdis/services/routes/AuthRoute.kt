@@ -29,8 +29,8 @@ fun Route.authRoute() {
             val currentPrincipal: OAuthAccessTokenResponse.OAuth2? = call.principal()
             currentPrincipal?.let { principal ->
                 principal.state?.let { state ->
-                    authenticationService.login(principal)
                     call.sessions.set(Session(generateSessionId(), principal.accessToken))
+                    authenticationService.login(principal)
                     redirects[state]?.let { redirectUrl ->
                         call.respondRedirect(redirectUrl)
                         return@get
@@ -52,6 +52,7 @@ fun Route.authRoute() {
         val authToken = call.getSession()?.token
         authenticationService.logout(authToken!!)
         call.sessions.clear<Session>()
+        call.respondRedirect("/login")
     }
 
 
