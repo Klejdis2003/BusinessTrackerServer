@@ -21,6 +21,9 @@ jobs:
       PRIVATE_KEY_PASSWORD: ${{ secrets.PRIVATE_KEY_PASSWORD }}
       AUTH0_CLIENT_SECRET: ${{ secrets.AUTH0_CLIENT_SECRET }}
       AUTH0_AUDIENCE: ${{ secrets.AUTH0_AUDIENCE }}
+      DOCKER_USERNAME: ${{ secrets.DOCKER_USERNAME }}
+      DOCKER_PASSWORD: ${{ secrets.DOCKER_PASSWORD }}
+      DOCKER_PROJECT : ${{ vars.DOCKER_PROJECT }}
 
     steps:
       - name: Checkout code
