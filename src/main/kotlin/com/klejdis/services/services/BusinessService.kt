@@ -12,9 +12,9 @@ class BusinessService(
     private val businessRepository: BusinessRepository,
     private val itemRepository: ItemRepository,
     private val businessMapper: BusinessMapper,
-    private val itemMapper: ItemMapper
-) : Service<Business>("Business") {
-
+    private val itemMapper: ItemMapper,
+    loggedInEmail: String
+) : Service<Business>("Business", loggedInEmail = loggedInEmail) {
     suspend fun get(id: Int): BusinessDto? {
         val account = businessRepository.get(id)
         account?.let { return businessMapper.toBusinessDto(it) }

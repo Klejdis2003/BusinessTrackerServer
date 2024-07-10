@@ -14,36 +14,38 @@ class OrderService(
     private val orderRepository: OrderRepository,
     private val businessRepository: BusinessRepository,
     private val itemRepository: ItemRepository,
-    private val orderMapper: OrderMapper
+    private val orderMapper: OrderMapper,
+    loggedInEmail: String
 ) : Service<Order>(
-    "Order"
+    entityName = "Order",
+    loggedInEmail = loggedInEmail
 ) {
     /**
      * @param id Order id
      * @param email The email of the business owner whose order is being fetched
      * @return OrderDto if the order exists and belongs to the business owner, null otherwise
      */
-    suspend fun get(id: Int, email: String): OrderDto? {
+    suspend fun get(id: Int): OrderDto? {
         val order = orderRepository.get(id)
-        return order?.takeIf { it.business.ownerEmail == email }?.let { orderMapper.toOrderDto(it) }
+        return order?.takeIf { it.business.ownerEmail == loggedInEmail }?.let { orderMapper.toOrderDto(it) }
     }
     suspend fun getByBusinessId(businessId: Int) =
         orderRepository.filterByBusinessId(businessId).map { orderMapper.toOrderDto(it) }
 
-    suspend fun getByBusinessOwnerEmail(email: String, filters: Iterable<Filter>) =
-        orderRepository.filterByBusinessOwnerEmail(email, filters).map { orderMapper.toOrderDto(it) }
+    suspend fun getAllBusinessOrders(filters: Iterable<Filter>) =
+        orderRepository.filterByBusinessOwnerEmail(loggedInEmail, filters).map { orderMapper.toOrderDto(it) }
 
 
 
-    suspend fun getMostExpensiveOrder(email: String) =
-        orderRepository.getMostExpensiveByBusinessOwnerEmail(email)?.let { orderMapper.toOrderDto(it) }
+    suspend fun getMostExpensiveOrder() =
+        orderRepository.getMostExpensiveByBusinessOwnerEmail(loggedInEmail)?.let { orderMapper.toOrderDto(it) }
 
     @Throws(EntityAlreadyExistsException::class)
-    suspend fun create(dto: OrderCreationDto, businessEmail: String): OrderDto {
+    suspend fun create(dto: OrderCreationDto): OrderDto {
 
         //make necessary checks and get needed values
-        val business = businessRepository.getByEmail(businessEmail)
-            ?: throw EntityNotFoundException("Business with email=$businessEmail does not exist")
+        val business = businessRepository.getByEmail(loggedInEmail)
+            ?: throw EntityNotFoundException("Business with email=$loggedInEmail does not exist")
         val dto = dto.copy(business = business)
         var order = OrderCreationDto.toEntity(dto)
 
@@ -63,10 +65,11 @@ class OrderService(
         return orderMapper.toOrderDto(order)
     }
 
-    suspend fun addOrderItems(orderId: Int, items: List<OrderItem>, email: String): OrderDto {
+    suspend fun addOrderItems(orderId: Int, items: List<OrderItem>): OrderDto {
         val order = orderRepository.get(orderId)
             ?: throw EntityNotFoundException("Order with id=$orderId does not exist")
-        if (order.business.ownerEmail != email) throw UnauthorizedException("Unauthorized action! Order with id=$orderId does not belong to the business with email=$email.")
+        if (order.business.ownerEmail != loggedInEmail)
+            throw UnauthorizedException("Unauthorized action! Order with id=$orderId does not belong to the business with email=$loggedInEmail.")
         order.items += items
         orderRepository.update(order)
         return orderMapper.toOrderDto(order)

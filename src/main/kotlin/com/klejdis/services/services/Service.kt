@@ -5,10 +5,12 @@ import org.postgresql.util.PSQLException
 import org.postgresql.util.PSQLState
 
 /**
- * A general purpose service class for handling basic CRUD operations and exceptions.
+ * A general purpose service class for handling basic CRUD operations and exceptions. It is scoped to a specific business email, to simplify
+ * the handling of entities that are related to a specific business. It also provides a custom exception handler for Postgres exceptions.
  * Can be extended to provide more specific functionality.
  * @param T The entity type to handle.
  * @property entityName The name of the entity to handle.
+ * @property loggedInEmail The email of the currently logged in business user.
  * @property psqlExceptionHandler A custom exception handler for Postgres exceptions. Only set the fields that
  * need to be customized, the rest will be automatically set to default values
  * @constructor Creates a new service with the given entity name and an optional custom exception handler.
@@ -16,9 +18,8 @@ import org.postgresql.util.PSQLState
 open class Service<T : Entity<T>>(
     private val entityName: String,
     private var psqlExceptionHandler: PSQLExceptionHandler = PSQLExceptionHandler(),
-    protected val loggedInBusinessEmail : String = "",
+    protected val loggedInEmail: String
 ) {
-
     /**
      * Pass the code to create a new entity as a lambda. Error handling is done automatically through
      * the [handlePSQLException] method.

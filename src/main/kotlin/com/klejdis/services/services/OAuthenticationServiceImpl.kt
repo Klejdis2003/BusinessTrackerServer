@@ -1,9 +1,12 @@
 package com.klejdis.services.services
 
+import com.klejdis.services.endKoinBusinessScope
+import com.klejdis.services.getScopedService
 import com.klejdis.services.model.ProfileInfo
 import com.klejdis.services.plugins.OAUTH_DOMAIN
 import com.klejdis.services.plugins.sessionMaxAgeInSeconds
 import com.klejdis.services.request.OAuthTokenRevocationRequest
+import com.klejdis.services.startKoinBusinessScope
 import com.klejdis.services.util.BackgroundTasksUtil
 import io.github.cdimascio.dotenv.Dotenv
 import io.ktor.client.*
@@ -18,7 +21,6 @@ import java.util.concurrent.ConcurrentHashMap
 
 class OAuthenticationServiceImpl(
     private val httpClient: HttpClient,
-    private val businessService: BusinessService,
     private val vault: Dotenv
 ) : OAuthenticationService {
     private val tokenProfileInfoMap: MutableMap<String, ProfileInfo> = ConcurrentHashMap()
@@ -36,12 +38,12 @@ class OAuthenticationServiceImpl(
      * @return The user's profile information.
      */
     override suspend fun getProfileInfoFromToken(token: String): ProfileInfo {
-
         if (tokenProfileInfoMap.containsKey(token)) {
             println("Profile Info CACHE HIT")
             return tokenProfileInfoMap[token]!!
         }
 
+        println("Making request to get profile info from token $token")
         val url = url {
             protocol = URLProtocol.HTTPS
             host = "dev-ff32y82lak8hyod4.us.auth0.com"
@@ -65,15 +67,21 @@ class OAuthenticationServiceImpl(
      * @param tokenResponse The token received from the Auth provider.
      * @return The user's profile information.
      */
-    override suspend fun login(tokenResponse: OAuth2Response): ProfileInfo {
+    override suspend fun login(tokenResponse: OAuth2Response, onSuccessfulLogin: suspend (ProfileInfo) -> Unit): ProfileInfo {
         val profileInfo = getProfileInfoFromToken(tokenResponse.accessToken)
         cacheData(tokenResponse, profileInfo)
+        startKoinBusinessScope(profileInfo.email)
+        val businessService = getScopedService<BusinessService>(profileInfo.email)
         businessService.createIfNotExists(profileInfo.email)
+        onSuccessfulLogin(profileInfo)
         return profileInfo
     }
 
-    override suspend fun logout(authToken: String): Boolean {
+    override suspend fun logout(authToken: String, onSuccessfulLogout: suspend () -> Unit): Boolean {
         val tokenResponse = authTokenToTokenResponseMap[authToken]
+        val email = tokenProfileInfoMap[authToken]?.email
+        println("Logging out user $email with token $authToken")
+        email?.let { endKoinBusinessScope(it) }
         if (tokenResponse?.refreshToken == null) {
             println("Logout request with no refresh token. Ignoring.")
             return false
@@ -82,7 +90,7 @@ class OAuthenticationServiceImpl(
         val refreshToken = tokenResponse.refreshToken!!
         val tokenRevocationResponseSuccessful = makeRevocationRequest(refreshToken)
         removeFromCache(tokenResponse.accessToken)
-
+        onSuccessfulLogout()
         return tokenRevocationResponseSuccessful
     }
 

@@ -1,20 +1,23 @@
 package com.klejdis.services
 
+import ch.qos.logback.classic.LoggerContext
 import com.klejdis.services.config.rebuildDatabase
 import com.klejdis.services.plugins.*
 import io.ktor.network.tls.certificates.*
 import io.ktor.server.application.*
 import io.ktor.server.engine.*
 import io.ktor.server.netty.*
+import io.ktor.util.logging.*
 import org.dotenv.vault.dotenvVault
 import org.koin.core.context.startKoin
+import org.slf4j.LoggerFactory
 import java.io.File
 
 val MODE = Mode.DEV
 
 
 fun main() {
-    startKoin { modules(appModule) }
+    startKoin { modules(appModule, businessServicesModule) }
     embeddedServer(
         Netty,
         configure = {
@@ -32,7 +35,8 @@ fun Application.module() {
     configureRouting()
     configureSessions()
     rebuildDatabase()
-
+    val l =  LoggerFactory.getILoggerFactory() as LoggerContext
+    l.getLogger(Logger.ROOT_LOGGER_NAME).level = ch.qos.logback.classic.Level.INFO
 }
 
 fun ApplicationEngine.Configuration.configureSSL() {

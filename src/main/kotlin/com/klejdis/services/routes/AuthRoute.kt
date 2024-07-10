@@ -2,6 +2,7 @@ package com.klejdis.services.routes
 
 import com.klejdis.services.model.ProfileInfo
 import com.klejdis.services.model.Session
+import com.klejdis.services.plugins.AuthMethod
 import com.klejdis.services.plugins.HOME_ROUTE
 import com.klejdis.services.plugins.getSession
 import com.klejdis.services.plugins.redirects
@@ -16,25 +17,12 @@ import org.koin.ktor.ext.get as koinGet
 fun Route.authRoute() {
     val authenticationService = koinGet<OAuthenticationService>()
 
-    get("/login") {
-        if (call.sessions.get<Session>() != null)
-            call.respondRedirect(HOME_ROUTE)
-        else
-            call.respondRedirect("/loginRedirect")
+    authenticate(AuthMethod.OAuth.provider) {
+        get("/loginRedirect") {
+            //Ktor automatically redirects to callback URL
+        }
 
-    }
-    get("/logout") {
-        val authToken = call.getSession()?.token
-        authenticationService.logout(authToken!!)
-        call.sessions.clear<Session>()
-    }
-
-    get("/loginRedirect") {
-        //Ktor automatically redirects to callback URL
-    }
-
-    route("/callback") {
-        get {
+        get("/callback") {
             val currentPrincipal: OAuthAccessTokenResponse.OAuth2? = call.principal()
             currentPrincipal?.let { principal ->
                 principal.state?.let { state ->
@@ -49,6 +37,21 @@ fun Route.authRoute() {
             call.respondRedirect(HOME_ROUTE)
         }
     }
+
+    get("/login") {
+        if (call.sessions.get<Session>() != null)
+            call.respondRedirect(HOME_ROUTE)
+        else
+            call.respondRedirect("/loginRedirect")
+
+    }
+    get("/logout") {
+        val authToken = call.getSession()?.token
+        authenticationService.logout(authToken!!)
+        call.sessions.clear<Session>()
+    }
+
+
 }
 
 

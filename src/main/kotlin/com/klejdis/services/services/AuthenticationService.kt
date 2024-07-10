@@ -14,14 +14,14 @@ interface AuthenticationService<in K, out T> {
      * @param token The token received from the Auth provider.
      * @return Defined by the implementation.
      */
-    suspend fun login(tokenResponse: K): T
+    suspend fun login(tokenResponse: K, onSuccessfulLogin: suspend (T) -> Unit = {}): T
 
     /**
      * Logs the user out by clearing the session.
      * @param token The token received from the Auth provider.
      * @return Defined by the implementation.
      */
-    suspend fun logout(authToken: String): Boolean
+    suspend fun logout(authToken: String, onSuccessfulLogout: suspend () -> Unit = {}): Boolean
 
     /**
      * Uses the received token to grab the user's profile information.

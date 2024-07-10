@@ -10,7 +10,6 @@ import com.klejdis.services.services.EntityNotFoundException
 import com.klejdis.services.services.printStackTraceIfInDevMode
 import io.ktor.http.*
 import io.ktor.server.application.*
-import io.ktor.server.auth.*
 import io.ktor.server.http.content.*
 import io.ktor.server.plugins.*
 import io.ktor.server.plugins.openapi.*
@@ -27,7 +26,7 @@ const val HOME_ROUTE = "/orders"
 
 fun Application.configureRouting() {
     routing {
-        authenticate(AuthMethod.OAuth.provider) { authRoute() }
+        authRoute()
         businessesRoute()
         expenseRoutes()
         ordersRoute()
