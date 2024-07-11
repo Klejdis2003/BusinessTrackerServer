@@ -9,7 +9,7 @@ import org.koin.ktor.ext.inject
 val redirects = mutableMapOf<String, String>()
 const val OAUTH_DOMAIN = "dev-ff32y82lak8hyod4.us.auth0.com"
 fun Application.configureSecurity() {
-    val environment = System.getProperties()
+    val environment = System.getenv()
     val httpClient by inject<HttpClient>()
     install(Authentication) {
         oauth(AuthMethod.OAuth.provider) {
@@ -20,10 +20,10 @@ fun Application.configureSecurity() {
                     authorizeUrl = "https://$OAUTH_DOMAIN/authorize",
                     accessTokenUrl = "https://$OAUTH_DOMAIN/oauth/token",
                     requestMethod = HttpMethod.Post,
-                    clientId = environment.getProperty("AUTH0_CLIENT_ID")!!,
-                    clientSecret = environment.getProperty("AUTH0_CLIENT_SECRET")!!,
+                    clientId = environment["AUTH0_CLIENT_ID"]!!,
+                    clientSecret = environment["AUTH0_CLIENT_SECRET"]!!,
                     defaultScopes = listOf("profile", "openid", "email", "offline_access"),
-                    extraAuthParameters = listOf("audience" to environment.getProperty("AUTH0_AUDIENCE")!!),
+                    extraAuthParameters = listOf("audience" to environment["AUTH0_AUDIENCE"]!!),
                     onStateCreated = { call, state ->
                         call.request.queryParameters["redirectUrl"]?.let {
                             redirects[state] = it

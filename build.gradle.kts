@@ -37,13 +37,7 @@ ktor {
         System.getenv().forEach { (key, value) ->
             environmentVariables.add(DockerEnvironmentVariable(key, value))
         }
-        System.getProperties().forEach { (key, value) ->
-            environmentVariables.add(DockerEnvironmentVariable(key.toString(), value.toString()))
-        }
-        portMappings.set(listOf(
-            DockerPortMapping(80, 8080),
-            DockerPortMapping(8080, 80)
-        ))
+
 
     }
 }
@@ -63,24 +57,6 @@ application {
 
     val isDevelopment: Boolean = project.ext.has("development")
     applicationDefaultJvmArgs = listOf("-Dio.ktor.development=$isDevelopment")
-
-    val environmentFile = File(".env")
-    if (environmentFile.exists()) {
-        println("Loading environment variables from .env file.")
-        environmentFile.forEachLine { line ->
-            if (line.isNotBlank() && !line.startsWith("#")) {
-                val (key, value) = line.split("=", limit = 2).map { it.trim() }
-                if (key.isNotBlank() && value.isNotBlank()) {
-                    applicationDefaultJvmArgs += "-D$key=$value"
-                }
-            }
-        }
-    }
-    else {
-        System.getenv().forEach { (key, value) ->
-            applicationDefaultJvmArgs += "-D$key=$value"
-        }
-    }
 
 }
 

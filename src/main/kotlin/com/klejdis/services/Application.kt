@@ -39,11 +39,11 @@ fun Application.module() {
 }
 
 fun ApplicationEngine.Configuration.configureSSL() {
-    val props = System.getProperties()
+    val env = System.getenv()
     val keystoreFile = File("keystore.jks")
     val keystore = buildKeyStore {
         certificate("ssl") {
-            password = props.getProperty("PRIVATE_KEY_PASSWORD")
+            password = env["PRIVATE_KEY_PASSWORD"]!!
             domains = listOf("localhost")
         }
     }
@@ -51,8 +51,8 @@ fun ApplicationEngine.Configuration.configureSSL() {
     sslConnector(
         keyStore = keystore,
         keyAlias = "ssl",
-        keyStorePassword = { props.getProperty("KEYSTORE_PASSWORD").toCharArray() },
-        privateKeyPassword = { props.getProperty("PRIVATE_KEY_PASSWORD").toCharArray() }
+        keyStorePassword = { env["KEYSTORE_PASSWORD"]!!.toCharArray() },
+        privateKeyPassword = { env["PRIVATE_KEY_PASSWORD"]!!.toCharArray() }
     ) {
         port = System.getenv("PORT")?.toInt() ?: 8080
         keyStorePath = keystoreFile
