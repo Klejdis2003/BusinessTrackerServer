@@ -78,4 +78,4 @@ jobs:
         uses: azure/webapps-deploy@v2
         with:
           app-name: ${{vars.APP_NAME}}
-          images: ${{vars.REGISTRY_NAME}}.azurecr.io/klejdis-business-analytics-service:latest
+          images: ${{vars.REGISTRY_NAME}}.azurecr.io/${{vars.DOCKER_PROJECT}}:latest
