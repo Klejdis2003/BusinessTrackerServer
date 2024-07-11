@@ -1,7 +1,6 @@
 package com.klejdis.services
 
 
-import com.klejdis.services.config.JwtConfig
 import com.klejdis.services.config.postgresDatabase
 import com.klejdis.services.dto.BusinessMapper
 import com.klejdis.services.dto.CustomerMapper
@@ -27,7 +26,6 @@ val appModule = module {
             ignoreUnknownKeys = true
         }
     }
-    single<JwtConfig> { JwtConfig(get()) }
     single<HttpClient> {
         HttpClient(CIO) {
             install(ContentNegotiation) {

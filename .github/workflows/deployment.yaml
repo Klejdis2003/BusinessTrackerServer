@@ -25,6 +25,7 @@ jobs:
       DOCKER_USERNAME: ${{ secrets.DOCKER_USERNAME }}
       DOCKER_PASSWORD: ${{ secrets.DOCKER_PASSWORD }}
       DOCKER_PROJECT : ${{ vars.DOCKER_PROJECT }}
+      KEYSTORE_RELEASE_KEY_BASE64: ${{ secrets.KEYSTORE_RELEASE_KEY_BASE64}}
 
     steps:
       - name: Checkout code
@@ -34,6 +35,9 @@ jobs:
         with:
           distribution: 'temurin'
           java-version: '21'
+
+      - name: Set up Java Keystore
+        run: echo "${{secrets.KEYSTORE_RELEASE_KEY_BASE64}}" | base64 -decode > keystore.jks
 
       - name: Build with Gradle
         run: ./gradlew build -x test

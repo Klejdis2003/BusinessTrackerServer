@@ -6,18 +6,17 @@ import com.klejdis.services.model.*
 
 import com.klejdis.services.util.parseSqlFile
 import io.ktor.server.application.*
-import org.dotenv.vault.dotenvVault
 import org.ktorm.database.Database
 import org.ktorm.entity.sequenceOf
 import org.ktorm.support.postgresql.PostgreSqlDialect
 
 private fun configuredDB(): Database {
-    val dotenv = dotenvVault()
+    val env = System.getProperties()
     val database = Database.connect(
-        url = "jdbc:postgresql://${dotenv["POSTGRES_HOST"]}:${dotenv["POSTGRES_PORT"]}/${dotenv["POSTGRES_DATABASE"]}",
+        url = "jdbc:postgresql://${env["POSTGRES_HOST"]}:${env["POSTGRES_PORT"]}/${env["POSTGRES_DATABASE"]}",
         driver = "org.postgresql.Driver",
-        user = dotenv["POSTGRES_USERNAME"],
-        password = dotenv["POSTGRES_PASSWORD"],
+        user = env["POSTGRES_USERNAME"].toString(),
+        password = env["POSTGRES_PASSWORD"].toString(),
         dialect = PostgreSqlDialect()
     )
     return database

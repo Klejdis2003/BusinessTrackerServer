@@ -8,7 +8,6 @@ import io.ktor.server.application.*
 import io.ktor.server.engine.*
 import io.ktor.server.netty.*
 import io.ktor.util.logging.*
-import org.dotenv.vault.dotenvVault
 import org.koin.core.context.startKoin
 import org.slf4j.LoggerFactory
 import java.io.File
@@ -40,11 +39,11 @@ fun Application.module() {
 }
 
 fun ApplicationEngine.Configuration.configureSSL() {
+    val props = System.getProperties()
     val keystoreFile = File("keystore.jks")
-    val vault = dotenvVault ()
     val keystore = buildKeyStore {
         certificate("ssl") {
-            password = vault["PRIVATE_KEY_PASSWORD"]
+            password = props.getProperty("PRIVATE_KEY_PASSWORD")
             domains = listOf("localhost")
         }
     }
@@ -52,8 +51,8 @@ fun ApplicationEngine.Configuration.configureSSL() {
     sslConnector(
         keyStore = keystore,
         keyAlias = "ssl",
-        keyStorePassword = { vault["KEYSTORE_PASSWORD"].toCharArray() },
-        privateKeyPassword = { vault["PRIVATE_KEY_PASSWORD"].toCharArray() }
+        keyStorePassword = { props.getProperty("KEYSTORE_PASSWORD").toCharArray() },
+        privateKeyPassword = { props.getProperty("PRIVATE_KEY_PASSWORD").toCharArray() }
     ) {
         port = System.getenv("PORT")?.toInt() ?: 8080
         keyStorePath = keystoreFile

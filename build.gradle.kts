@@ -22,6 +22,7 @@ tasks.register("run_prod") {
     project.ext.set("development", false)
 }
 
+
 //add a task to run in dev mode
 tasks.register("run_dev") {
     project.ext.set("development", true)
@@ -58,11 +59,10 @@ application {
             if (line.isNotBlank() && !line.startsWith("#")) {
                 val (key, value) = line.split("=", limit = 2).map { it.trim() }
                 if (key.isNotBlank() && value.isNotBlank()) {
-                    args.add("-D$key=$value")
+                    applicationDefaultJvmArgs += "-D$key=$value"
                 }
             }
         }
-        applicationDefaultJvmArgs += args
     }
 
 }
