@@ -11,12 +11,12 @@ import org.ktorm.entity.sequenceOf
 import org.ktorm.support.postgresql.PostgreSqlDialect
 
 private fun configuredDB(): Database {
-    val env = System.getProperties()
+    val props = System.getProperties()
     val database = Database.connect(
-        url = "jdbc:postgresql://${env["POSTGRES_HOST"]}:${env["POSTGRES_PORT"]}/${env["POSTGRES_DATABASE"]}",
+        url = "jdbc:postgresql://${props["POSTGRES_HOST"]}:${props["POSTGRES_PORT"]}/${props["POSTGRES_DATABASE"]}",
         driver = "org.postgresql.Driver",
-        user = env["POSTGRES_USERNAME"].toString(),
-        password = env["POSTGRES_PASSWORD"].toString(),
+        user = props["POSTGRES_USER"].toString(),
+        password = props["POSTGRES_PASSWORD"].toString(),
         dialect = PostgreSqlDialect()
     )
     return database
