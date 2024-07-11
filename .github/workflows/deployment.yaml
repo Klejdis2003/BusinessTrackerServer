@@ -41,13 +41,10 @@ jobs:
       - name: Build Docker image with Ktor plugin
         run: ./gradlew publishImageToLocalRegistry
 
-
-
-
-
       - name: Push Docker image to ACR
         run: |
              docker images
+             echo "${{ secrets.ACR_PASSWORD }}" | docker login ${{ secrets.ACR_LOGIN_SERVER }} -u ${{ secrets.ACR_USERNAME }} --password-stdin
              docker tag ${{vars.DOCKER_PROJECT}}:latest ${{vars.REGISTRY_NAME}}.azurecr.io/${{vars.DOCKER_PROJECT}}:latest
              docker push ${{vars.REGISTRY_NAME}}.azurecr.io/${{vars.DOCKER_PROJECT}}:latest
              
