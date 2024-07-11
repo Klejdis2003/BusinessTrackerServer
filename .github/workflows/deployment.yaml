@@ -46,7 +46,7 @@ jobs:
         with:
           login-server: ${{vars.REGISTRY_NAME}}.azurecr.io
           username: ${{ secrets.DOCKER_USERNAME }}
-          password: ${{ secrets.DOCKER_PASSWORD }}
+          password: ${{ secrets.ACR_PASSWORD }}
 
       - name: Push Docker image to ACR
         run: |
