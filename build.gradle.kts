@@ -28,9 +28,8 @@ tasks.register("run_dev") {
 
 ktor {
     docker {
-        localImageName = "klejdis-business-analytics-service"
+        localImageName = System.getenv("DOCKER_PROJECT")
         jreVersion.set(JavaVersion.VERSION_21)
-        localImageName.set("klejdis-business-analytics-service")
         imageTag.set("latest")
     }
 }

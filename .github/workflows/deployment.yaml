@@ -43,9 +43,11 @@ jobs:
 
       - name: Properly Tag Docker image
         run: docker images
+             docker tag ${{vars.DOCKER_PROJECT}}:latest ${{vars.REGISTRY_NAME}}.azurecr.io/${{vars.DOCKER_PROJECT}}:latest
+
 
       - name: Push Docker image to ACR
-        run: docker push ${{vars.REGISTRY_NAME}}.azurecr.io/klejdis-business-analytics-service:latest
+        run: docker push ${{vars.REGISTRY_NAME}}.azurecr.io/${{vars.DOCKER_PROJECT}}:latest
 
   deploy:
     needs: build-and-push
