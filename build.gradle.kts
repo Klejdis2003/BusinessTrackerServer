@@ -34,10 +34,17 @@ ktor {
     docker {
         localImageName = System.getenv("DOCKER_PROJECT")
         jreVersion.set(JavaVersion.VERSION_21)
+        System.getenv().forEach { (key, value) ->
+            environmentVariables.add(DockerEnvironmentVariable(key, value))
+        }
+        System.getProperties().forEach { (key, value) ->
+            environmentVariables.add(DockerEnvironmentVariable(key.toString(), value.toString()))
+        }
         portMappings.set(listOf(
             DockerPortMapping(80, 8080),
             DockerPortMapping(8080, 80)
         ))
+
     }
 }
 
