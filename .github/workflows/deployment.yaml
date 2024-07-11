@@ -10,6 +10,7 @@ on:
 jobs:
   build-and-push:
     runs-on: ubuntu-latest
+    environment: production
     env:
       POSTGRES_DATABASE: ${{ secrets.POSTGRES_DATABASE }}
       POSTGRES_HOST: ${{ secrets.POSTGRES_HOST }}
