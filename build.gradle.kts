@@ -30,14 +30,8 @@ ktor {
     docker {
         localImageName = "klejdis-business-analytics-service"
         jreVersion.set(JavaVersion.VERSION_21)
-        jib {
-            from {
-                image = "openjdk:21-jre-slim"
-            }
-            to {
-                image = "klejdisanalytics.azurecr.io/klejdis-business-analytics-service"
-            }
-        }
+        localImageName.set("klejdis-business-analytics-service")
+        imageTag.set("latest")
     }
 }
 
