@@ -42,7 +42,8 @@ jobs:
         run: ./gradlew publishImageToLocalRegistry
 
       - name: Properly Tag Docker image
-        run: docker images
+        run: |
+             docker images
              docker tag ${{vars.DOCKER_PROJECT}}:latest ${{vars.REGISTRY_NAME}}.azurecr.io/${{vars.DOCKER_PROJECT}}:latest
 
 
