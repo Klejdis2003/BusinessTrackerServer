@@ -32,14 +32,22 @@ ktor {
     docker {
         localImageName = "klejdis-business-analytics-service"
         jreVersion.set(JavaVersion.VERSION_21)
-        jib.to.image = System.getenv("DOCKER_PROJECT")
         externalRegistry.set(
             DockerImageRegistry.externalRegistry(
                 username = provider { System.getenv("DOCKER_USERNAME") },
                 password = provider { System.getenv("DOCKER_PASSWORD") },
                 project = provider { System.getenv("DOCKER_PROJECT") },
+                hostname = provider { System.getenv("klejdisanalytics.azurecr.io") }
             )
         )
+        jib {
+            from {
+                image = "openjdk:21-jre-slim"
+            }
+            to {
+                image = "klejdisanalytics.azurecr.io/klejdis-business-analytics-service"
+            }
+        }
     }
 }
 
