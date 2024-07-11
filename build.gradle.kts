@@ -1,5 +1,3 @@
-import io.ktor.plugin.features.*
-
 val ktor_version: String by project
 val kotlin_version: String by project
 val logback_version: String by project
@@ -32,14 +30,6 @@ ktor {
     docker {
         localImageName = "klejdis-business-analytics-service"
         jreVersion.set(JavaVersion.VERSION_21)
-        externalRegistry.set(
-            DockerImageRegistry.externalRegistry(
-                username = provider { System.getenv("DOCKER_USERNAME") },
-                password = provider { System.getenv("DOCKER_PASSWORD") },
-                project = provider { System.getenv("DOCKER_PROJECT") },
-                hostname = provider { "klejdisanalytics.azurecr.io" }
-            )
-        )
         jib {
             from {
                 image = "openjdk:21-jre-slim"

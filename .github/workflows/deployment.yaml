@@ -38,7 +38,7 @@ jobs:
         run: ./gradlew build -x test
 
       - name: Build Docker image with Ktor plugin
-        run: ./gradlew publishImage
+        run: ./gradlew publishImageToLocalRegistry
 
       - name: Push Docker image to ACR
         run: docker push ${{vars.REGISTRY_NAME}}.azurecr.io/klejdis-business-analytics-service:latest
