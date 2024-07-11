@@ -10,13 +10,11 @@ import com.klejdis.services.dto.OrderMapper
 import com.klejdis.services.model.Session
 import com.klejdis.services.repositories.*
 import com.klejdis.services.services.*
-import io.github.cdimascio.dotenv.Dotenv
 import io.ktor.client.*
 import io.ktor.client.engine.cio.*
 import io.ktor.client.plugins.contentnegotiation.*
 import io.ktor.serialization.kotlinx.json.*
 import kotlinx.serialization.json.Json
-import org.dotenv.vault.dotenvVault
 import org.koin.core.parameter.parametersOf
 import org.koin.dsl.module
 import org.koin.mp.KoinPlatform.getKoin
@@ -29,7 +27,6 @@ val appModule = module {
             ignoreUnknownKeys = true
         }
     }
-    single<Dotenv> { dotenvVault() }
     single<JwtConfig> { JwtConfig(get()) }
     single<HttpClient> {
         HttpClient(CIO) {
@@ -53,7 +50,7 @@ val appModule = module {
     single<OrderMapper> { OrderMapper(get(), get()) }
 
     single<OAuthenticationService> {
-        OAuthenticationServiceImpl(get(), get())
+        OAuthenticationServiceImpl(get())
     }
 
 

@@ -8,7 +8,6 @@ import com.klejdis.services.request.OAuthTokenRevocationRequest
 import com.klejdis.services.routes.getScopedService
 import com.klejdis.services.startKoinBusinessScope
 import com.klejdis.services.util.BackgroundTasksUtil
-import io.github.cdimascio.dotenv.Dotenv
 import io.ktor.client.*
 import io.ktor.client.call.*
 import io.ktor.client.request.*
@@ -20,8 +19,7 @@ import java.util.concurrent.ConcurrentHashMap
 
 
 class OAuthenticationServiceImpl(
-    private val httpClient: HttpClient,
-    private val vault: Dotenv
+    private val httpClient: HttpClient
 ) : OAuthenticationService {
     private val tokenProfileInfoMap: MutableMap<String, ProfileInfo> = ConcurrentHashMap()
     private val authTokenToTokenResponseMap: MutableMap<String, OAuth2Response> = ConcurrentHashMap()
@@ -104,8 +102,8 @@ class OAuthenticationServiceImpl(
             contentType(ContentType.Application.Json)
             setBody(
                 OAuthTokenRevocationRequest(
-                    clientId = vault["AUTH0_CLIENT_ID"],
-                    clientSecret = vault["AUTH0_CLIENT_SECRET"],
+                    clientId = System.getenv("AUTH0_CLIENT_ID"),
+                    clientSecret = System.getenv("AUTH0_CLIENT_SECRET"),
                     refreshToken = refreshToken
                 )
             )

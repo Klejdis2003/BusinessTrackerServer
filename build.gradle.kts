@@ -6,6 +6,7 @@ val postgresql_driver_version: String by project
 val koin_version: String by project
 val swagger_codegen_version: String by project
 
+
 plugins {
     kotlin("jvm") version "2.0.0"
     id("io.ktor.plugin") version "3.0.0-beta-1"
@@ -30,7 +31,6 @@ ktor {
     docker {
         localImageName = System.getenv("DOCKER_PROJECT")
         jreVersion.set(JavaVersion.VERSION_21)
-        imageTag.set("latest")
     }
 }
 
@@ -49,6 +49,22 @@ application {
 
     val isDevelopment: Boolean = project.ext.has("development")
     applicationDefaultJvmArgs = listOf("-Dio.ktor.development=$isDevelopment")
+
+    val environmentFile = File(".env")
+    if (environmentFile.exists()) {
+        val args = mutableListOf<String>()
+        println("Loading environment variables from .env file.")
+        environmentFile.forEachLine { line ->
+            if (line.isNotBlank() && !line.startsWith("#")) {
+                val (key, value) = line.split("=", limit = 2).map { it.trim() }
+                if (key.isNotBlank() && value.isNotBlank()) {
+                    args.add("-D$key=$value")
+                }
+            }
+        }
+        applicationDefaultJvmArgs += args
+    }
+
 }
 
 repositories {
@@ -77,7 +93,6 @@ dependencies {
     implementation("org.ktorm:ktorm-core:$ktorm_version")
     implementation("org.ktorm:ktorm-support-postgresql:$ktorm_version")
     implementation("ch.qos.logback:logback-classic:$logback_version")
-    implementation("com.github.dotenv-org:dotenv-vault-kotlin:0.0.3")
     implementation("io.ktor:ktor-client-cio-jvm:3.0.0-beta-1")
     testImplementation("io.ktor:ktor-server-tests-jvm")
     testImplementation("org.jetbrains.kotlin:kotlin-test-junit:$kotlin_version")
