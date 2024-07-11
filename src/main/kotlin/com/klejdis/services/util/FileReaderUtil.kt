@@ -1,6 +1,13 @@
 package com.klejdis.services.util
 
-import java.io.File
+fun loadResourceFile(filePath: String): String {
+    val loader = Thread.currentThread().contextClassLoader
+    val inputStream = loader.getResourceAsStream(filePath)
+    if (inputStream != null) {
+        return inputStream.bufferedReader().use { it.readText() }
+    }
+    throw IllegalArgumentException("Resource file not found: $filePath")
+}
 
 /**
  * Parses a SQL file and returns the content as a string.
@@ -9,6 +16,5 @@ import java.io.File
  *
  */
 fun parseSqlFile(fileName: String): String {
-    val file = File("src/main/kotlin/com/klejdis/services/config/sql/$fileName.sql")
-    return file.readText()
+    return loadResourceFile("sql/$fileName.sql")
 }

@@ -44,7 +44,9 @@ jobs:
         run: ./gradlew build -x test
 
       - name: Build Docker image with Ktor plugin
-        run: ./gradlew publishImageToLocalRegistry
+        run: | 
+             ./gradlew publishImageToLocalRegistry
+              docker run -d -p 8080:8080 --name ${{vars.DOCKER_PROJECT}} ${{vars.DOCKER_PROJECT}}:latest
 
       - name: Login to Azure Container Registry
         uses: azure/docker-login@v2
