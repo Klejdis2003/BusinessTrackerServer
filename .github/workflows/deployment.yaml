@@ -41,6 +41,9 @@ jobs:
       - name: Build Docker image with Ktor plugin
         run: ./gradlew publishImageToLocalRegistry
 
+      - name: Properly Tag Docker image
+        run: docker tag ${{vars.DOCKER_PROJECT}}.azurecr.io/klejdis-business-analytics-service:latest ${{vars.REGISTRY_NAME}}.azurecr.io/klejdis-business-analytics-service:latest
+
       - name: Push Docker image to ACR
         run: docker push ${{vars.REGISTRY_NAME}}.azurecr.io/klejdis-business-analytics-service:latest
 
