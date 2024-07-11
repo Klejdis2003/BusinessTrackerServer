@@ -59,7 +59,6 @@ application {
 
     val environmentFile = File(".env")
     if (environmentFile.exists()) {
-        val args = mutableListOf<String>()
         println("Loading environment variables from .env file.")
         environmentFile.forEachLine { line ->
             if (line.isNotBlank() && !line.startsWith("#")) {
@@ -68,6 +67,11 @@ application {
                     applicationDefaultJvmArgs += "-D$key=$value"
                 }
             }
+        }
+    }
+    else {
+        System.getenv().forEach { (key, value) ->
+            System.setProperty(key, value)
         }
     }
 
