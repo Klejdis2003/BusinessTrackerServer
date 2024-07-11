@@ -37,7 +37,7 @@ ktor {
                 username = provider { System.getenv("DOCKER_USERNAME") },
                 password = provider { System.getenv("DOCKER_PASSWORD") },
                 project = provider { System.getenv("DOCKER_PROJECT") },
-                hostname = provider { System.getenv("klejdisanalytics.azurecr.io") }
+                hostname = provider { "klejdisanalytics.azurecr.io" }
             )
         )
         jib {
