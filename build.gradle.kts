@@ -78,7 +78,7 @@ application {
     }
     else {
         System.getenv().forEach { (key, value) ->
-            System.setProperty(key, value)
+            applicationDefaultJvmArgs += "-D$key=$value"
         }
     }
 
