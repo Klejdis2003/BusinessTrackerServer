@@ -32,6 +32,11 @@ ktor {
         jreVersion.set(JavaVersion.VERSION_21)
         localImageName.set("klejdis-business-analytics-service")
         imageTag.set("latest")
+        jib{
+            to {
+                image = "klejdisanalytics.azurecr.io/klejdis-business-analytics-service:latest"
+            }
+        }
     }
 }
 
