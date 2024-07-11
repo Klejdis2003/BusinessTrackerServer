@@ -1,3 +1,5 @@
+import io.ktor.plugin.features.*
+
 val ktor_version: String by project
 val kotlin_version: String by project
 val logback_version: String by project
@@ -32,6 +34,10 @@ ktor {
     docker {
         localImageName = System.getenv("DOCKER_PROJECT")
         jreVersion.set(JavaVersion.VERSION_21)
+        portMappings.set(listOf(
+            DockerPortMapping(80, 8080),
+            DockerPortMapping(8080, 80)
+        ))
     }
 }
 
