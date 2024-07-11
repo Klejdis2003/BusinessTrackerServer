@@ -12,8 +12,6 @@ import io.ktor.http.*
 import io.ktor.server.application.*
 import io.ktor.server.http.content.*
 import io.ktor.server.plugins.*
-import io.ktor.server.plugins.openapi.*
-import io.ktor.server.plugins.swagger.*
 import io.ktor.server.request.*
 import io.ktor.server.response.*
 import io.ktor.server.routing.*
@@ -32,8 +30,8 @@ fun Application.configureRouting() {
         ordersRoute()
 
         staticFiles(remotePath = "/code_documentation", File("src/main/resources/documentation/code"))
-        openAPI(path = "openapi", swaggerFile = "src/main/resources/openapi/documentation.yaml")
-        swaggerUI(path="swagger", swaggerFile = "src/main/resources/openapi/documentation.yaml")
+        //openAPI(path = "openapi", swaggerFile = "src/main/resources/openapi/documentation.yaml")
+        //swaggerUI(path="swagger", swaggerFile = "src/main/resources/openapi/documentation.yaml")
     }
 }
 
