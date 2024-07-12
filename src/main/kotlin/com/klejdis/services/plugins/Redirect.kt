@@ -5,7 +5,7 @@ import io.ktor.server.plugins.httpsredirect.*
 
 fun Application.configureHTTPSRedirect() {
     install(HttpsRedirect) {
-        sslPort = 8080
+        sslPort = 8443
         permanentRedirect = true
     }
 }

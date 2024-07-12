@@ -31,7 +31,7 @@ fun Application.configureSecurity() {
                     }
                 )
 
-            urlProvider = { "https://localhost:8080/callback" }
+            urlProvider = { System.getenv("AUTH0_CALLBACK_URL") ?: "http://localhost:8443/callback" }
             providerLookup = { oAuthServerSettings }
             client = httpClient
         }

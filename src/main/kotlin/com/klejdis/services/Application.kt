@@ -2,7 +2,11 @@ package com.klejdis.services
 
 import ch.qos.logback.classic.LoggerContext
 import com.klejdis.services.config.rebuildDatabase
-import com.klejdis.services.plugins.*
+import com.klejdis.services.plugins.configureRouting
+import com.klejdis.services.plugins.configureSecurity
+import com.klejdis.services.plugins.configureSerialization
+import com.klejdis.services.plugins.configureSessions
+import io.ktor.http.*
 import io.ktor.network.tls.certificates.*
 import io.ktor.server.application.*
 import io.ktor.server.engine.*
@@ -12,8 +16,12 @@ import org.koin.core.context.startKoin
 import org.slf4j.LoggerFactory
 import java.io.File
 
-val MODE = Mode.DEV
-
+val MODE = Mode.valueOf(System.getenv("MODE") ?: "DEV")
+val URL_PROTOCOL = when(MODE) {
+    Mode.DEV -> URLProtocol.HTTPS
+    Mode.PROD -> URLProtocol.HTTP
+}
+val URL_PORT = System.getenv("PORT")?.toInt() ?: 8443
 
 fun main() {
     startKoin { modules(appModule, businessServicesModule) }
@@ -28,7 +36,7 @@ fun main() {
 }
 
 fun Application.module() {
-    configureHTTPSRedirect()
+    //configureHTTPSRedirect()
     configureSecurity()
     configureSerialization()
     configureRouting()
@@ -54,9 +62,14 @@ fun ApplicationEngine.Configuration.configureSSL() {
         keyStorePassword = { env["KEYSTORE_PASSWORD"]!!.toCharArray() },
         privateKeyPassword = { env["PRIVATE_KEY_PASSWORD"]!!.toCharArray() }
     ) {
-        port = System.getenv("PORT")?.toInt() ?: 8080
+        port = System.getenv("PORT")?.toInt() ?: 8443
         keyStorePath = keystoreFile
     }
+    connector {
+        port = System.getenv("PORT")?.toInt() ?: 8080
+    }
+
+
 }
 
 enum class Mode {

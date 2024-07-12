@@ -1,5 +1,7 @@
 package com.klejdis.services.plugins
 
+import com.klejdis.services.URL_PORT
+import com.klejdis.services.URL_PROTOCOL
 import com.klejdis.services.model.Session
 import com.klejdis.services.routes.authRoute
 import com.klejdis.services.routes.businessesRoute
@@ -46,8 +48,8 @@ suspend fun RoutingCall.getSession(): Session? {
     val session: Session? = sessions.get()
     if (session == null) {
         val redirectUrl = url {
-            protocol = URLProtocol.HTTPS
-            port = 8080
+            protocol = URL_PROTOCOL
+            port = URL_PORT
             path("/login")
             parameters.append("redirectUrl", request.uri)
         }
