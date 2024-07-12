@@ -52,8 +52,8 @@ fun Route.authRoute() {
     }
     get("/logout") {
         val authToken = call.getSession()?.token
-        authenticationService.logout(authToken!!)
         call.sessions.clear<Session>()
+        authToken?.let { authenticationService.logout(it) }
         call.respondRedirect(getLogoutRequestUrl())
     }
 
