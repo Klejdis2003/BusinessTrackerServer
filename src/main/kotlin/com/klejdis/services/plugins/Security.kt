@@ -7,7 +7,8 @@ import io.ktor.server.auth.*
 import org.koin.ktor.ext.inject
 
 val redirects = mutableMapOf<String, String>()
-const val OAUTH_DOMAIN = "dev-ff32y82lak8hyod4.us.auth0.com"
+val OAUTH_DOMAIN = System.getenv("OAUTH_DOMAIN") ?: "dev-ff32y82lak8hyod4.us.auth0.com"
+
 fun Application.configureSecurity() {
     val environment = System.getenv()
     val httpClient by inject<HttpClient>()
