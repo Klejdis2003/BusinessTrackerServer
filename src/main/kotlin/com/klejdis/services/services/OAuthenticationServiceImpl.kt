@@ -89,6 +89,7 @@ class OAuthenticationServiceImpl(
 
         val refreshToken = tokenResponse.refreshToken!!
         val tokenRevocationResponseSuccessful = makeRevocationRequest(refreshToken)
+        makeLogoutRequest()
         removeFromCache(tokenResponse.accessToken)
         onSuccessfulLogout()
         return tokenRevocationResponseSuccessful
@@ -111,6 +112,16 @@ class OAuthenticationServiceImpl(
             )
         }
         return response.status == HttpStatusCode.OK
+    }
+
+    private suspend fun makeLogoutRequest() {
+        httpClient.get {
+            url {
+                protocol = URLProtocol.HTTPS
+                host = OAUTH_DOMAIN
+                path("v2", "logout")
+            }
+        }
     }
 
     private fun cacheData(tokenResponse: OAuth2Response, profileInfo: ProfileInfo) {

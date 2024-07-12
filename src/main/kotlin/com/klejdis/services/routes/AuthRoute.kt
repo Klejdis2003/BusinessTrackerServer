@@ -30,6 +30,7 @@ fun Route.authRoute() {
             val currentPrincipal: OAuthAccessTokenResponse.OAuth2? = call.principal()
             currentPrincipal?.let { principal ->
                 principal.state?.let { state ->
+                    println(principal.expiresIn)
                     call.sessions.set(Session(generateSessionId(), principal.accessToken))
                     printIfDebugMode("Session ${call.getSession()} created.")
                     authenticationService.login(principal)
@@ -59,6 +60,7 @@ fun Route.authRoute() {
 
 
 }
+
 
 /**
  * Uses the current session data to fetch the profile info of the logged in business user from the OAuth provider or local cache.
