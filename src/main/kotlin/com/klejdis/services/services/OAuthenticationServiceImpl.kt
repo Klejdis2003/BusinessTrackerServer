@@ -80,7 +80,7 @@ class OAuthenticationServiceImpl(
     override suspend fun logout(authToken: String, onSuccessfulLogout: suspend () -> Unit): Boolean {
         val tokenResponse = authTokenToTokenResponseMap[authToken]
         val email = getProfileInfoFromToken(authToken).email
-        println("Logging out user $email with token $authToken")
+        println("Logging out user $email.")
         endKoinBusinessScope(email)
         if (tokenResponse?.refreshToken == null) {
             println("Logout request with no refresh token. Ignoring.")
@@ -89,7 +89,6 @@ class OAuthenticationServiceImpl(
 
         val refreshToken = tokenResponse.refreshToken!!
         val tokenRevocationResponseSuccessful = makeRevocationRequest(refreshToken)
-        makeLogoutRequest()
         removeFromCache(tokenResponse.accessToken)
         onSuccessfulLogout()
         return tokenRevocationResponseSuccessful
@@ -114,15 +113,6 @@ class OAuthenticationServiceImpl(
         return response.status == HttpStatusCode.OK
     }
 
-    private suspend fun makeLogoutRequest() {
-        httpClient.get {
-            url {
-                protocol = URLProtocol.HTTPS
-                host = OAUTH_DOMAIN
-                path("v2", "logout")
-            }
-        }
-    }
 
     private fun cacheData(tokenResponse: OAuth2Response, profileInfo: ProfileInfo) {
         tokenProfileInfoMap[tokenResponse.accessToken] = profileInfo
@@ -145,7 +135,7 @@ class OAuthenticationServiceImpl(
             printIfDebugMode("Current tokens: $authTokenToCreationTimeMap")
             authTokenToCreationTimeMap.forEach { (token, creationTime) ->
                 if (getZonedDateTimeNow() > creationTime.plusSeconds(sessionMaxAgeInSeconds)) {
-                    println("Removing expired token: $token for user ${tokenProfileInfoMap[token]?.email}")
+                    println("Removing expired token for user ${tokenProfileInfoMap[token]?.email}")
                     logout(token)
                     removeFromCache(token)
                 }

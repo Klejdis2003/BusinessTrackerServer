@@ -2,17 +2,16 @@ package com.klejdis.services.routes
 
 import com.klejdis.services.model.ProfileInfo
 import com.klejdis.services.model.Session
-import com.klejdis.services.plugins.AuthMethod
-import com.klejdis.services.plugins.HOME_ROUTE
-import com.klejdis.services.plugins.getSession
-import com.klejdis.services.plugins.redirects
+import com.klejdis.services.plugins.*
 import com.klejdis.services.services.OAuthenticationService
 import com.klejdis.services.services.Service
 import com.klejdis.services.util.printIfDebugMode
+import io.ktor.http.*
 import io.ktor.server.auth.*
 import io.ktor.server.response.*
 import io.ktor.server.routing.*
 import io.ktor.server.sessions.*
+import io.ktor.server.util.*
 import org.koin.core.parameter.parametersOf
 import org.koin.ktor.ext.inject
 import org.koin.mp.KoinPlatform.getKoin
@@ -55,12 +54,22 @@ fun Route.authRoute() {
         val authToken = call.getSession()?.token
         authenticationService.logout(authToken!!)
         call.sessions.clear<Session>()
-        call.respondRedirect("/login")
+        call.respondRedirect(getLogoutRequestUrl())
     }
-
 
 }
 
+private fun getLogoutRequestUrl(): String {
+    val url =
+        url {
+            protocol = URLProtocol.HTTPS
+            host = OAUTH_DOMAIN
+            path("v2", "logout")
+            parameters.append("client_id", System.getenv("AUTH0_CLIENT_ID"))
+            parameters.append("returnTo", "${System.getenv("APPLICATION_DOMAIN")}/login")
+        }
+    return url
+}
 
 /**
  * Uses the current session data to fetch the profile info of the logged in business user from the OAuth provider or local cache.
