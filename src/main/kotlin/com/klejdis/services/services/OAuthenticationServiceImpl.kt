@@ -44,7 +44,7 @@ class OAuthenticationServiceImpl(
         println("Making request to get profile info from token $token")
         val url = url {
             protocol = URLProtocol.HTTPS
-            host = "dev-ff32y82lak8hyod4.us.auth0.com"
+            host = OAUTH_DOMAIN
             path("userinfo")
         }
         val header = headers { append(HttpHeaders.Authorization, "Bearer $token") }
