@@ -51,6 +51,9 @@ fun Route.authRoute() {
 
     }
     get("/logout") {
+        //no prefetching
+        call.response.header("Cache-Control", "no-cache, no-store, must-revalidate")
+        call.response.header("X-Robots-Tag", "noindex, nofollow, noarchive, nosnippet, noodp, notranslate, noimageindex")
         val authToken = call.getSession()?.token
         call.sessions.clear<Session>()
         authToken?.let { authenticationService.logout(it) }
