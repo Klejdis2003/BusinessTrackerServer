@@ -20,7 +20,7 @@ import io.ktor.server.routing.*
 import io.ktor.server.sessions.*
 import io.ktor.server.util.*
 import java.io.File
-import java.time.LocalDateTime
+import java.time.ZonedDateTime
 
 const val HOME_ROUTE = "/orders"
 
@@ -56,8 +56,8 @@ suspend fun RoutingCall.getSession(): Session? {
         respondRedirect(redirectUrl)
         return null
     }
-    val sessionCreationTime = LocalDateTime.parse(session.creationTime)
-    val currentTime = LocalDateTime.now()
+    val sessionCreationTime = ZonedDateTime.parse(session.creationTime)
+    val currentTime = ZonedDateTime.now()
     if (currentTime > sessionCreationTime.plusSeconds(sessionMaxAgeInSeconds)){
         sessions.clear<Session>()
         return null
