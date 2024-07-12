@@ -62,7 +62,7 @@ fun ApplicationEngine.Configuration.configureSSL() {
         keyStorePassword = { env["KEYSTORE_PASSWORD"]!!.toCharArray() },
         privateKeyPassword = { env["PRIVATE_KEY_PASSWORD"]!!.toCharArray() }
     ) {
-        port = 8443
+        port = 443
         keyStorePath = keystoreFile
     }
     connector {
