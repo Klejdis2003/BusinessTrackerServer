@@ -9,6 +9,12 @@ fun loadResourceFile(filePath: String): String {
     throw IllegalArgumentException("Resource file not found: $filePath")
 }
 
+fun getResourceAsRelativePath(filePath: String): String {
+    val loader = Thread.currentThread().contextClassLoader
+    val resource = loader.getResource(filePath)
+    return resource?.path ?: throw IllegalArgumentException("Resource file not found: $filePath")
+}
+
 /**
  * Parses a SQL file and returns the content as a string.
  * @param fileName the name of the file to parse. Just the name,

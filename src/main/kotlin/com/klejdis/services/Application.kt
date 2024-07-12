@@ -1,19 +1,13 @@
 package com.klejdis.services
 
-import ch.qos.logback.classic.LoggerContext
 import com.klejdis.services.config.rebuildDatabase
-import com.klejdis.services.plugins.configureRouting
-import com.klejdis.services.plugins.configureSecurity
-import com.klejdis.services.plugins.configureSerialization
-import com.klejdis.services.plugins.configureSessions
+import com.klejdis.services.plugins.*
 import io.ktor.http.*
 import io.ktor.network.tls.certificates.*
 import io.ktor.server.application.*
 import io.ktor.server.engine.*
 import io.ktor.server.netty.*
-import io.ktor.util.logging.*
 import org.koin.core.context.startKoin
-import org.slf4j.LoggerFactory
 import java.io.File
 
 val MODE = Mode.valueOf(System.getenv("MODE") ?: "DEV")
@@ -21,7 +15,9 @@ val URL_PROTOCOL = when(MODE) {
     Mode.DEV -> URLProtocol.HTTPS
     Mode.PROD -> URLProtocol.HTTP
 }
-val URL_PORT = System.getenv("PORT")?.toInt() ?: 8443
+val SSL_PORT = System.getenv("SSL_PORT")?.toInt() ?: 8443
+val URL_PORT = System.getenv("PORT")?.toInt() ?: SSL_PORT
+
 
 fun main() {
     startKoin { modules(appModule, businessServicesModule) }
@@ -36,14 +32,13 @@ fun main() {
 }
 
 fun Application.module() {
-    //configureHTTPSRedirect()
+    configureHTTPSRedirect()
     configureSecurity()
     configureSerialization()
     configureRouting()
     configureSessions()
+    configureLogger()
     rebuildDatabase()
-    val l =  LoggerFactory.getILoggerFactory() as LoggerContext
-    l.getLogger(Logger.ROOT_LOGGER_NAME).level = ch.qos.logback.classic.Level.INFO
 }
 
 fun ApplicationEngine.Configuration.configureSSL() {
@@ -62,7 +57,7 @@ fun ApplicationEngine.Configuration.configureSSL() {
         keyStorePassword = { env["KEYSTORE_PASSWORD"]!!.toCharArray() },
         privateKeyPassword = { env["PRIVATE_KEY_PASSWORD"]!!.toCharArray() }
     ) {
-        port = 443
+        port = SSL_PORT
         keyStorePath = keystoreFile
     }
     connector {

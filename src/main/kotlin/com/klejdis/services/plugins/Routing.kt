@@ -32,8 +32,8 @@ fun Application.configureRouting() {
         ordersRoute()
 
         staticFiles(remotePath = "/code_documentation", File("src/main/resources/documentation/code"))
-        //openAPI(path = "openapi", swaggerFile = "src/main/resources/openapi/documentation.yaml")
-        //swaggerUI(path="swagger", swaggerFile = "src/main/resources/openapi/documentation.yaml")
+//        openAPI(path = "openapi", swaggerFile = getResourceFullPath("openapi/documentation.yaml"))
+//        swaggerUI(path="swagger", swaggerFile = getResourceFullPath("openapi/documentation.yaml"))
     }
 }
 

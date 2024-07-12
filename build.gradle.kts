@@ -74,6 +74,7 @@ dependencies {
     implementation("io.ktor:ktor-network-tls-certificates")
     implementation("io.ktor:ktor-server-content-negotiation")
     implementation("io.ktor:ktor-client-content-negotiation")
+    implementation("io.ktor:ktor-server-forwarded-header:$ktor_version")
     implementation("io.ktor:ktor-server-html-builder:$ktor_version")
     implementation("io.ktor:ktor-server-swagger:$ktor_version")
     implementation("io.ktor:ktor-server-openapi:$ktor_version")
