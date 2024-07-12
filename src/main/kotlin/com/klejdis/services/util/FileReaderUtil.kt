@@ -1,5 +1,8 @@
 package com.klejdis.services.util
 
+import java.time.ZoneOffset
+import java.time.ZonedDateTime
+
 fun loadResourceFile(filePath: String): String {
     val loader = Thread.currentThread().contextClassLoader
     val inputStream = loader.getResourceAsStream(filePath)
@@ -23,4 +26,13 @@ fun getResourceAsRelativePath(filePath: String): String {
  */
 fun parseSqlFile(fileName: String): String {
     return loadResourceFile("sql/$fileName.sql")
+}
+
+fun getZonedDateTimeNow(): ZonedDateTime {
+    return ZonedDateTime.now(ZoneOffset.UTC)
+}
+
+fun printIfDebugMode(message: String) {
+    val debugMode = System.getenv("DEBUG_MODE") ?: "false"
+    if (debugMode.toBoolean()) println(message)
 }

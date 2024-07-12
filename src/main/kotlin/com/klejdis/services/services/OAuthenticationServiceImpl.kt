@@ -8,13 +8,15 @@ import com.klejdis.services.request.OAuthTokenRevocationRequest
 import com.klejdis.services.routes.getScopedService
 import com.klejdis.services.startKoinBusinessScope
 import com.klejdis.services.util.BackgroundTasksUtil
+import com.klejdis.services.util.getZonedDateTimeNow
+import com.klejdis.services.util.printIfDebugMode
 import io.ktor.client.*
 import io.ktor.client.call.*
 import io.ktor.client.request.*
 import io.ktor.http.*
 import io.ktor.server.util.*
 import kotlinx.coroutines.Job
-import java.time.LocalDateTime
+import java.time.ZonedDateTime
 import java.util.concurrent.ConcurrentHashMap
 
 
@@ -23,7 +25,7 @@ class OAuthenticationServiceImpl(
 ) : OAuthenticationService {
     private val tokenProfileInfoMap: MutableMap<String, ProfileInfo> = ConcurrentHashMap()
     private val authTokenToTokenResponseMap: MutableMap<String, OAuth2Response> = ConcurrentHashMap()
-    private val authTokenToCreationTimeMap: MutableMap<String, LocalDateTime> = ConcurrentHashMap()
+    private val authTokenToCreationTimeMap: MutableMap<String, ZonedDateTime> = ConcurrentHashMap()
     private val job = invalidateExpiredSessions()
 
     init{
@@ -114,7 +116,7 @@ class OAuthenticationServiceImpl(
     private fun cacheData(tokenResponse: OAuth2Response, profileInfo: ProfileInfo) {
         tokenProfileInfoMap[tokenResponse.accessToken] = profileInfo
         authTokenToTokenResponseMap[tokenResponse.accessToken] = tokenResponse
-        authTokenToCreationTimeMap[tokenResponse.accessToken] = LocalDateTime.now()
+        authTokenToCreationTimeMap[tokenResponse.accessToken] = getZonedDateTimeNow()
     }
 
     private fun removeFromCache(token: String) {
@@ -129,8 +131,9 @@ class OAuthenticationServiceImpl(
     private fun invalidateExpiredSessions(): Job {
         return BackgroundTasksUtil.run(60) {
             println("Checking for expired tokens...")
+            printIfDebugMode("Current tokens: $authTokenToCreationTimeMap")
             authTokenToCreationTimeMap.forEach { (token, creationTime) ->
-                if (LocalDateTime.now() > creationTime.plusSeconds(sessionMaxAgeInSeconds)) {
+                if (getZonedDateTimeNow() > creationTime.plusSeconds(sessionMaxAgeInSeconds)) {
                     println("Removing expired token: $token for user ${tokenProfileInfoMap[token]?.email}")
                     logout(token)
                     removeFromCache(token)

@@ -8,6 +8,7 @@ import com.klejdis.services.plugins.getSession
 import com.klejdis.services.plugins.redirects
 import com.klejdis.services.services.OAuthenticationService
 import com.klejdis.services.services.Service
+import com.klejdis.services.util.printIfDebugMode
 import io.ktor.server.auth.*
 import io.ktor.server.response.*
 import io.ktor.server.routing.*
@@ -30,6 +31,7 @@ fun Route.authRoute() {
             currentPrincipal?.let { principal ->
                 principal.state?.let { state ->
                     call.sessions.set(Session(generateSessionId(), principal.accessToken))
+                    printIfDebugMode("Session ${call.getSession()} created.")
                     authenticationService.login(principal)
                     redirects[state]?.let { redirectUrl ->
                         call.respondRedirect(redirectUrl)

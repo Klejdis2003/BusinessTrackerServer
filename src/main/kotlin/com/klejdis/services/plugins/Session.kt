@@ -21,6 +21,7 @@ fun Application.configureSessions() {
             cookie.secure = true
             cookie.httpOnly = true
             cookie.extensions["SameSite"] = "Lax"
+
         }
     }
     monitor.subscribe(ApplicationStopping) {
