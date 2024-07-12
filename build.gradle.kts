@@ -30,12 +30,6 @@ tasks.register("run_dev") {
     project.ext.set("development", true)
 }
 
-tasks.withType<Jar> {
-    from(sourceSets.main.get().resources.srcDirs) {
-        include("**/resources/**")
-        include("**/sql/**")
-    }
-}
 
 ktor {
     docker {
