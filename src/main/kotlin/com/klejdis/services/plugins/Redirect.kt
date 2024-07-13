@@ -12,4 +12,6 @@ fun Application.configureHTTPSRedirect() {
         sslPort = SSL_PORT
         permanentRedirect = true
     }
+
+
 }

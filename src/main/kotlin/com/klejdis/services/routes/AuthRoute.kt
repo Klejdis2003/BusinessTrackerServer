@@ -84,7 +84,10 @@ private fun getLogoutRequestUrl(): String {
 suspend fun RoutingCall.getProfileInfoFromSession(): ProfileInfo? {
     val authenticationService by inject<OAuthenticationService>()
     val session = getSession()
-    return session?.let { authenticationService.getProfileInfoFromToken(it.token) }
+    return session?.let {
+        try { authenticationService.getProfileInfoFromToken(it.token) }
+        catch (e: Exception) { null }
+    }
 }
 
 /**

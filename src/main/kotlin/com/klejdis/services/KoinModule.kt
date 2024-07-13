@@ -76,7 +76,7 @@ val businessServicesModule = module {
 }
 
 fun startKoinBusinessScope(loggedInEmail: String) {
-    val scope = getKoin().createScope<Session>(loggedInEmail)
+    val scope = getKoin().getOrCreateScope<Session>(loggedInEmail)
 
     scope.get<BusinessService> { parametersOf(loggedInEmail) }
     scope.get<OrderService> { parametersOf(loggedInEmail) }
