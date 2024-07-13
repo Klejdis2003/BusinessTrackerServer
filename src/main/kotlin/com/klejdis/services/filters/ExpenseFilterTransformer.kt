@@ -77,13 +77,13 @@ sealed class ExpenseFilterCategory: KtormSimpleFilterCategory() {
             return { Expenses.date eq date }
         }
     }
-    data object EarlierThan: ExpenseFilterCategory() {
+    data object MaxDate: ExpenseFilterCategory() {
         override fun transform(value: String): () -> ColumnDeclaring<Boolean> {
             val date = convertWithExceptionHandling(typeName) { LocalDate.parse(value) }
             return { Expenses.date lessEq date }
         }
     }
-    data object LaterThan: ExpenseFilterCategory() {
+    data object MinDate: ExpenseFilterCategory() {
         override fun transform(value: String): () -> ColumnDeclaring<Boolean> {
             val date = convertWithExceptionHandling(typeName) { LocalDate.parse(value) }
             return { Expenses.date greaterEq date }

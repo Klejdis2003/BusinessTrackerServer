@@ -39,6 +39,10 @@ class ExpenseRepositoryKtorm(
         return fetchMainQueryWithConditions(additionalConditions = listOf(condition))
     }
 
+    override suspend fun filterByBusinessOwnerEmail(email: String, filters: Iterable<Filter>): List<Expense> {
+        return fetchMainQueryWithConditions(filters, additionalConditions = listOf { Businesses.ownerEmail eq email })
+    }
+
     override suspend fun getAll(filters: Iterable<Filter>): List<Expense> {
         return fetchMainQueryWithConditions(filters)
     }

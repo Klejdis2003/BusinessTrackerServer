@@ -4,7 +4,6 @@ import com.klejdis.services.model.ProfileInfo
 import com.klejdis.services.model.Session
 import com.klejdis.services.plugins.*
 import com.klejdis.services.services.OAuthenticationService
-import com.klejdis.services.services.Service
 import com.klejdis.services.util.printIfDebugMode
 import io.ktor.http.*
 import io.ktor.server.auth.*
@@ -47,7 +46,7 @@ fun Route.authRoute() {
         if (call.sessions.get<Session>() != null)
             call.respondRedirect(HOME_ROUTE)
         else
-            call.respondRedirect("/loginRedirect")
+            call.respondRedirect("/loginRedirect?redirectUrl=${call.parameters["redirectUrl"] ?: HOME_ROUTE}")
 
     }
     get("/logout") {
@@ -98,12 +97,12 @@ suspend fun RoutingCall.getProfileInfoFromSession(): ProfileInfo? {
  * @throws Exception if the session is not found
  * @see getProfileInfoFromSession
  */
-suspend inline fun<reified T: Service<*>> RoutingCall.getScopedService(): T {
+suspend inline fun<reified T> RoutingCall.getScopedService(): T {
     val loggedInEmail = getProfileInfoFromSession()?.email ?: throw Exception("No email in session")
-    return getKoin().getOrCreateScope<Session>(loggedInEmail).get<T> { parametersOf(loggedInEmail) }
+    return getKoin().getOrCreateScope<Session>(loggedInEmail).get { parametersOf(loggedInEmail) }
 }
 
-inline fun<reified T: Service<*>> getScopedService(loggedInEmail: String): T {
+inline fun<reified T> getScopedService(loggedInEmail: String): T {
     val scope = getKoin().getOrCreateScope<Session>(loggedInEmail)
-    return scope.get<T> { parametersOf(loggedInEmail) }
+    return scope.get { parametersOf(loggedInEmail) }
 }

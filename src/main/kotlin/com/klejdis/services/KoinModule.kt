@@ -72,6 +72,10 @@ val businessServicesModule = module {
             CustomerService(get(), loggedInEmail)
         }
 
+        scoped<AnalyticsService> { (loggedInEmail: String) ->
+            AnalyticsService(get(), get(), loggedInEmail)
+        }
+
     }
 }
 
@@ -82,6 +86,7 @@ fun startKoinBusinessScope(loggedInEmail: String) {
     scope.get<OrderService> { parametersOf(loggedInEmail) }
     scope.get<ExpenseService> { parametersOf(loggedInEmail) }
     scope.get<CustomerService> { parametersOf(loggedInEmail) }
+    scope.get<AnalyticsService> { parametersOf(loggedInEmail) }
 }
 
 fun endKoinBusinessScope(loggedInEmail: String) {

@@ -3,17 +3,10 @@ package com.klejdis.services.plugins
 import com.klejdis.services.URL_PORT
 import com.klejdis.services.URL_PROTOCOL
 import com.klejdis.services.model.Session
-import com.klejdis.services.routes.authRoute
-import com.klejdis.services.routes.businessesRoute
-import com.klejdis.services.routes.expenseRoutes
-import com.klejdis.services.routes.ordersRoute
-import com.klejdis.services.services.EntityAlreadyExistsException
-import com.klejdis.services.services.EntityNotFoundException
-import com.klejdis.services.services.printStackTraceIfInDevMode
+import com.klejdis.services.routes.*
 import io.ktor.http.*
 import io.ktor.server.application.*
 import io.ktor.server.http.content.*
-import io.ktor.server.plugins.*
 import io.ktor.server.request.*
 import io.ktor.server.response.*
 import io.ktor.server.routing.*
@@ -30,6 +23,7 @@ fun Application.configureRouting() {
         businessesRoute()
         expenseRoutes()
         ordersRoute()
+        analyticsRoute()
 
         staticFiles(remotePath = "/code_documentation", File("src/main/resources/documentation/code"))
 //        openAPI(path = "openapi", swaggerFile = getResourceFullPath("openapi/documentation.yaml"))
@@ -67,27 +61,8 @@ suspend fun RoutingCall.getSession(): Session? {
 
 }
 
-suspend fun RoutingCall.handleException(e: Exception) {
-    e.printStackTraceIfInDevMode()
-    when (e) {
-        is EntityNotFoundException -> respond(HttpStatusCode.NotFound, e.message!!)
-        is EntityAlreadyExistsException -> respond(HttpStatusCode.Conflict, e.message!!)
-        is IllegalArgumentException -> respond(HttpStatusCode.BadRequest, e.message!!)
-        is BadRequestException -> {
-            val message = e.cause?.message?.substringBefore("for") ?: e.message
-            respond(HttpStatusCode.BadRequest, message ?: "Missing required fields.")
-        }
-        is NoSuchElementException -> respond(HttpStatusCode.BadRequest, e.message!!)
-        else -> respond(HttpStatusCode.InternalServerError, "An unexpected error occurred.")
-    }
-}
 
-suspend fun RoutingCall.executeWithExceptionHandling(block: suspend () -> Unit) {
-    try {
-        block()
-    } catch (e: Exception) {
-        handleException(e)
-    }
-}
+
+
 
 
