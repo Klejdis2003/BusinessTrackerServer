@@ -2,6 +2,7 @@ package com.klejdis.services.repositories
 
 import com.klejdis.services.config.items
 import com.klejdis.services.filters.Filter
+import com.klejdis.services.filters.ItemFilterTransformer
 import com.klejdis.services.model.Businesses
 import com.klejdis.services.model.Item
 import com.klejdis.services.model.Items
@@ -17,7 +18,6 @@ class ItemRepositoryKtorm(
 
     private fun buildJoinedTablesQuery(
         conditions: List<() -> ColumnDeclaring<Boolean>> = emptyList(),
-        aggregateConditions: List<ColumnDeclaring<Boolean>> = emptyList()
     ): Query {
         return database
             .from(Items)
@@ -33,11 +33,15 @@ class ItemRepositoryKtorm(
         return query.map { Items.createEntity(it) }
     }
 
-    private fun fetchMainQueryWithConditions(conditions: List<() -> ColumnDeclaring<Boolean>> = emptyList()) =
-        fetchQuery(buildJoinedTablesQuery(conditions))
+    private fun fetchMainQueryWithConditions(
+        filters: Iterable<Filter> = emptyList(),
+        conditions: List<() -> ColumnDeclaring<Boolean>> = emptyList()) =
+        fetchQuery(buildJoinedTablesQuery(
+            conditions + ItemFilterTransformer.generateTransformedFilters(filters)
+        ))
 
     private fun fetchMainQueryWithCondition(condition: () -> ColumnDeclaring<Boolean>) =
-        fetchMainQueryWithConditions(listOf(condition))
+        fetchMainQueryWithConditions(conditions = listOf(condition))
 
     override suspend fun get(id: Int): Item? {
         return fetchMainQueryWithCondition { Items.id eq id }.firstOrNull()
@@ -47,12 +51,12 @@ class ItemRepositoryKtorm(
         return fetchMainQueryWithCondition { Items.id inList ids }
     }
 
-    override suspend fun getByBusinessId(businessId: Int): List<Item> {
-        return fetchMainQueryWithCondition { Items.businessId eq businessId }
+    override suspend fun getByBusinessId(businessId: Int, filters: Iterable<Filter>): List<Item> {
+        return fetchMainQueryWithConditions(filters = filters, conditions = listOf { Items.businessId eq businessId })
     }
 
-    override suspend fun getByBusinessOwnerEmail(email: String): List<Item> {
-        return fetchMainQueryWithConditions(listOf { Businesses.ownerEmail eq email })
+    override suspend fun getByBusinessOwnerEmail(email: String, filters: Iterable<Filter>): List<Item> {
+        return fetchMainQueryWithConditions(filters = filters, conditions = listOf { Businesses.ownerEmail eq email })
     }
 
     override suspend fun getAll(filters: Iterable<Filter>): List<Item> {
@@ -60,8 +64,7 @@ class ItemRepositoryKtorm(
     }
 
     override suspend fun create(entity: Item): Item {
-        val id = database.items.add(entity)
-        entity.id = id
+        database.items.add(entity)
         return entity
     }
 

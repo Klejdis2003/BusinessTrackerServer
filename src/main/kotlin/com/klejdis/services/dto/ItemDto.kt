@@ -3,7 +3,7 @@ package com.klejdis.services.dto
 import com.klejdis.services.model.Item
 import com.klejdis.services.model.ItemType
 import kotlinx.serialization.Serializable
-import java.util.Currency
+import java.util.*
 
 @Serializable
 data class ItemDto(
@@ -29,6 +29,40 @@ data class ItemDto(
                 )
             )
         }
+    }
+}
+
+@Serializable
+data class ItemCreationDto(
+    val name: String,
+    val purchasePrice: Int,
+    val price: Int,
+    val currencySymbol: String,
+    val typeId: Int
+) {
+    companion object: Mappable<Item, ItemCreationDto> {
+        override fun fromEntity(entity: Item): ItemCreationDto {
+            return ItemCreationDto(
+                name = entity.name,
+                purchasePrice = entity.purchasePrice,
+                price = entity.price,
+                currencySymbol = entity.currency,
+                typeId = entity.type.id
+            )
+        }
+
+        override fun toEntity(dto: ItemCreationDto): Item {
+            return Item {
+                this.name = dto.name
+                this.purchasePrice = dto.purchasePrice
+                this.price = dto.price
+                this.currency = dto.currencySymbol
+                this.type = ItemType {
+                    this.id = dto.typeId
+                }
+            }
+        }
+
     }
 }
 

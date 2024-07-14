@@ -4,6 +4,7 @@ import com.klejdis.services.model.ProfileInfo
 import com.klejdis.services.model.Session
 import com.klejdis.services.plugins.*
 import com.klejdis.services.services.OAuthenticationService
+import com.klejdis.services.services.UnauthorizedException
 import com.klejdis.services.util.printIfDebugMode
 import io.ktor.http.*
 import io.ktor.server.auth.*
@@ -98,7 +99,7 @@ suspend fun RoutingCall.getProfileInfoFromSession(): ProfileInfo? {
  * @see getProfileInfoFromSession
  */
 suspend inline fun<reified T> RoutingCall.getScopedService(): T {
-    val loggedInEmail = getProfileInfoFromSession()?.email ?: throw Exception("No email in session")
+    val loggedInEmail = getProfileInfoFromSession()?.email ?: throw UnauthorizedException("No email in session")
     return getKoin().getOrCreateScope<Session>(loggedInEmail).get { parametersOf(loggedInEmail) }
 }
 

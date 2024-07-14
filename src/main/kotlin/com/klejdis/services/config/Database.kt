@@ -5,7 +5,6 @@ import com.klejdis.services.Mode
 import com.klejdis.services.model.*
 
 import com.klejdis.services.util.parseSqlFile
-import io.ktor.server.application.*
 import org.ktorm.database.Database
 import org.ktorm.entity.sequenceOf
 import org.ktorm.support.postgresql.PostgreSqlDialect
@@ -57,11 +56,12 @@ private object DBService {
 
 /**
  * Populates the database with the initial data, only in DEV mode for testing purposes.
- * Always rebuilds the database.
+ * Always rebuilds the database in DEV mode, does nothing in PROD mode.
  */
-fun Application.rebuildDatabase() {
-    if (MODE == Mode.PROD) return
-    DBService.dropTables()
-    DBService.createTables()
-    DBService.populateTables()
+fun rebuildDatabase() {
+    if (MODE == Mode.DEV) {
+        DBService.dropTables()
+        DBService.createTables()
+        DBService.populateTables()
+    }
 }

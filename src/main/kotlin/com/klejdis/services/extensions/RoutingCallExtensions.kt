@@ -2,6 +2,7 @@ package com.klejdis.services.extensions
 
 import com.klejdis.services.services.EntityAlreadyExistsException
 import com.klejdis.services.services.EntityNotFoundException
+import com.klejdis.services.services.UnauthorizedException
 import com.klejdis.services.services.printStackTraceIfInDevMode
 import io.ktor.http.*
 import io.ktor.server.plugins.*
@@ -17,6 +18,7 @@ suspend fun RoutingCall.handleException(e: Exception) {
     when (e) {
         is EntityNotFoundException -> respond(HttpStatusCode.NotFound, e.message!!)
         is EntityAlreadyExistsException -> respond(HttpStatusCode.Conflict, e.message!!)
+        is UnauthorizedException -> respond(HttpStatusCode.Unauthorized, e.message!!)
         is IllegalArgumentException -> respond(HttpStatusCode.BadRequest, e.message!!)
         is BadRequestException -> {
             val message = e.cause?.message?.substringBefore("for") ?: e.message
@@ -31,9 +33,9 @@ suspend fun RoutingCall.handleException(e: Exception) {
  * Executes the given block and handles any exceptions that occur during the execution.
  * @param block The block to execute.
  */
-suspend fun RoutingCall.executeWithExceptionHandling(block: suspend () -> Unit) {
+suspend fun RoutingCall.executeWithExceptionHandling(block: suspend (RoutingCall) -> Unit) {
     try {
-        block()
+        block(this)
     } catch (e: Exception) {
         handleException(e)
     }
@@ -44,7 +46,7 @@ suspend fun RoutingCall.executeWithExceptionHandling(block: suspend () -> Unit) 
  * @param message The message to respond with.
  */
 suspend inline fun <reified T: Any> RoutingCall.respondWithExceptionHandling(message: T) {
-    executeWithExceptionHandling {
+    return executeWithExceptionHandling {
         respond(message)
     }
 }

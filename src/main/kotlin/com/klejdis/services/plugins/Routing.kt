@@ -24,6 +24,8 @@ fun Application.configureRouting() {
         expenseRoutes()
         ordersRoute()
         analyticsRoute()
+        itemsRoute()
+        currencyRoutes()
 
         staticFiles(remotePath = "/code_documentation", File("src/main/resources/documentation/code"))
 //        openAPI(path = "openapi", swaggerFile = getResourceFullPath("openapi/documentation.yaml"))
@@ -45,7 +47,8 @@ suspend fun RoutingCall.getSession(): Session? {
             protocol = URL_PROTOCOL
             port = URL_PORT
             path("/login")
-            parameters.append("redirectUrl", request.uri)
+            if(request.uri != "/logout") //avoid hitting back the logout endpoint again and again
+                parameters.append("redirectUrl", request.uri)
         }
         respondRedirect(redirectUrl)
         return null

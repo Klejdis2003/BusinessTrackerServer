@@ -12,19 +12,19 @@ import io.ktor.util.*
 fun Route.ordersRoute() {
     route("/orders") {
         get {
-            val orderService =  call.getScopedService<OrderService>()
-            val filters = call.request.queryParameters.flattenEntries()
             call.executeWithExceptionHandling {
+                val orderService =  it.getScopedService<OrderService>()
+                val filters = call.request.queryParameters.flattenEntries()
                 val orders = orderService.getAllBusinessOrders(filters)
-                call.respond(orders)
+                it.respond(orders)
             }
         }
         post {
-            val orderService =  call.getScopedService<OrderService>()
             call.executeWithExceptionHandling {
+                val orderService = it.getScopedService<OrderService>()
                 val order = call.receive<OrderCreationDto>()
                 val newOrder = orderService.create(order)
-                call.respond(newOrder)
+                it.respond(newOrder)
             }
         }
         get("/{id}") {
@@ -39,10 +39,10 @@ fun Route.ordersRoute() {
                 )
         }
         get("/top") {
-            val orderService =  call.getScopedService<OrderService>()
             call.executeWithExceptionHandling {
+                val orderService = it.getScopedService<OrderService>()
                 val order = orderService.getMostExpensiveOrder()
-                order?.let { call.respond(order) }
+                order?.let { o -> call.respond(o) }
                     ?: call.respond(HttpStatusCode.NotFound, "Your business does not have any orders")
             }
         }

@@ -50,6 +50,7 @@ val appModule = module {
     single<OAuthenticationService> {
         OAuthenticationServiceImpl(get())
     }
+    single<CurrencyService> { CurrencyService() }
 
 
 }
@@ -76,6 +77,9 @@ val businessServicesModule = module {
             AnalyticsService(get(), get(), loggedInEmail)
         }
 
+        scoped<ItemService> { (loggedInEmail: String) ->
+            ItemService(get(), get(), loggedInEmail)
+        }
     }
 }
 
@@ -87,6 +91,7 @@ fun startKoinBusinessScope(loggedInEmail: String) {
     scope.get<ExpenseService> { parametersOf(loggedInEmail) }
     scope.get<CustomerService> { parametersOf(loggedInEmail) }
     scope.get<AnalyticsService> { parametersOf(loggedInEmail) }
+    scope.get<ItemService> { parametersOf(loggedInEmail) }
 }
 
 fun endKoinBusinessScope(loggedInEmail: String) {
