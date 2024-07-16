@@ -5,6 +5,7 @@ import com.klejdis.services.filters.Filter
 import com.klejdis.services.filters.ItemFilterTransformer
 import com.klejdis.services.model.Businesses
 import com.klejdis.services.model.Item
+import com.klejdis.services.model.ItemTypes
 import com.klejdis.services.model.Items
 import org.ktorm.database.Database
 import org.ktorm.dsl.*
@@ -22,6 +23,7 @@ class ItemRepositoryKtorm(
         return database
             .from(Items)
             .innerJoin(Businesses, on = Items.businessId eq Businesses.id)
+            .innerJoin(ItemTypes, on = Items.type eq ItemTypes.id)
             .select()
             .whereWithConditions { conditions.forEach { condition -> it += condition() } }
     }

@@ -1,5 +1,6 @@
 package com.klejdis.services.services
 
+import com.klejdis.services.util.FileOperations
 import com.klejdis.services.util.Image
 import com.klejdis.services.util.MultiPartProcessResult
 import com.klejdis.services.util.MultiPartProcessor
@@ -10,6 +11,10 @@ import org.koin.java.KoinJavaComponent.inject
 import org.ktorm.entity.Entity
 import org.postgresql.util.PSQLException
 import org.postgresql.util.PSQLState
+import java.io.File
+import java.time.LocalDateTime
+import java.time.format.DateTimeFormatter
+import java.util.*
 
 /**
  * A general purpose service class for handling basic CRUD operations and exceptions. It is scoped to a specific business email, to simplify
@@ -22,12 +27,16 @@ import org.postgresql.util.PSQLState
  * need to be customized, the rest will be automatically set to default values
  * @constructor Creates a new service with the given entity name and an optional custom exception handler.
  */
-open class Service<T : Entity<T>>(
+abstract class Service<T : Entity<T>>(
     private val entityName: String,
     private var psqlExceptionHandler: PSQLExceptionHandler = PSQLExceptionHandler(),
     protected val loggedInEmail: String
 ) {
     val json by inject<Json>(Json::class.java)
+    protected val imageStorePath = entityName.lowercase()
+    protected val formExpectedName = entityName.lowercase()
+
+
     /**
      * Pass the code to create a new entity as a lambda. Error handling is done automatically through
      * the [handlePSQLException] method.
@@ -82,15 +91,26 @@ open class Service<T : Entity<T>>(
         serializer: KSerializer<T>,
         formItemExpectedName: String? = null,
         imageName: String? = null
-    ): MultiPartProcessResult<T, Image> =
-        MultiPartProcessor.getDeserializedFormAndImageData<T>(
+    ): MultiPartProcessResult<T, Image> {
+        val deserializedFormAndImageData = MultiPartProcessor.getDeserializedFormAndImageData<T>(
             multiPartData,
             path,
             serializer,
             json,
             formItemExpectedName,
             imageName
-    )
+        )
+        return deserializedFormAndImageData
+    }
+
+    protected fun generateImageName(): String {
+        return "${LocalDateTime.now().format(DateTimeFormatter.ofPattern("yyyyMMddHHmmss"))}-${UUID.randomUUID()}"
+    }
+
+    protected fun deleteImageFile(fileName: String): Boolean{
+        val file = File("${FileOperations.IMAGE_DIR}/$imageStorePath/$fileName")
+        return file.delete()
+    }
 }
 
 
@@ -155,4 +175,10 @@ class PSQLExceptionHandler {
     }
 
 
+}
+
+sealed class ImageUploadPath {
+    data object Item : ImageUploadPath()
+
+    val path: String get() = this::class.simpleName!!.lowercase()
 }

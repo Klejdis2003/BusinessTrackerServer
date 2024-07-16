@@ -11,12 +11,13 @@ import io.ktor.server.routing.*
 import io.ktor.util.*
 import java.io.File
 
-const val ITEM_IMAGES_ENDPOINT = "items/images"
+const val ITEM_IMAGES_ENDPOINT = "items/image"
 
 fun Route.itemsRoute(){
     route("/items"){
-        staticFiles("/images", File("${FileOperations.IMAGE_DIR}/items")) {
+        staticFiles("/images", File("${FileOperations.IMAGE_DIR}/item")) {
             this.modify{ resource, call ->
+                if(resource.name == "default.jpg") return@modify
                 val itemService = call.getScopedService<ItemService>()
                 itemService.get(resource.name) ?: call.respond(HttpStatusCode.NotFound, "Item not found")
             }
@@ -44,6 +45,23 @@ fun Route.itemsRoute(){
                 call.respond(HttpStatusCode.Created, newItem)
             }
         }
+        put("/{id}") {
+            call.executeWithExceptionHandling {
+                val itemService = it.getScopedService<ItemService>()
+                val id = it.parameters["id"]?.toIntOrNull() ?: throw IllegalArgumentException("Invalid id")
+                val multiPartData = it.receiveMultipart()
+                val updatedItem = itemService.updateImage(id, multiPartData)
+                it.respond(HttpStatusCode.OK, updatedItem)
+            }
+        }
 
+        delete("/{id}") {
+            val itemService = call.getScopedService<ItemService>()
+            call.executeWithExceptionHandling {
+                val id = call.parameters["id"]?.toIntOrNull() ?: throw IllegalArgumentException("Invalid id")
+                itemService.delete(id)
+                call.respond(HttpStatusCode.OK)
+            }
+        }
     }
 }

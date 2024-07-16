@@ -7,10 +7,8 @@ import com.klejdis.services.model.Item
 import com.klejdis.services.repositories.BusinessRepository
 import com.klejdis.services.repositories.ItemRepository
 import com.klejdis.services.util.FileOperations
+import com.klejdis.services.util.MultiPartProcessor
 import io.ktor.http.content.*
-import java.time.LocalDateTime
-import java.time.format.DateTimeFormatter
-import java.util.*
 
 
 class ItemService(
@@ -53,17 +51,17 @@ class ItemService(
     suspend fun create(multiPartData: MultiPartData): ItemDto {
         val multiPartProcessResult = deserializeFormAndSaveImage<ItemCreationDto>(
             multiPartData = multiPartData,
-            path = "items",
+            path = imageStorePath,
             serializer = ItemCreationDto.serializer(),
-            formItemExpectedName = "item",
-            imageName = "item${System.currentTimeMillis()}"
+            formItemExpectedName = formExpectedName,
+            imageName = generateImageName()
         )
         if(multiPartProcessResult.formItemData == null || multiPartProcessResult.fileItemData == null) throw IllegalArgumentException("Item data not found")
 
         val business = businessRepository.getByEmail(loggedInEmail) ?: throw EntityNotFoundException("Business not found")
         val item = ItemCreationDto.toEntity(multiPartProcessResult.formItemData).apply { this.business = business }
-        val imageName = "${LocalDateTime.now().format(DateTimeFormatter.ofPattern("yyyyMMddHHmmss"))}-${UUID.randomUUID()}"
-        val image = multiPartProcessResult.fileItemData.copy(name = imageName)
+
+        val image = multiPartProcessResult.fileItemData
         item.imageFilename = image.fullFileName
 
         val createdItem = executeCreateBlockWithErrorHandling { itemRepository.create(item) }
@@ -71,10 +69,28 @@ class ItemService(
         return ItemDto.fromEntity(createdItem)
     }
 
-    suspend fun update(item: Item) =
-        executeUpdateBlock { itemRepository.update(item) }
+    suspend fun updateImage(itemId: Int, multiPartData: MultiPartData): ItemDto {
+        val item = itemRepository.get(itemId) ?: throw EntityNotFoundException("Item not found")
+        if(item.business.ownerEmail != loggedInEmail) throw UnauthorizedException()
+        val image = MultiPartProcessor.getImage(
+            multipart = multiPartData,
+            imageName = generateImageName(),
+            path = imageStorePath
+        )
+        if(image == null) throw IllegalArgumentException("Image not found")
 
-    suspend fun delete(id: Int) =
-        itemRepository.delete(id)
+        // Delete the old image file if it exists and save the new image file
+        item.imageFilename?.let { deleteImageFile(it) }
+        item.imageFilename = image.fullFileName
+
+        val updatedItem = executeUpdateBlock { itemRepository.update(item) }
+        FileOperations.saveImage(image)
+        return ItemDto.fromEntity(updatedItem)
+    }
+
+    suspend fun delete(id: Int){
+        val item = itemRepository.get(id) ?: throw EntityNotFoundException("Item not found")
+        if(itemRepository.delete(id)) item.imageFilename?.let { deleteImageFile(it) }
+    }
 
 }

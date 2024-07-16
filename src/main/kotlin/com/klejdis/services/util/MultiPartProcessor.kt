@@ -18,6 +18,41 @@ data class MultiPartProcessResult<T, K>(
 
 object MultiPartProcessor {
 
+    /**
+     * Handles the form item data from the multipart data.
+     * @param formItem The form item data to handle.
+     * @return The form item data.
+     */
+    @PublishedApi
+    internal inline fun<reified T> handleFormItemData(
+        formItem: PartData.FormItem,
+        formItemExpectedName: String,
+        json: Json,
+        serializer: KSerializer<T>,
+    ): T {
+        val formItemName = formItemExpectedName ?: T::class.simpleName
+        if (formItemName != formItem.name) throw IllegalArgumentException("Expected data $formItemName not provided.")
+        return json.decodeFromString(serializer, formItem.value)
+    }
+
+    @PublishedApi
+    internal suspend fun handleFileData(
+        fileItem: PartData.FileItem,
+        imageName: String?,
+        path: String
+    ): Image {
+        val originalFileFormat = fileItem.originalFileName?.split(".")?.last()
+        val name = imageName ?: fileItem.originalFileName?.substringBeforeLast(".")
+        val imagePath = "${FileOperations.IMAGE_DIR}/$path"
+        return Image(
+            name = name!!,
+            extension = originalFileFormat!!,
+            bytes = processMultiPartImage(fileItem),
+            parentPath = imagePath
+        )
+    }
+
+
      suspend fun processMultiPartImage(fileItem: PartData.FileItem): ByteArray {
         return fileItem.provider().readRemaining().readBytes()
     }
@@ -82,23 +117,27 @@ object MultiPartProcessor {
         process(
             multipart = multipart,
             handleFormItemData = { formItem ->
-                val formItemName = formItemExpectedName ?: T::class.simpleName
-                if (formItemName != formItem.name) throw IllegalArgumentException("Expected data $formItemName not provided.")
-                json.decodeFromString(serializer, formItem.value)
-            },
-            handleFileData = { fileItem ->
-                val originalFileFormat = fileItem.originalFileName?.split(".")?.last()
-                val name = imageName ?: fileItem.originalFileName?.substringBeforeLast(".")
-                val imagePath = "${FileOperations.IMAGE_DIR}/$path"
-                Image(
-                    name = name!!,
-                    extension = originalFileFormat!!,
-                    bytes = processMultiPartImage(fileItem),
-                    parentPath = imagePath
-                )
-            }
+                handleFormItemData(
+                    formItem,
+                    formItemExpectedName ?: T::class.simpleName!!,
+                    json,
+                    serializer)},
+            handleFileData = { fileItem -> handleFileData(fileItem, imageName, path) }
         )
+
+    suspend fun getImage(
+        multipart: MultiPartData,
+        imageName: String? = null,
+        path : String = ""
+    ): Image? {
+        val result = process(
+            multipart = multipart,
+            handleFormItemData = { throw IllegalArgumentException("No form data expected.") },
+            handleFileData = { fileItem -> handleFileData(fileItem, imageName, path) }
+        )
+        return result.fileItemData
     }
+}
 
 
 
