@@ -1,5 +1,12 @@
 package com.klejdis.services.services
 
+import com.klejdis.services.util.Image
+import com.klejdis.services.util.MultiPartProcessResult
+import com.klejdis.services.util.MultiPartProcessor
+import io.ktor.http.content.*
+import kotlinx.serialization.KSerializer
+import kotlinx.serialization.json.Json
+import org.koin.java.KoinJavaComponent.inject
 import org.ktorm.entity.Entity
 import org.postgresql.util.PSQLException
 import org.postgresql.util.PSQLState
@@ -20,6 +27,7 @@ open class Service<T : Entity<T>>(
     private var psqlExceptionHandler: PSQLExceptionHandler = PSQLExceptionHandler(),
     protected val loggedInEmail: String
 ) {
+    val json by inject<Json>(Json::class.java)
     /**
      * Pass the code to create a new entity as a lambda. Error handling is done automatically through
      * the [handlePSQLException] method.
@@ -67,6 +75,22 @@ open class Service<T : Entity<T>>(
             throw e
         }
     }
+
+    protected suspend inline fun<reified T: Any> deserializeFormAndSaveImage(
+        multiPartData: MultiPartData,
+        path: String,
+        serializer: KSerializer<T>,
+        formItemExpectedName: String? = null,
+        imageName: String? = null
+    ): MultiPartProcessResult<T, Image> =
+        MultiPartProcessor.getDeserializedFormAndImageData<T>(
+            multiPartData,
+            path,
+            serializer,
+            json,
+            formItemExpectedName,
+            imageName
+    )
 }
 
 

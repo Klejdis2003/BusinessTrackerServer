@@ -13,7 +13,8 @@ import org.ktorm.schema.varchar
  * @property business the business that owns the item.
  * @property purchasePrice the price at which the business bought the item.
  * @property price the price at which the business sells the item.
- * @property quantity the number of items in stock.
+ * @property currency the currency in which the item is sold.
+ * @property imageFilename the filename of the image representing the item.
  * @property type the type of the item.
  */
 interface Item : Entity<Item> {
@@ -25,6 +26,7 @@ interface Item : Entity<Item> {
     var purchasePrice: Int
     var price: Int
     var currency: String
+    var imageFilename: String?
     var type: ItemType
 }
 
@@ -36,5 +38,6 @@ object Items : Table<Item>("items") {
     val purchasePrice = int("purchase_price").bindTo { it.purchasePrice }
     val price = int("price").bindTo { it.price }
     val currency = varchar("currency").bindTo { it.currency }
+    val imageFilename = varchar("image_filename").bindTo { it.imageFilename }
     val type = int("item_type_id").references(ItemTypes) { it.type }
 }

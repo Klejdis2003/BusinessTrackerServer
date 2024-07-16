@@ -1,6 +1,8 @@
 package com.klejdis.services.util
 
 import java.time.LocalDate
+import java.time.ZoneOffset
+import java.time.ZonedDateTime
 
 /**
  * Represents a time period that spans from a start date to an end date.
@@ -64,5 +66,9 @@ data class DatePeriod(
             startDate
         )
     }
+}
+
+fun getZonedDateTimeNow(): ZonedDateTime {
+    return ZonedDateTime.now(ZoneOffset.UTC)
 }
 

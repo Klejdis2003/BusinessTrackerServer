@@ -3,8 +3,8 @@ package com.klejdis.services.config
 import com.klejdis.services.MODE
 import com.klejdis.services.Mode
 import com.klejdis.services.model.*
+import com.klejdis.services.util.FileOperations
 
-import com.klejdis.services.util.parseSqlFile
 import org.ktorm.database.Database
 import org.ktorm.entity.sequenceOf
 import org.ktorm.support.postgresql.PostgreSqlDialect
@@ -32,7 +32,7 @@ val Database.customers get() = this.sequenceOf(Customers)
 private object DBService {
     private fun executeSqlFile(fileName: String) {
         postgresDatabase.useConnection { conn ->
-            val sql = parseSqlFile(fileName)
+            val sql = FileOperations.parseSqlFile(fileName)
             conn.createStatement().execute(sql)
         }
     }
@@ -63,5 +63,7 @@ fun rebuildDatabase() {
         DBService.dropTables()
         DBService.createTables()
         DBService.populateTables()
+        FileOperations.removeAllImageFiles()
     }
 }
+

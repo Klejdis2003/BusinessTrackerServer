@@ -3,10 +3,11 @@ package com.klejdis.services.routes
 import com.klejdis.services.model.ProfileInfo
 import com.klejdis.services.model.Session
 import com.klejdis.services.plugins.*
+import com.klejdis.services.printIfDebugMode
 import com.klejdis.services.services.OAuthenticationService
 import com.klejdis.services.services.UnauthorizedException
-import com.klejdis.services.util.printIfDebugMode
 import io.ktor.http.*
+import io.ktor.server.application.*
 import io.ktor.server.auth.*
 import io.ktor.server.response.*
 import io.ktor.server.routing.*
@@ -17,6 +18,17 @@ import org.koin.ktor.ext.inject
 import org.koin.mp.KoinPlatform.getKoin
 import org.koin.ktor.ext.get as koinGet
 
+/**
+ * The route that handles the authentication of the user. It uses the OAuth2 protocol to authenticate the user.
+ * The route has the following endpoints:
+ * - /loginRedirect: Redirects the user to the OAuth provider's login page.
+ * - /callback: The OAuth provider redirects the user to this endpoint after the user has logged in. The endpoint
+ * fetches the user's profile info and stores it in the session.
+ * - /login: Redirects the user to the OAuth provider's login page. If the user is already logged in, it redirects to the home page.
+ * - /logout: Logs the user out and redirects to the OAuth provider's logout page.
+ * @see getProfileInfoFromSession For more info on how the profile info is fetched
+ * @see getScopedService For more info on how the service is fetched
+ */
 fun Route.authRoute() {
     val authenticationService = koinGet<OAuthenticationService>()
 
@@ -81,11 +93,15 @@ private fun getLogoutRequestUrl(): String {
  * @see getSession For more info on how the session is retrieved
  * @see OAuthenticationService.getProfileInfoFromToken For more info on how the profile info is fetched
  */
-suspend fun RoutingCall.getProfileInfoFromSession(): ProfileInfo? {
+suspend fun ApplicationCall.getProfileInfoFromSession(): ProfileInfo? {
     val authenticationService by inject<OAuthenticationService>()
     val session = getSession()
     return session?.let {
-        try { authenticationService.getProfileInfoFromToken(it.token) }
+        try {
+            authenticationService.getProfileInfoFromToken(it.token) {
+                sessions.clear<Session>()
+            }
+        }
         catch (e: Exception) { null }
     }
 }
@@ -98,8 +114,8 @@ suspend fun RoutingCall.getProfileInfoFromSession(): ProfileInfo? {
  * @throws Exception if the session is not found
  * @see getProfileInfoFromSession
  */
-suspend inline fun<reified T> RoutingCall.getScopedService(): T {
-    val loggedInEmail = getProfileInfoFromSession()?.email ?: throw UnauthorizedException("No email in session")
+suspend inline fun<reified T> ApplicationCall.getScopedService(): T {
+    val loggedInEmail = getProfileInfoFromSession()?.email ?: throw UnauthorizedException("User is not logged in.")
     return getKoin().getOrCreateScope<Session>(loggedInEmail).get { parametersOf(loggedInEmail) }
 }
 

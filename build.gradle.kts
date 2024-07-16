@@ -87,6 +87,7 @@ dependencies {
     implementation("org.postgresql:postgresql:$postgresql_driver_version")
     implementation("org.ktorm:ktorm-core:$ktorm_version")
     implementation("org.ktorm:ktorm-support-postgresql:$ktorm_version")
+    implementation("org.jetbrains.kotlinx:kotlinx-coroutines-core")
     implementation("ch.qos.logback:logback-classic:$logback_version")
     implementation("io.ktor:ktor-client-cio-jvm:3.0.0-beta-1")
     testImplementation("io.ktor:ktor-server-tests-jvm")

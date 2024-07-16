@@ -3,13 +3,13 @@ package com.klejdis.services.services
 import com.klejdis.services.endKoinBusinessScope
 import com.klejdis.services.model.ProfileInfo
 import com.klejdis.services.plugins.OAUTH_DOMAIN
-import com.klejdis.services.plugins.sessionMaxAgeInSeconds
+import com.klejdis.services.plugins.SESSION_MAX_AGE_SECONDS
+import com.klejdis.services.printIfDebugMode
 import com.klejdis.services.request.OAuthTokenRevocationRequest
 import com.klejdis.services.routes.getScopedService
 import com.klejdis.services.startKoinBusinessScope
 import com.klejdis.services.util.BackgroundTasksUtil
 import com.klejdis.services.util.getZonedDateTimeNow
-import com.klejdis.services.util.printIfDebugMode
 import io.ktor.client.*
 import io.ktor.client.call.*
 import io.ktor.client.request.*
@@ -37,7 +37,10 @@ class OAuthenticationServiceImpl(
      * @param token The token received from the Auth provider.
      * @return The user's profile information.
      */
-    override suspend fun getProfileInfoFromToken(token: String): ProfileInfo {
+    override suspend fun getProfileInfoFromToken(
+        token: String,
+        unauthorizedFailure: suspend () -> Unit
+    ): ProfileInfo? {
         if (tokenProfileInfoMap.containsKey(token)) {
             println("Profile Info CACHE HIT")
             return tokenProfileInfoMap[token]!!
@@ -53,7 +56,13 @@ class OAuthenticationServiceImpl(
         val response = httpClient.get(url) {
             headers.appendAll(header)
         }
+        if(response.status == HttpStatusCode.Unauthorized) {
+            unauthorizedFailure()
+            return null
+        }
+
         val profileInfo: ProfileInfo = response.body()
+        tokenProfileInfoMap[token] = profileInfo
         return profileInfo
     }
 
@@ -68,7 +77,7 @@ class OAuthenticationServiceImpl(
      * @return The user's profile information.
      */
     override suspend fun login(tokenResponse: OAuth2Response, onSuccessfulLogin: suspend (ProfileInfo) -> Unit): ProfileInfo {
-        val profileInfo = getProfileInfoFromToken(tokenResponse.accessToken)
+        val profileInfo = getProfileInfoFromToken(tokenResponse.accessToken) ?: throw Exception("Could not get profile info.")
         cacheData(tokenResponse, profileInfo)
         startKoinBusinessScope(profileInfo.email)
         val businessService = getScopedService<BusinessService>(profileInfo.email)
@@ -79,7 +88,7 @@ class OAuthenticationServiceImpl(
 
     override suspend fun logout(authToken: String, onSuccessfulLogout: suspend () -> Unit): Boolean {
         val tokenResponse = authTokenToTokenResponseMap[authToken]
-        val email = getProfileInfoFromToken(authToken).email
+        val email = getProfileInfoFromToken(authToken)?.email ?: return false
         println("Logging out user $email.")
         endKoinBusinessScope(email)
         if (tokenResponse?.refreshToken == null) {
@@ -115,9 +124,9 @@ class OAuthenticationServiceImpl(
 
 
     private fun cacheData(tokenResponse: OAuth2Response, profileInfo: ProfileInfo) {
-        tokenProfileInfoMap[tokenResponse.accessToken] = profileInfo
-        authTokenToTokenResponseMap[tokenResponse.accessToken] = tokenResponse
-        authTokenToCreationTimeMap[tokenResponse.accessToken] = getZonedDateTimeNow()
+        tokenProfileInfoMap.putIfAbsent(tokenResponse.accessToken, profileInfo)
+        authTokenToTokenResponseMap.putIfAbsent(tokenResponse.accessToken, tokenResponse)
+        authTokenToCreationTimeMap.putIfAbsent(tokenResponse.accessToken, getZonedDateTimeNow())
     }
 
     private fun removeFromCache(token: String) {
@@ -134,7 +143,7 @@ class OAuthenticationServiceImpl(
             println("Checking for expired tokens...")
             printIfDebugMode("Current tokens: $authTokenToCreationTimeMap")
             authTokenToCreationTimeMap.forEach { (token, creationTime) ->
-                if (getZonedDateTimeNow() > creationTime.plusSeconds(sessionMaxAgeInSeconds)) {
+                if (getZonedDateTimeNow() > creationTime.plusSeconds(SESSION_MAX_AGE_SECONDS)) {
                     println("Removing expired token for user ${tokenProfileInfoMap[token]?.email}")
                     logout(token)
                     removeFromCache(token)

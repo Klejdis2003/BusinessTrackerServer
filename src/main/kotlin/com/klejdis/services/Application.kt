@@ -15,8 +15,10 @@ val URL_PROTOCOL = when(MODE) {
     Mode.DEV -> URLProtocol.HTTPS
     Mode.PROD -> URLProtocol.HTTP
 }
+val APPLICATION_DOMAIN = System.getenv("APPLICATION_DOMAIN") ?: "https://localhost:8443"
 val SSL_PORT = System.getenv("SSL_PORT")?.toInt() ?: 8443
 val URL_PORT = System.getenv("PORT")?.toInt() ?: SSL_PORT
+
 
 
 fun main() {
@@ -65,6 +67,11 @@ fun ApplicationEngine.Configuration.configureSSL() {
     }
 
 
+}
+
+fun printIfDebugMode(message: String) {
+    val debugMode = System.getenv("DEBUG_MODE") ?: "false"
+    if (debugMode.toBoolean()) println(message)
 }
 
 enum class Mode {

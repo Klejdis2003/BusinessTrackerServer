@@ -11,14 +11,16 @@ import io.ktor.server.auth.*
 interface AuthenticationService<in K, out T> {
     /**
      * Logs the user in using the token received from the Auth provider.
-     * @param token The token received from the Auth provider.
+     * @param tokenResponse The token received from the Auth provider.
+     * @param onSuccessfulLogin The function to be called after a successful login.
      * @return Defined by the implementation.
      */
     suspend fun login(tokenResponse: K, onSuccessfulLogin: suspend (T) -> Unit = {}): T
 
     /**
      * Logs the user out by clearing the session.
-     * @param token The token received from the Auth provider.
+     * @param authToken The token received from the Auth provider.
+     * @param onSuccessfulLogout The function to be called after a successful logout.
      * @return Defined by the implementation.
      */
     suspend fun logout(authToken: String, onSuccessfulLogout: suspend () -> Unit = {}): Boolean
@@ -28,7 +30,7 @@ interface AuthenticationService<in K, out T> {
      * @param token The token received from Auth provider.
      * @return Defined by the implementation.
      */
-    suspend fun getProfileInfoFromToken(token: String): T
+    suspend fun getProfileInfoFromToken(token: String, unauthorizedFailure: suspend () -> Unit = {}): ProfileInfo?
 
     /**
      * Destroys the service and all its background processes.

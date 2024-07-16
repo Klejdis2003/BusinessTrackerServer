@@ -36,6 +36,7 @@ CREATE TABLE IF NOT EXISTS items
     business_id    INT         NOT NULL,
     name           VARCHAR(50) NOT NULL,
     description    TEXT        NOT NULL DEFAULT '',
+    image_filename TEXT   UNIQUE  DEFAULT '',
     purchase_price DECIMAL(8)  NOT NULL,
     price          DECIMAL(8)  NOT NULL,
     currency       VARCHAR(3)  NOT NULL,

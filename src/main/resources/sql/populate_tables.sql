@@ -16,19 +16,20 @@ VALUES ('Electronics', 'Electronic devices'),
        ('Appliances', 'Home appliances'),
        ('Books', 'Books and magazines');
 
-INSERT INTO items (business_id, name, description, purchase_price, price, currency, item_type_id)
-VALUES (2, 'Laptop', 'Laptop computer', 500.00, 800.00, 'USD', 1),
-       (1, 'Smartphone', 'Smartphone device', 300.00, 500.00, 'USD', 1),
-       (2, 'Tablet', 'Tablet device', 200.00, 300.00, 'USD', 1),
-       (1, 'T-shirt', 'T-shirt', 10.00, 20.00, 'USD', 2),
-       (3, 'Jeans', 'Jeans', 20.00, 40.00, 'USD', 2),
-       (4, 'Dress', 'Dress', 30.00, 60.00, 'USD', 2),
-       (3, 'Sofa', 'Sofa', 300.00, 500.00, 'USD', 3),
-       (4, 'Chair', 'Chair', 50.00, 100.00, 'USD', 3),
-       (1, 'Refrigerator', 'Refrigerator', 500.00, 800.00, 'USD',  4),
-       (2, 'Washing machine', 'Washing machine', 300.00, 500.00, 'USD', 4),
-       (3, 'Book', 'Book', 5.00, 10.00, 'USD', 5),
-       (4, 'Magazine', 'Magazine', 2.00, 5.00, 'USD', 5);
+INSERT INTO items (business_id, name, description, purchase_price, price, currency, item_type_id, image_filename)
+VALUES (2, 'Laptop', 'Laptop computer', 500.00, 800.00, 'USD', 1, null),
+       (1, 'Desktop', 'Desktop computer', 400.00, 700.00, 'USD', 1, null),
+       (1, 'Smartphone', 'Smartphone device', 300.00, 500.00, 'USD', 1, 'https://example.com/smartphone.jpg'),
+       (2, 'Tablet', 'Tablet device', 200.00, 300.00, 'USD', 1, 'https://example.com/tablet.jpg'),
+       (1, 'T-shirt', 'T-shirt', 10.00, 20.00, 'USD', 2, 'https://example.com/tshirt.jpg'),
+       (3, 'Jeans', 'Jeans', 20.00, 40.00, 'USD', 2, 'https://example.com/jeans.jpg'),
+       (4, 'Dress', 'Dress', 30.00, 60.00, 'USD', 2,'https://example.com/dress.jpg'),
+       (1, 'Sweater', 'Sweater', 40.00, 80.00, 'USD', 2, 'https://example.com/sweater.jpg'),
+       (2, 'Sofa', 'Sofa', 300.00, 500.00, 'USD', 3, 'https://example.com/sofa.jpg'),
+       (3, 'Chair', 'Chair', 50.00, 100.00, 'USD', 3, 'https://example.com/chair.jpg'),
+       (1, 'Refrigerator', 'Refrigerator', 500.00, 800.00, 'USD', 4, 'https://example.com/refrigerator.jpg'),
+       (2, 'Washing machine', 'Washing machine', 300.00, 500.00, 'USD', 4, 'https://example.com/washing_machine.jpg'),
+       (3, 'Book', 'Book', 5.00, 10.00, 'USD', 5, 'https://example.com/book.jpg');
 
 INSERT INTO orders (business_id, customer_phone, date) -- 1000 orders for business 1
 VALUES

@@ -1,7 +1,9 @@
 package com.klejdis.services.dto
 
+import com.klejdis.services.APPLICATION_DOMAIN
 import com.klejdis.services.model.Item
 import com.klejdis.services.model.ItemType
+import com.klejdis.services.routes.ITEM_IMAGES_ENDPOINT
 import kotlinx.serialization.Serializable
 import java.util.*
 
@@ -12,6 +14,7 @@ data class ItemDto(
     val purchasePrice: Int,
     val price: Int,
     val currency: CurrencyDto,
+    val imageUrl: String,
     val type: ItemTypeDto
 ) {
     companion object {
@@ -26,7 +29,9 @@ data class ItemDto(
                     id = item.type.id,
                     name = item.type.name,
                     description = item.type.description
-                )
+                ),
+                imageUrl = item.imageFilename?.let {"$APPLICATION_DOMAIN/${ITEM_IMAGES_ENDPOINT}/${item.imageFilename}"}
+                    ?: "$APPLICATION_DOMAIN/${ITEM_IMAGES_ENDPOINT}/default.jpg"
             )
         }
     }
@@ -85,7 +90,8 @@ class ItemMapper {
                 id = item.type.id,
                 name = item.type.name,
                 description = item.type.description
-            )
+            ),
+            imageUrl = item.imageFilename ?: "default.jpg"
         )
     }
 

@@ -40,7 +40,7 @@ fun Application.configureRouting() {
  * with no need to repeatedly check for the session's existence and knowing what needs to be done.
  * @return The session if it exists, null otherwise.
  */
-suspend fun RoutingCall.getSession(): Session? {
+suspend fun ApplicationCall.getSession(): Session? {
     val session: Session? = sessions.get()
     if (session == null) {
         val redirectUrl = url {
@@ -55,7 +55,7 @@ suspend fun RoutingCall.getSession(): Session? {
     }
     val sessionCreationTime = ZonedDateTime.parse(session.creationTime)
     val currentTime = ZonedDateTime.now()
-    if (currentTime > sessionCreationTime.plusSeconds(sessionMaxAgeInSeconds)){
+    if (currentTime > sessionCreationTime.plusSeconds(SESSION_MAX_AGE_SECONDS)){
         sessions.clear<Session>()
         return null
     }

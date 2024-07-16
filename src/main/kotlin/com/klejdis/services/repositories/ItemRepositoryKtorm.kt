@@ -22,10 +22,7 @@ class ItemRepositoryKtorm(
         return database
             .from(Items)
             .innerJoin(Businesses, on = Items.businessId eq Businesses.id)
-            .select(
-                Items.columns +
-                        Businesses.columns
-            )
+            .select()
             .whereWithConditions { conditions.forEach { condition -> it += condition() } }
     }
 
@@ -53,6 +50,10 @@ class ItemRepositoryKtorm(
 
     override suspend fun getByBusinessId(businessId: Int, filters: Iterable<Filter>): List<Item> {
         return fetchMainQueryWithConditions(filters = filters, conditions = listOf { Items.businessId eq businessId })
+    }
+
+    override suspend fun getByImageUrl(imageUrl: String): Item? {
+        return fetchMainQueryWithCondition { Items.imageFilename eq imageUrl }.firstOrNull()
     }
 
     override suspend fun getByBusinessOwnerEmail(email: String, filters: Iterable<Filter>): List<Item> {
