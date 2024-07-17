@@ -4,7 +4,6 @@ package com.klejdis.services
 import com.klejdis.services.config.postgresDatabase
 import com.klejdis.services.dto.BusinessMapper
 import com.klejdis.services.dto.CustomerMapper
-import com.klejdis.services.dto.ItemMapper
 import com.klejdis.services.dto.OrderMapper
 import com.klejdis.services.model.Session
 import com.klejdis.services.repositories.*
@@ -44,7 +43,6 @@ val appModule = module {
     //mappers
     single<BusinessMapper> { BusinessMapper() }
     single<CustomerMapper> { CustomerMapper() }
-    single<ItemMapper> { ItemMapper() }
     single<OrderMapper> { OrderMapper(get(), get()) }
 
     single<OAuthenticationService> {
