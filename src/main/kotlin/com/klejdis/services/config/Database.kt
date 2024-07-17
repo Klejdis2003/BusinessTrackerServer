@@ -3,6 +3,7 @@ package com.klejdis.services.config
 import com.klejdis.services.MODE
 import com.klejdis.services.Mode
 import com.klejdis.services.model.*
+import com.klejdis.services.storage.ItemImageStorage
 import com.klejdis.services.util.FileOperations
 
 import org.ktorm.database.Database
@@ -63,7 +64,7 @@ fun rebuildDatabase() {
         DBService.dropTables()
         DBService.createTables()
         DBService.populateTables()
-        FileOperations.removeAllImageFiles()
+        ItemImageStorage.clearAll(exceptions = setOf("default.jpg"))
     }
 }
 

@@ -77,38 +77,3 @@ data class ItemTypeDto(
     val name: String,
     val description: String
 )
-
-class ItemMapper {
-    fun toItemDto(item: Item): ItemDto {
-        return ItemDto(
-            id = item.id,
-            name = item.name,
-            purchasePrice = item.purchasePrice,
-            price = item.price,
-            currency = CurrencyMapper.toDto(Currency.getInstance(item.currency)),
-            type = ItemTypeDto(
-                id = item.type.id,
-                name = item.type.name,
-                description = item.type.description
-            ),
-            imageUrl = item.imageFilename ?: "default.jpg"
-        )
-    }
-
-    fun toEntity(dto: ItemDto): Item {
-        return Item {
-            this.id = dto.id
-            this.name = dto.name
-            this.purchasePrice = dto.purchasePrice
-            this.price = dto.price
-            this.currency = dto.currency.code
-            this.type = ItemType {
-                this.id = dto.type.id
-                this.name = dto.type.name
-                this.description = dto.type.description
-            }
-        }
-    }
-
-
-}

@@ -36,19 +36,13 @@ object MultiPartProcessor {
     }
 
     @PublishedApi
-    internal suspend fun handleFileData(
-        fileItem: PartData.FileItem,
-        imageName: String?,
-        path: String
-    ): Image {
+    internal suspend fun handleFileData(fileItem: PartData.FileItem): Image {
         val originalFileFormat = fileItem.originalFileName?.split(".")?.last()
-        val name = imageName ?: fileItem.originalFileName?.substringBeforeLast(".")
-        val imagePath = "${FileOperations.IMAGE_DIR}/$path"
+        val name = fileItem.originalFileName?.substringBeforeLast(".")
         return Image(
             name = name!!,
-            extension = originalFileFormat!!,
+            format = originalFileFormat!!,
             bytes = processMultiPartImage(fileItem),
-            parentPath = imagePath
         )
     }
 
@@ -99,20 +93,16 @@ object MultiPartProcessor {
     /**
      * Processes a form and saves the image file from the multipart data.
      * @param multipart The multipart data to process.
-     * @param path The path to save the multipart data to. Defaults to the resources directory.
      * For example, if the path is "items", the multipart data will be saved to src/main/resources/images/items.
      * @param serializer The serializer to use to deserialize the form data.
-     * @param imageName The name of the image file. If not provided, the original file name from the multipart
-     * data will be used.
-     * @return The form data and the path where the multipart data was saved.
+     * @return The form data and the path where the multipart data was saved. The Image portion of the
+     * result contains the original file name, the file format, and the bytes of the file.
      */
     suspend inline fun <reified T : Any> getDeserializedFormAndImageData(
         multipart: MultiPartData,
-        path: String,
         serializer: KSerializer<T>,
         json: Json = Json.Default,
         formItemExpectedName: String? = null,
-        imageName: String? = null
     ): MultiPartProcessResult<T, Image> =
         process(
             multipart = multipart,
@@ -122,18 +112,16 @@ object MultiPartProcessor {
                     formItemExpectedName ?: T::class.simpleName!!,
                     json,
                     serializer)},
-            handleFileData = { fileItem -> handleFileData(fileItem, imageName, path) }
+            handleFileData = { fileItem -> handleFileData(fileItem) }
         )
 
     suspend fun getImage(
-        multipart: MultiPartData,
-        imageName: String? = null,
-        path : String = ""
+        multipart: MultiPartData
     ): Image? {
         val result = process(
             multipart = multipart,
             handleFormItemData = { throw IllegalArgumentException("No form data expected.") },
-            handleFileData = { fileItem -> handleFileData(fileItem, imageName, path) }
+            handleFileData = { fileItem -> handleFileData(fileItem) }
         )
         return result.fileItemData
     }

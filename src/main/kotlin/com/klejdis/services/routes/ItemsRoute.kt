@@ -2,23 +2,24 @@ package com.klejdis.services.routes
 
 import com.klejdis.services.extensions.executeWithExceptionHandling
 import com.klejdis.services.services.ItemService
-import com.klejdis.services.util.FileOperations
+import com.klejdis.services.storage.ItemImageStorage
 import io.ktor.http.*
 import io.ktor.server.http.content.*
 import io.ktor.server.request.*
 import io.ktor.server.response.*
 import io.ktor.server.routing.*
 import io.ktor.util.*
-import java.io.File
 
-const val ITEM_IMAGES_ENDPOINT = "items/image"
+const val ITEM_IMAGES_ENDPOINT = "items/images"
 
 fun Route.itemsRoute(){
     route("/items"){
-        staticFiles("/images", File("${FileOperations.IMAGE_DIR}/item")) {
-            this.modify{ resource, call ->
+        staticFiles("/images", ItemImageStorage.getPathAsFile()) {
+            modify{ resource, call ->
                 if(resource.name == "default.jpg") return@modify
                 val itemService = call.getScopedService<ItemService>()
+
+                //the item may exist, but it may not belong to the user that requested it, so we need to check
                 itemService.get(resource.name) ?: call.respond(HttpStatusCode.NotFound, "Item not found")
             }
         }

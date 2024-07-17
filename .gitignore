@@ -1,6 +1,8 @@
 .gradle
 build/
 docs/
+/uploads/images/
+!uploads/images/item/default.jpg
 **/documentation
 .env
 **.pem
