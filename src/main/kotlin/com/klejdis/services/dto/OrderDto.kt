@@ -147,7 +147,6 @@ data class OrderCreationItemDto(
 )
 
 class OrderMapper(
-    private val itemMapper: ItemMapper,
     private val customerMapper: CustomerMapper
 ) {
     fun toOrderDto(order: Order): OrderDto {
@@ -158,7 +157,7 @@ class OrderMapper(
             total = order.total,
             items = order.items.map {
                 OrderItemDto(
-                    item = itemMapper.toItemDto(it.item),
+                    item = ItemDto.fromEntity(it.item),
                     quantity = it.quantity
                 )
             }

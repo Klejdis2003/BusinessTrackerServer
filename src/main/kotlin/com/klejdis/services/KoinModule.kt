@@ -43,7 +43,7 @@ val appModule = module {
     //mappers
     single<BusinessMapper> { BusinessMapper() }
     single<CustomerMapper> { CustomerMapper() }
-    single<OrderMapper> { OrderMapper(get(), get()) }
+    single<OrderMapper> { OrderMapper(get()) }
 
     single<OAuthenticationService> {
         OAuthenticationServiceImpl(get())
@@ -60,7 +60,7 @@ val businessServicesModule = module {
         }
         scoped<BusinessService> {
             (loggedInEmail: String) ->
-            BusinessService(get(), get(), get(), get(), get(), loggedInEmail)
+            BusinessService(get(), get(), get(), get(), loggedInEmail)
         }
 
         scoped<ExpenseService> {
