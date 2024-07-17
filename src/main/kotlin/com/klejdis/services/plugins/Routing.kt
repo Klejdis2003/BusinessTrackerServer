@@ -4,9 +4,12 @@ import com.klejdis.services.URL_PORT
 import com.klejdis.services.URL_PROTOCOL
 import com.klejdis.services.model.Session
 import com.klejdis.services.routes.*
+import com.klejdis.services.util.FileOperations
 import io.ktor.http.*
 import io.ktor.server.application.*
 import io.ktor.server.http.content.*
+import io.ktor.server.plugins.openapi.*
+import io.ktor.server.plugins.swagger.*
 import io.ktor.server.request.*
 import io.ktor.server.response.*
 import io.ktor.server.routing.*
@@ -29,8 +32,8 @@ fun Application.configureRouting() {
         currencyRoutes()
         staticFiles(remotePath = "/code_documentation", File("src/main/resources/documentation/code"))
         staticFiles(remotePath = DEFAULT_IMAGES_ENDPOINT, File("uploads/images"))
-//        openAPI(path = "openapi", swaggerFile = getResourceFullPath("openapi/documentation.yaml"))
-//        swaggerUI(path="swagger", swaggerFile = getResourceFullPath("openapi/documentation.yaml"))
+        openAPI(path = "openapi", swaggerFile = FileOperations.getResourceAsRelativePath("openapi/documentation.yaml"))
+        swaggerUI(path="swagger", swaggerFile = FileOperations.getResourceAsRelativePath("openapi/documentation.yaml"))
     }
 }
 

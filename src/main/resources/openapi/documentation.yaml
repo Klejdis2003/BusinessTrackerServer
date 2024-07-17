@@ -9,6 +9,123 @@ paths:
   /:
     get:
       description: ""
+  /analytics:
+    get:
+      description: ""
+      parameters:
+      - name: "startDate"
+        in: "query"
+        required: false
+        schema:
+          type: "string"
+      - name: "endDate"
+        in: "query"
+        required: false
+        schema:
+          type: "string"
+      responses:
+        "302":
+          description: "Found <br> Redirect"
+          content:
+            text/plain:
+              schema:
+                type: "string"
+              examples:
+                Example#1:
+                  value: ""
+        "404":
+          description: "Not Found"
+          content:
+            '*/*':
+              schema:
+                type: "string"
+        "409":
+          description: "Conflict"
+          content:
+            '*/*':
+              schema:
+                type: "string"
+        "400":
+          description: "Bad Request"
+          content:
+            '*/*':
+              schema:
+                type: "string"
+        "500":
+          description: "Internal Server Error"
+          content:
+            '*/*':
+              schema:
+                type: "string"
+              examples:
+                Example#1:
+                  value: "An unexpected error occurred."
+        "200":
+          description: "OK"
+          content:
+            '*/*':
+              schema: {}
+  /analytics/topCustomers:
+    get:
+      description: ""
+      parameters:
+      - name: "startDate"
+        in: "query"
+        required: false
+        schema:
+          type: "string"
+      - name: "endDate"
+        in: "query"
+        required: false
+        schema:
+          type: "string"
+      - name: "limit"
+        in: "query"
+        required: false
+        schema:
+          type: "integer"
+      responses:
+        "302":
+          description: "Found <br> Redirect"
+          content:
+            text/plain:
+              schema:
+                type: "string"
+              examples:
+                Example#1:
+                  value: ""
+        "404":
+          description: "Not Found"
+          content:
+            '*/*':
+              schema:
+                type: "string"
+        "409":
+          description: "Conflict"
+          content:
+            '*/*':
+              schema:
+                type: "string"
+        "400":
+          description: "Bad Request"
+          content:
+            '*/*':
+              schema:
+                type: "string"
+        "500":
+          description: "Internal Server Error"
+          content:
+            '*/*':
+              schema:
+                type: "string"
+              examples:
+                Example#1:
+                  value: "An unexpected error occurred."
+        "200":
+          description: "OK"
+          content:
+            '*/*':
+              schema: {}
   /callback:
     get:
       description: ""
@@ -23,6 +140,57 @@ paths:
                 Example#1:
                   description: ""
                   value: "/orders"
+  /currencies:
+    get:
+      description: ""
+      parameters:
+      - name: "query"
+        in: "query"
+        required: false
+        schema:
+          type: "string"
+      responses:
+        "404":
+          description: "Not Found"
+          content:
+            '*/*':
+              schema:
+                type: "string"
+        "409":
+          description: "Conflict"
+          content:
+            '*/*':
+              schema:
+                type: "string"
+        "302":
+          description: "Found <br> Redirect"
+          content:
+            text/plain:
+              schema:
+                type: "string"
+              examples:
+                Example#1:
+                  value: ""
+        "400":
+          description: "Bad Request"
+          content:
+            '*/*':
+              schema:
+                type: "string"
+        "500":
+          description: "Internal Server Error"
+          content:
+            '*/*':
+              schema:
+                type: "string"
+              examples:
+                Example#1:
+                  value: "An unexpected error occurred."
+        "200":
+          description: "OK"
+          content:
+            '*/*':
+              schema: {}
   /customers:
     get:
       description: ""
@@ -33,14 +201,41 @@ paths:
             text/plain:
               schema:
                 type: "string"
+              examples:
+                Example#1:
+                  value: ""
+        "404":
+          description: "Not Found"
+          content:
+            '*/*':
+              schema:
+                type: "string"
+        "409":
+          description: "Conflict"
+          content:
+            '*/*':
+              schema:
+                type: "string"
+        "400":
+          description: "Bad Request"
+          content:
+            '*/*':
+              schema:
+                type: "string"
+        "500":
+          description: "Internal Server Error"
+          content:
+            '*/*':
+              schema:
+                type: "string"
+              examples:
+                Example#1:
+                  value: "An unexpected error occurred."
         "200":
           description: "OK"
           content:
             '*/*':
-              schema:
-                type: "array"
-                items:
-                  $ref: "#/components/schemas/CustomerDto"
+              schema: {}
   /expenses:
     get:
       description: ""
@@ -51,6 +246,36 @@ paths:
             text/plain:
               schema:
                 type: "string"
+              examples:
+                Example#1:
+                  value: ""
+        "404":
+          description: "Not Found"
+          content:
+            '*/*':
+              schema:
+                type: "string"
+        "409":
+          description: "Conflict"
+          content:
+            '*/*':
+              schema:
+                type: "string"
+        "400":
+          description: "Bad Request"
+          content:
+            '*/*':
+              schema:
+                type: "string"
+        "500":
+          description: "Internal Server Error"
+          content:
+            '*/*':
+              schema:
+                type: "string"
+              examples:
+                Example#1:
+                  value: "An unexpected error occurred."
         "200":
           description: "OK"
           content:
@@ -74,13 +299,43 @@ paths:
             text/plain:
               schema:
                 type: "string"
+              examples:
+                Example#1:
+                  value: ""
+        "404":
+          description: "Not Found"
+          content:
+            '*/*':
+              schema:
+                type: "string"
+        "409":
+          description: "Conflict"
+          content:
+            '*/*':
+              schema:
+                type: "string"
+        "400":
+          description: "Bad Request"
+          content:
+            '*/*':
+              schema:
+                type: "string"
+        "500":
+          description: "Internal Server Error"
+          content:
+            '*/*':
+              schema:
+                type: "string"
+              examples:
+                Example#1:
+                  value: "An unexpected error occurred."
         "201":
           description: "Created"
           content:
             '*/*':
               schema:
                 $ref: "#/components/schemas/ExpenseDto"
-  /login:
+  /items:
     get:
       description: ""
       responses:
@@ -92,7 +347,239 @@ paths:
                 type: "string"
               examples:
                 Example#1:
-                  value: "/loginRedirect"
+                  value: ""
+        "404":
+          description: "Not Found"
+          content:
+            '*/*':
+              schema:
+                type: "string"
+        "409":
+          description: "Conflict"
+          content:
+            '*/*':
+              schema:
+                type: "string"
+        "400":
+          description: "Bad Request"
+          content:
+            '*/*':
+              schema:
+                type: "string"
+        "500":
+          description: "Internal Server Error"
+          content:
+            '*/*':
+              schema:
+                type: "string"
+              examples:
+                Example#1:
+                  value: "An unexpected error occurred."
+        "200":
+          description: "OK"
+          content:
+            '*/*':
+              schema:
+                type: "array"
+                items:
+                  $ref: "#/components/schemas/ItemDto"
+    post:
+      description: ""
+      responses:
+        "302":
+          description: "Found <br> Redirect"
+          content:
+            text/plain:
+              schema:
+                type: "string"
+              examples:
+                Example#1:
+                  value: ""
+        "404":
+          description: "Not Found"
+          content:
+            '*/*':
+              schema:
+                type: "string"
+        "409":
+          description: "Conflict"
+          content:
+            '*/*':
+              schema:
+                type: "string"
+        "400":
+          description: "Bad Request"
+          content:
+            '*/*':
+              schema:
+                type: "string"
+        "500":
+          description: "Internal Server Error"
+          content:
+            '*/*':
+              schema:
+                type: "string"
+              examples:
+                Example#1:
+                  value: "An unexpected error occurred."
+        "201":
+          description: "Created"
+          content:
+            '*/*':
+              schema:
+                $ref: "#/components/schemas/ItemDto"
+  /items/{id}:
+    delete:
+      description: ""
+      parameters:
+      - name: "id"
+        in: "path"
+        required: true
+        schema:
+          type: "integer"
+      responses:
+        "302":
+          description: "Found <br> Redirect"
+          content:
+            text/plain:
+              schema:
+                type: "string"
+              examples:
+                Example#1:
+                  value: ""
+        "404":
+          description: "Not Found"
+          content:
+            '*/*':
+              schema:
+                type: "string"
+        "409":
+          description: "Conflict"
+          content:
+            '*/*':
+              schema:
+                type: "string"
+        "400":
+          description: "Bad Request"
+          content:
+            '*/*':
+              schema:
+                type: "string"
+        "500":
+          description: "Internal Server Error"
+          content:
+            '*/*':
+              schema:
+                type: "string"
+              examples:
+                Example#1:
+                  value: "An unexpected error occurred."
+        "200":
+          description: "OK"
+          content:
+            '*/*':
+              schema:
+                type: "object"
+    get:
+      description: ""
+      parameters:
+      - name: "id"
+        in: "path"
+        required: true
+        schema:
+          type: "string"
+      responses:
+        "302":
+          description: "Found <br> Redirect"
+          content:
+            text/plain:
+              schema:
+                type: "string"
+        "404":
+          description: "Not Found"
+          content:
+            '*/*':
+              schema:
+                type: "string"
+              examples:
+                Example#1:
+                  value: "Item not found"
+        "200":
+          description: "OK"
+          content:
+            '*/*':
+              schema:
+                $ref: "#/components/schemas/Object"
+    put:
+      description: ""
+      parameters:
+      - name: "id"
+        in: "path"
+        required: true
+        schema:
+          type: "integer"
+      responses:
+        "404":
+          description: "Not Found"
+          content:
+            '*/*':
+              schema:
+                type: "string"
+        "409":
+          description: "Conflict"
+          content:
+            '*/*':
+              schema:
+                type: "string"
+        "302":
+          description: "Found <br> Redirect"
+          content:
+            text/plain:
+              schema:
+                type: "string"
+              examples:
+                Example#1:
+                  value: ""
+        "400":
+          description: "Bad Request"
+          content:
+            '*/*':
+              schema:
+                type: "string"
+        "500":
+          description: "Internal Server Error"
+          content:
+            '*/*':
+              schema:
+                type: "string"
+              examples:
+                Example#1:
+                  value: "An unexpected error occurred."
+        "200":
+          description: "OK"
+          content:
+            '*/*':
+              schema:
+                $ref: "#/components/schemas/ItemDto"
+  /login:
+    get:
+      description: ""
+      parameters:
+      - name: "redirectUrl"
+        in: "query"
+        required: false
+        schema:
+          type: "string"
+      responses:
+        "302":
+          description: "Found <br> Redirect"
+          content:
+            text/plain:
+              schema:
+                type: "string"
+              examples:
+                Example#1:
+                  value: ""
                 Example#2:
                   description: ""
                   value: "/orders"
@@ -113,12 +600,42 @@ paths:
     get:
       description: ""
       responses:
+        "404":
+          description: "Not Found"
+          content:
+            '*/*':
+              schema:
+                type: "string"
+        "409":
+          description: "Conflict"
+          content:
+            '*/*':
+              schema:
+                type: "string"
         "302":
           description: "Found <br> Redirect"
           content:
             text/plain:
               schema:
                 type: "string"
+              examples:
+                Example#1:
+                  value: ""
+        "400":
+          description: "Bad Request"
+          content:
+            '*/*':
+              schema:
+                type: "string"
+        "500":
+          description: "Internal Server Error"
+          content:
+            '*/*':
+              schema:
+                type: "string"
+              examples:
+                Example#1:
+                  value: "An unexpected error occurred."
         "200":
           description: "OK"
           content:
@@ -136,12 +653,42 @@ paths:
               $ref: "#/components/schemas/OrderCreationDto"
         required: true
       responses:
+        "404":
+          description: "Not Found"
+          content:
+            '*/*':
+              schema:
+                type: "string"
+        "409":
+          description: "Conflict"
+          content:
+            '*/*':
+              schema:
+                type: "string"
         "302":
           description: "Found <br> Redirect"
           content:
             text/plain:
               schema:
                 type: "string"
+              examples:
+                Example#1:
+                  value: ""
+        "400":
+          description: "Bad Request"
+          content:
+            '*/*':
+              schema:
+                type: "string"
+        "500":
+          description: "Internal Server Error"
+          content:
+            '*/*':
+              schema:
+                type: "string"
+              examples:
+                Example#1:
+                  value: "An unexpected error occurred."
         "200":
           description: "OK"
           content:
@@ -189,18 +736,6 @@ paths:
     get:
       description: ""
       responses:
-        "302":
-          description: "Found <br> Redirect"
-          content:
-            text/plain:
-              schema:
-                type: "string"
-        "200":
-          description: "OK"
-          content:
-            '*/*':
-              schema:
-                $ref: "#/components/schemas/OrderDto"
         "404":
           description: "Not Found"
           content:
@@ -210,21 +745,47 @@ paths:
               examples:
                 Example#1:
                   value: "Your business does not have any orders"
+        "409":
+          description: "Conflict"
+          content:
+            '*/*':
+              schema:
+                type: "string"
+        "302":
+          description: "Found <br> Redirect"
+          content:
+            text/plain:
+              schema:
+                type: "string"
+              examples:
+                Example#1:
+                  value: ""
+        "400":
+          description: "Bad Request"
+          content:
+            '*/*':
+              schema:
+                type: "string"
+        "500":
+          description: "Internal Server Error"
+          content:
+            '*/*':
+              schema:
+                type: "string"
+              examples:
+                Example#1:
+                  value: "An unexpected error occurred."
+        "200":
+          description: "OK"
+          content:
+            '*/*':
+              schema:
+                $ref: "#/components/schemas/Function1_? super OrderDto"
 components:
   schemas:
     Function1:
       type: "object"
       properties: {}
-    CustomerDto:
-      type: "object"
-      properties:
-        phone:
-          type: "string"
-        name:
-          type: "string"
-      required:
-      - "phone"
-      - "name"
     CurrencyDto:
       type: "object"
       properties:
@@ -305,12 +866,28 @@ components:
           format: "int32"
         currency:
           $ref: "#/components/schemas/CurrencyDto"
+        imageUrl:
+          type: "string"
         type:
           $ref: "#/components/schemas/ItemTypeDto"
       required:
       - "name"
       - "currency"
+      - "imageUrl"
       - "type"
+    Object:
+      type: "object"
+      properties: {}
+    CustomerDto:
+      type: "object"
+      properties:
+        phone:
+          type: "string"
+        name:
+          type: "string"
+      required:
+      - "phone"
+      - "name"
     OrderItemDto:
       type: "object"
       properties:
@@ -373,3 +950,5 @@ components:
       - "customer"
       - "items"
       - "date"
+    Function1_? super OrderDto:
+      type: "object"

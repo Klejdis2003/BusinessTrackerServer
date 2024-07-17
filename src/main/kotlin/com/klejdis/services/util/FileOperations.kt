@@ -14,7 +14,8 @@ object FileOperations {
 
     fun getResourceAsRelativePath(filePath: String): String {
         val loader = Thread.currentThread().contextClassLoader
-        val resourcePath = loader.getResource("")?.path + filePath
+        val resourcePath = loader.getResource(filePath)?.path
+            ?: throw IllegalArgumentException("Resource file not found: $filePath")
         return resourcePath
     }
 
