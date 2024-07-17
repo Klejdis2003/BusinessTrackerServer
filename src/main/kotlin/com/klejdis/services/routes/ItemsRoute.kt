@@ -10,20 +10,13 @@ import io.ktor.server.response.*
 import io.ktor.server.routing.*
 import io.ktor.util.*
 
-const val ITEM_IMAGES_ENDPOINT = "items/images"
+object ItemsRouteConstants {
+    const val ROUTE = "/items"
+    const val IMAGES_ROUTE = "$ROUTE/images"
+}
 
 fun Route.itemsRoute(){
     route("/items"){
-        staticFiles("/images", ItemImageStorage.getPathAsFile()) {
-            modify{ resource, call ->
-                if(resource.name == "default.jpg") return@modify
-                val itemService = call.getScopedService<ItemService>()
-
-                //the item may exist, but it may not belong to the user that requested it, so we need to check
-                itemService.get(resource.name) ?: call.respond(HttpStatusCode.NotFound, "Item not found")
-            }
-        }
-
         get{
             val itemService = call.getScopedService<ItemService>()
 
@@ -63,6 +56,15 @@ fun Route.itemsRoute(){
                 itemService.delete(id)
                 call.respond(HttpStatusCode.OK)
             }
+        }
+    }
+    staticFiles(ItemsRouteConstants.IMAGES_ROUTE, ItemImageStorage.getPathAsFile()) {
+        modify{ resource, call ->
+            if(resource.name == "default.jpg") return@modify
+            val itemService = call.getScopedService<ItemService>()
+
+            //the item may exist, but it may not belong to the user that requested it, so we need to check
+            itemService.get(resource.name) ?: call.respond(HttpStatusCode.NotFound, "Item not found")
         }
     }
 }

@@ -16,6 +16,7 @@ import java.io.File
 import java.time.ZonedDateTime
 
 const val HOME_ROUTE = "/orders"
+const val DEFAULT_IMAGES_ENDPOINT = "/images"
 
 fun Application.configureRouting() {
     routing {
@@ -26,8 +27,8 @@ fun Application.configureRouting() {
         analyticsRoute()
         itemsRoute()
         currencyRoutes()
-
         staticFiles(remotePath = "/code_documentation", File("src/main/resources/documentation/code"))
+        staticFiles(remotePath = DEFAULT_IMAGES_ENDPOINT, File("uploads/images"))
 //        openAPI(path = "openapi", swaggerFile = getResourceFullPath("openapi/documentation.yaml"))
 //        swaggerUI(path="swagger", swaggerFile = getResourceFullPath("openapi/documentation.yaml"))
     }

@@ -20,6 +20,7 @@ import com.klejdis.services.util.DatePeriod
 class AnalyticsService(
     private val orderRepository: OrderRepository,
     private val expenseRepository: ExpenseRepository,
+    private val itemMapper: ItemMapper,
     private val loggedInEmail: String
 ) {
 
@@ -135,7 +136,7 @@ class AnalyticsService(
             .take(adjustedLimit)
             .map {
                 MostPopularItemDto(
-                    ItemDto.fromEntity(it.key),
+                    itemMapper.toItemDto(it.key),
                     it.value
                 )
             }
@@ -162,7 +163,7 @@ class AnalyticsService(
             .take(adjustedLimit)
             .map {
                 MostProfitableItemDto(
-                    ItemDto.fromEntity(it.key),
+                    itemMapper.toItemDto(it.key),
                     it.value
                 )
             }

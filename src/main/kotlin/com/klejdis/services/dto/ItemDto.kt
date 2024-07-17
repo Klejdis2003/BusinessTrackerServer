@@ -1,11 +1,18 @@
 package com.klejdis.services.dto
 
-import com.klejdis.services.APPLICATION_DOMAIN
 import com.klejdis.services.model.Item
 import com.klejdis.services.model.ItemType
-import com.klejdis.services.routes.ITEM_IMAGES_ENDPOINT
+import com.klejdis.services.storage.ItemImageStorage
 import kotlinx.serialization.Serializable
 import java.util.*
+
+class ItemMapper(private val imageLinkMapper: ImageLinkMapper) {
+    fun toItemDto(item: Item): ItemDto {
+        val fullPath = ItemImageStorage.getFullPathOf(item.imageFilename)
+        val imageUrl = imageLinkMapper.mapPathToLink(fullPath)
+        return ItemDto.fromEntity(item, imageUrl)
+    }
+}
 
 @Serializable
 data class ItemDto(
@@ -18,7 +25,7 @@ data class ItemDto(
     val type: ItemTypeDto
 ) {
     companion object {
-        fun fromEntity(item: Item): ItemDto {
+        fun fromEntity(item: Item, imageUrl: String): ItemDto {
             return ItemDto(
                 id = item.id,
                 name = item.name,
@@ -30,8 +37,7 @@ data class ItemDto(
                     name = item.type.name,
                     description = item.type.description
                 ),
-                imageUrl = item.imageFilename?.let {"$APPLICATION_DOMAIN/${ITEM_IMAGES_ENDPOINT}/${item.imageFilename}"}
-                    ?: "$APPLICATION_DOMAIN/${ITEM_IMAGES_ENDPOINT}/default.jpg"
+                imageUrl = imageUrl
             )
         }
     }

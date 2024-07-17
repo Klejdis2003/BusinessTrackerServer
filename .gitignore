@@ -2,7 +2,7 @@
 build/
 docs/
 /uploads/images/
-!uploads/images/item/default.jpg
+!uploads/images/default.jpg
 **/documentation
 .env
 **.pem

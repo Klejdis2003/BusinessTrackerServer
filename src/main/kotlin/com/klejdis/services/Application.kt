@@ -15,6 +15,10 @@ val URL_PROTOCOL = when(MODE) {
     Mode.DEV -> URLProtocol.HTTPS
     Mode.PROD -> URLProtocol.HTTP
 }
+
+/**
+ * The base URL of the application. It is used to generate links to the application.
+ */
 val APPLICATION_DOMAIN = System.getenv("APPLICATION_DOMAIN") ?: "https://localhost:8443"
 val SSL_PORT = System.getenv("SSL_PORT")?.toInt() ?: 8443
 val URL_PORT = System.getenv("PORT")?.toInt() ?: SSL_PORT

@@ -4,6 +4,56 @@ import com.klejdis.services.model.*
 import kotlinx.serialization.Serializable
 import java.time.LocalDate
 
+class OrderMapper(
+    private val customerMapper: CustomerMapper,
+    private val itemMapper : ItemMapper
+) {
+    fun toOrderDto(order: Order): OrderDto {
+        return OrderDto(
+            id = order.id,
+            date = order.date.toString(),
+            customer = customerMapper.toCustomerDto(order.customer),
+            total = order.total,
+            items = order.items.map {
+                OrderItemDto(
+                    item = itemMapper.toItemDto(it.item),
+                    quantity = it.quantity
+                )
+            }
+        )
+    }
+
+
+    fun toEntity(dto: OrderCreationDto, business: Business): Order {
+        return Order {
+            this.date = LocalDate.parse(dto.date)
+            this.items = dto.items.map {
+                OrderItem(
+                    item = Item{ id = it.itemId },
+                    quantity = it.quantity
+                )
+            }
+            this.customer = CustomerDto.toEntity(dto.customer)
+            this.business = business
+        }
+    }
+
+    fun toEntity(dto: OrderDto, business: Business): Order {
+        return Order {
+            this.id = dto.id
+            this.date = LocalDate.parse(dto.date)
+            this.items = dto.items.map {
+                OrderItem(
+                    item = Item{ id = it.item.id },
+                    quantity = it.quantity
+                )
+            }
+            this.customer = customerMapper.toEntity(dto.customer)
+            this.business = business
+        }
+    }
+}
+
 /**
  * Represents an order.
  * @param id The id of the order
@@ -22,41 +72,7 @@ data class OrderDto(
     val items: List<OrderItemDto>,
     val total: Int,
     val business: Business? = null
-) {
-    companion object : Mappable<Order, OrderDto>{
-        override fun fromEntity(entity: Order): OrderDto {
-            return OrderDto(
-                id = entity.id,
-                date = entity.date.toString(),
-                customer = CustomerDto.fromEntity(entity.customer),
-                items = entity.items.map {
-                    OrderItemDto(
-                        item = ItemDto.fromEntity(it.item),
-                        quantity = it.quantity
-                    )
-                },
-                total = entity.total
-            )
-        }
-
-        override fun toEntity(dto: OrderDto): Order {
-            if(dto.business == null) throw IllegalArgumentException("Business must be provided, but was null.")
-            return Order {
-                this.id = dto.id
-                this.date = LocalDate.parse(dto.date)
-                this.items = dto.items.map {
-                    OrderItem(
-                        item = Item{ id = it.item.id },
-                        quantity = it.quantity
-                    )
-                }
-                this.customer = CustomerDto.toEntity(dto.customer)
-                this.business = dto.business
-            }
-
-        }
-    }
-}
+)
 
 /**
  * Represents the data needed to create an order.
@@ -146,52 +162,3 @@ data class OrderCreationItemDto(
     val quantity: Int
 )
 
-class OrderMapper(
-    private val customerMapper: CustomerMapper
-) {
-    fun toOrderDto(order: Order): OrderDto {
-        return OrderDto(
-            id = order.id,
-            date = order.date.toString(),
-            customer = customerMapper.toCustomerDto(order.customer),
-            total = order.total,
-            items = order.items.map {
-                OrderItemDto(
-                    item = ItemDto.fromEntity(it.item),
-                    quantity = it.quantity
-                )
-            }
-        )
-    }
-
-
-    fun toEntity(dto: OrderCreationDto, business: Business): Order {
-        return Order {
-            this.date = LocalDate.parse(dto.date)
-            this.items = dto.items.map {
-                OrderItem(
-                    item = Item{ id = it.itemId },
-                    quantity = it.quantity
-                )
-            }
-            this.customer = CustomerDto.toEntity(dto.customer)
-            this.business = business
-        }
-    }
-
-    fun toEntity(dto: OrderDto, business: Business): Order {
-        return Order {
-            this.id = dto.id
-            this.date = LocalDate.parse(dto.date)
-            this.items = dto.items.map {
-                OrderItem(
-                    item = Item{ id = it.item.id },
-                    quantity = it.quantity
-                )
-            }
-            this.customer = customerMapper.toEntity(dto.customer)
-            this.business = business
-        }
-    }
-
-}

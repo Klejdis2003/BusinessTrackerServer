@@ -50,6 +50,8 @@ sealed class Path {
      */
     fun toFile() = File(value)
 
+    override fun toString() = value
+
     fun isParentPathOf(path: Path): Boolean {
         return path.value.startsWith(value)
     }

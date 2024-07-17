@@ -2,11 +2,10 @@ package com.klejdis.services
 
 
 import com.klejdis.services.config.postgresDatabase
-import com.klejdis.services.dto.BusinessMapper
-import com.klejdis.services.dto.CustomerMapper
-import com.klejdis.services.dto.OrderMapper
+import com.klejdis.services.dto.*
 import com.klejdis.services.model.Session
 import com.klejdis.services.repositories.*
+import com.klejdis.services.routes.ItemsRouteConstants
 import com.klejdis.services.services.*
 import io.ktor.client.*
 import io.ktor.client.engine.cio.*
@@ -43,7 +42,8 @@ val appModule = module {
     //mappers
     single<BusinessMapper> { BusinessMapper() }
     single<CustomerMapper> { CustomerMapper() }
-    single<OrderMapper> { OrderMapper(get()) }
+    single<OrderMapper> { OrderMapper(get(), get()) }
+    single<ItemMapper> { ItemMapper(ImageLinkMapper(ItemsRouteConstants.IMAGES_ROUTE)) }
 
     single<OAuthenticationService> {
         OAuthenticationServiceImpl(get())
@@ -60,7 +60,7 @@ val businessServicesModule = module {
         }
         scoped<BusinessService> {
             (loggedInEmail: String) ->
-            BusinessService(get(), get(), get(), get(), loggedInEmail)
+            BusinessService(get(), get(), get(), get(), get(), loggedInEmail)
         }
 
         scoped<ExpenseService> {
@@ -72,11 +72,11 @@ val businessServicesModule = module {
         }
 
         scoped<AnalyticsService> { (loggedInEmail: String) ->
-            AnalyticsService(get(), get(), loggedInEmail)
+            AnalyticsService(get(), get(), get(), loggedInEmail)
         }
 
         scoped<ItemService> { (loggedInEmail: String) ->
-            ItemService(get(), get(), loggedInEmail)
+            ItemService(get(), get(), get(), loggedInEmail)
         }
     }
 }

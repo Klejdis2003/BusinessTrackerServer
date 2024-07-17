@@ -2,6 +2,7 @@ package com.klejdis.services.services
 
 import com.klejdis.services.dto.ItemCreationDto
 import com.klejdis.services.dto.ItemDto
+import com.klejdis.services.dto.ItemMapper
 import com.klejdis.services.filters.Filter
 import com.klejdis.services.model.Item
 import com.klejdis.services.repositories.BusinessRepository
@@ -14,6 +15,7 @@ import io.ktor.http.content.*
 class ItemService(
     private val itemRepository: ItemRepository,
     private val businessRepository: BusinessRepository,
+    private val itemMapper: ItemMapper,
     loggedInEmail: String
 ) : Service<Item>(
     entityName = "Item",
@@ -21,8 +23,8 @@ class ItemService(
 ) {
     suspend fun getAll(filters: Iterable<Filter>) =
         itemRepository
-            .getByBusinessOwnerEmail(loggedInEmail, filters)
-            .map { ItemDto.fromEntity(it) }
+            .getAll(filters)
+            .map { itemMapper.toItemDto(it) }
 
     suspend fun get(id: Int) =
         itemRepository
@@ -31,7 +33,7 @@ class ItemService(
                 println(it?.business ?: "No business found")
                 it?.business?.ownerEmail == loggedInEmail
             }
-            ?.let { ItemDto.fromEntity(it) }
+            ?.let { itemMapper.toItemDto(it) }
 
     suspend fun get(filename: String) =
         itemRepository
@@ -39,13 +41,13 @@ class ItemService(
             .takeIf {
                 it?.business?.ownerEmail == loggedInEmail
             }
-            ?.let { ItemDto.fromEntity(it) }
+            ?.let { itemMapper.toItemDto(it) }
     suspend fun create(item: ItemCreationDto): ItemDto{
         val business = businessRepository.getByEmail(loggedInEmail) ?: throw EntityNotFoundException("Business not found")
         val createdItem = executeCreateBlockWithErrorHandling {
             itemRepository.create(ItemCreationDto.toEntity(item).apply { this.business = business })
         }
-        return ItemDto.fromEntity(createdItem)
+        return itemMapper.toItemDto(createdItem)
     }
 
     suspend fun create(multiPartData: MultiPartData): ItemDto {
@@ -64,7 +66,7 @@ class ItemService(
         val createdItem = executeCreateBlockWithErrorHandling { itemRepository.create(item) }
         ItemImageStorage.save(image, generateRandomFilename = false)
 
-        return ItemDto.fromEntity(createdItem)
+        return itemMapper.toItemDto(createdItem)
     }
 
     suspend fun updateImage(itemId: Int, multiPartData: MultiPartData): ItemDto {
@@ -73,7 +75,7 @@ class ItemService(
         val image = MultiPartProcessor.getImage(multiPartData) ?: throw IllegalArgumentException("Image not found")
         val updatedItem = executeUpdateBlock { itemRepository.update(item) }
         ItemImageStorage.update(image)
-        return ItemDto.fromEntity(updatedItem)
+        return itemMapper.toItemDto(updatedItem)
     }
 
     suspend fun delete(id: Int){

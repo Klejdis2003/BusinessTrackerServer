@@ -42,13 +42,17 @@ open class ImageStorage (path: Path): LocalStorage<Image>(path) {
         return directory.deleteRecursively()
     }
 
-    fun clearAll(exceptions: Set<String>) {
-        val directory = path.toFile()
-        directory.walk().forEach {
-            if(it.isFile && it.name !in exceptions) it.delete()
-        }
+    fun getFullPathOf(filename: String?): String? {
+        return filename?.let { "${path.value}/$it" }
     }
 
+    fun clearAll(exceptions: Collection<String>) {
+        val directory = path.toFile()
+        directory.walk().forEach {
+            if(it.isFile && exceptions.none { ex -> it.name.contains(ex) })
+                it.delete()
+        }
+    }
     fun getPathAsFile() = path.toFile()
     fun getPathAsString() = path.value
 }
