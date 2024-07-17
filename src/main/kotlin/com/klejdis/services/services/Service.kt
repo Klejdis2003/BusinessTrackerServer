@@ -1,6 +1,5 @@
 package com.klejdis.services.services
 
-import com.klejdis.services.util.FileOperations
 import com.klejdis.services.util.Image
 import com.klejdis.services.util.MultiPartProcessResult
 import com.klejdis.services.util.MultiPartProcessor
@@ -11,9 +10,6 @@ import org.koin.java.KoinJavaComponent.inject
 import org.ktorm.entity.Entity
 import org.postgresql.util.PSQLException
 import org.postgresql.util.PSQLState
-import java.io.File
-import java.time.LocalDateTime
-import java.time.format.DateTimeFormatter
 import java.util.*
 
 /**
@@ -87,29 +83,16 @@ abstract class Service<T : Entity<T>>(
 
     protected suspend inline fun<reified T: Any> deserializeFormAndSaveImage(
         multiPartData: MultiPartData,
-        path: String,
         serializer: KSerializer<T>,
         formItemExpectedName: String? = null,
-        imageName: String? = null
     ): MultiPartProcessResult<T, Image> {
         val deserializedFormAndImageData = MultiPartProcessor.getDeserializedFormAndImageData<T>(
             multiPartData,
-            path,
             serializer,
             json,
             formItemExpectedName,
-            imageName
         )
         return deserializedFormAndImageData
-    }
-
-    protected fun generateImageName(): String {
-        return "${LocalDateTime.now().format(DateTimeFormatter.ofPattern("yyyyMMddHHmmss"))}-${UUID.randomUUID()}"
-    }
-
-    protected fun deleteImageFile(fileName: String): Boolean{
-        val file = File("${FileOperations.IMAGE_DIR}/$imageStorePath/$fileName")
-        return file.delete()
     }
 }
 
@@ -175,10 +158,4 @@ class PSQLExceptionHandler {
     }
 
 
-}
-
-sealed class ImageUploadPath {
-    data object Item : ImageUploadPath()
-
-    val path: String get() = this::class.simpleName!!.lowercase()
 }
