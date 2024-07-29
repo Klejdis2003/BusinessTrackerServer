@@ -2,6 +2,7 @@ package com.klejdis.services.routes
 
 import com.klejdis.services.dto.ExpenseCreationDto
 import com.klejdis.services.extensions.executeWithExceptionHandling
+import com.klejdis.services.extensions.getScopedService
 import com.klejdis.services.filters.Filter
 import com.klejdis.services.services.ExpenseService
 import io.ktor.http.*

@@ -5,7 +5,7 @@ import io.ktor.server.auth.*
 import kotlinx.serialization.Serializable
 
 @Serializable
-data class Session(
+data class LoginSession(
     val id: String,
     val token: String,
     val creationTime: String = getZonedDateTimeNow().toString(),

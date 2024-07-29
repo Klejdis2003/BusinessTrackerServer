@@ -3,7 +3,7 @@ package com.klejdis.services
 
 import com.klejdis.services.config.postgresDatabase
 import com.klejdis.services.dto.*
-import com.klejdis.services.model.Session
+import com.klejdis.services.model.LoginSession
 import com.klejdis.services.repositories.*
 import com.klejdis.services.routes.ItemsRouteConstants
 import com.klejdis.services.services.*
@@ -54,7 +54,7 @@ val appModule = module {
 }
 
 val businessServicesModule = module {
-    scope<Session>{
+    scope<LoginSession>{
         scoped<OrderService> { (loggedInEmail: String) ->
             OrderService(get(), get(), get(), get(), loggedInEmail)
         }
@@ -82,7 +82,7 @@ val businessServicesModule = module {
 }
 
 fun startKoinBusinessScope(loggedInEmail: String) {
-    val scope = getKoin().getOrCreateScope<Session>(loggedInEmail)
+    val scope = getKoin().getOrCreateScope<LoginSession>(loggedInEmail)
 
     scope.get<BusinessService> { parametersOf(loggedInEmail) }
     scope.get<OrderService> { parametersOf(loggedInEmail) }
@@ -90,6 +90,11 @@ fun startKoinBusinessScope(loggedInEmail: String) {
     scope.get<CustomerService> { parametersOf(loggedInEmail) }
     scope.get<AnalyticsService> { parametersOf(loggedInEmail) }
     scope.get<ItemService> { parametersOf(loggedInEmail) }
+}
+
+inline fun<reified T> getScopedService(loggedInEmail: String): T {
+    val scope = getKoin().getOrCreateScope<LoginSession>(loggedInEmail)
+    return scope.get { parametersOf(loggedInEmail) }
 }
 
 fun endKoinBusinessScope(loggedInEmail: String) {

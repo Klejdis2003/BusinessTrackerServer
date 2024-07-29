@@ -1,9 +1,12 @@
 package com.klejdis.services.routes
 
 
+import com.klejdis.services.extensions.executeWithExceptionHandling
+import com.klejdis.services.extensions.getScopedService
 import com.klejdis.services.extensions.respondWithExceptionHandling
 import com.klejdis.services.services.AnalyticsService
 import com.klejdis.services.util.DatePeriod
+import io.ktor.server.response.*
 import io.ktor.server.routing.*
 
 fun Route.analyticsRoute() {
@@ -14,7 +17,9 @@ fun Route.analyticsRoute() {
             val endDate = call.parameters["endDate"]
             val datePeriod = DatePeriod.fromString(startDate, endDate)
 
-            call.respondWithExceptionHandling(analyticsService.getAnalytics(datePeriod))
+            call.executeWithExceptionHandling {
+                it.respond(analyticsService.getAnalytics(datePeriod))
+            }
         }
 
         get("/topCustomers") {

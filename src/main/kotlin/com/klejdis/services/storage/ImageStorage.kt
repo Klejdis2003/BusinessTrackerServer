@@ -18,26 +18,28 @@ open class ImageStorage (path: Path): LocalStorage<Image>(path) {
     init {
         require(path.isStrictSubPathOf(Path.Uploads.Images)) { "The path must be a parent of Item" }
     }
-    override fun save(item: Image, generateRandomFilename: Boolean): String {
+    override suspend fun save(item: Image, generateRandomFileName: Boolean): String {
         FileOperations.createDirectoryIfNotExists(path)
-        if(generateRandomFilename) item.name = generateImageName()
+        if(generateRandomFileName) item.name = generateImageName()
 
         val file = File(path.toFile(), item.getFullFileName())
         file.writeBytes(item.bytes)
         return file.path
     }
+    override suspend fun save(item: Image): String {
+        return save(item, true)
+    }
 
-    override fun update(item: Image){
+    override suspend fun update(item: Image){
         save(item, false)
     }
 
-
-    override fun delete(filename: String): Boolean {
+    override suspend fun delete(filename: String): Boolean {
         val file = File(path.toFile(), filename)
         return file.delete()
     }
 
-    override fun clearAll(): Boolean {
+    override suspend fun clearAll(): Boolean {
         val directory = path.toFile()
         return directory.deleteRecursively()
     }

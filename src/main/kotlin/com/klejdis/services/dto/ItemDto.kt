@@ -83,3 +83,9 @@ data class ItemTypeDto(
     val name: String,
     val description: String
 )
+
+@Serializable
+data class Image(
+    val url: String,
+    val fileExtension: String,
+)

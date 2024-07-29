@@ -1,6 +1,7 @@
 package com.klejdis.services.routes
 
 import com.klejdis.services.extensions.executeWithExceptionHandling
+import com.klejdis.services.extensions.getScopedService
 import com.klejdis.services.services.ItemService
 import com.klejdis.services.storage.ItemImageStorage
 import io.ktor.http.*
@@ -18,10 +19,9 @@ object ItemsRouteConstants {
 fun Route.itemsRoute(){
     route("/items"){
         get{
-            val itemService = call.getScopedService<ItemService>()
-
-            val filters = call.request.queryParameters.flattenEntries()
             call.executeWithExceptionHandling {
+                val itemService = call.getScopedService<ItemService>()
+                val filters = call.request.queryParameters.flattenEntries()
                 it.respond(itemService.getAll(filters))
             }
         }
@@ -67,4 +67,5 @@ fun Route.itemsRoute(){
             itemService.get(resource.name) ?: call.respond(HttpStatusCode.NotFound, "Item not found")
         }
     }
+
 }

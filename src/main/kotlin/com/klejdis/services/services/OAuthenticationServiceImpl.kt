@@ -1,12 +1,12 @@
 package com.klejdis.services.services
 
 import com.klejdis.services.endKoinBusinessScope
+import com.klejdis.services.getScopedService
 import com.klejdis.services.model.ProfileInfo
+import com.klejdis.services.plugins.LOGIN_SESSION_MAX_AGE_SECONDS
 import com.klejdis.services.plugins.OAUTH_DOMAIN
-import com.klejdis.services.plugins.SESSION_MAX_AGE_SECONDS
 import com.klejdis.services.printIfDebugMode
 import com.klejdis.services.request.OAuthTokenRevocationRequest
-import com.klejdis.services.routes.getScopedService
 import com.klejdis.services.startKoinBusinessScope
 import com.klejdis.services.util.BackgroundTasksUtil
 import com.klejdis.services.util.getZonedDateTimeNow
@@ -26,7 +26,7 @@ class OAuthenticationServiceImpl(
     private val tokenProfileInfoMap: MutableMap<String, ProfileInfo> = ConcurrentHashMap()
     private val authTokenToTokenResponseMap: MutableMap<String, OAuth2Response> = ConcurrentHashMap()
     private val authTokenToCreationTimeMap: MutableMap<String, ZonedDateTime> = ConcurrentHashMap()
-    private val job = invalidateExpiredSessions()
+    private val job = invalidateExpiredSessions() //storing it to ensure it is properly terminated when the service is destroyed
 
     init{
         job.start()
@@ -143,7 +143,7 @@ class OAuthenticationServiceImpl(
             println("Checking for expired tokens...")
             printIfDebugMode("Current tokens: $authTokenToCreationTimeMap")
             authTokenToCreationTimeMap.forEach { (token, creationTime) ->
-                if (getZonedDateTimeNow() > creationTime.plusSeconds(SESSION_MAX_AGE_SECONDS)) {
+                if (getZonedDateTimeNow() > creationTime.plusSeconds(LOGIN_SESSION_MAX_AGE_SECONDS)) {
                     println("Removing expired token for user ${tokenProfileInfoMap[token]?.email}")
                     logout(token)
                     removeFromCache(token)

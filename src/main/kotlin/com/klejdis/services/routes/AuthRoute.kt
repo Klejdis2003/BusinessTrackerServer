@@ -1,11 +1,16 @@
 package com.klejdis.services.routes
 
+import com.klejdis.services.extensions.getScopedService
+import com.klejdis.services.extensions.getSession
+import com.klejdis.services.model.LoginSession
 import com.klejdis.services.model.ProfileInfo
-import com.klejdis.services.model.Session
-import com.klejdis.services.plugins.*
+import com.klejdis.services.plugins.AuthMethod
+import com.klejdis.services.plugins.ContextSession
+import com.klejdis.services.plugins.OAUTH_DOMAIN
+import com.klejdis.services.plugins.redirects
 import com.klejdis.services.printIfDebugMode
 import com.klejdis.services.services.OAuthenticationService
-import com.klejdis.services.services.UnauthorizedException
+import com.klejdis.services.storage.InMemoryLoginSessionStorage
 import io.ktor.http.*
 import io.ktor.server.application.*
 import io.ktor.server.auth.*
@@ -13,9 +18,8 @@ import io.ktor.server.response.*
 import io.ktor.server.routing.*
 import io.ktor.server.sessions.*
 import io.ktor.server.util.*
-import org.koin.core.parameter.parametersOf
+import io.ktor.util.*
 import org.koin.ktor.ext.inject
-import org.koin.mp.KoinPlatform.getKoin
 import org.koin.ktor.ext.get as koinGet
 
 /**
@@ -27,11 +31,10 @@ import org.koin.ktor.ext.get as koinGet
  * - /login: Redirects the user to the OAuth provider's login page. If the user is already logged in, it redirects to the home page.
  * - /logout: Logs the user out and redirects to the OAuth provider's logout page.
  * @see getProfileInfoFromSession For more info on how the profile info is fetched
- * @see getScopedService For more info on how the service is fetched
+ * @see ApplicationCall.getScopedService For more info on how the service is fetched
  */
 fun Route.authRoute() {
     val authenticationService = koinGet<OAuthenticationService>()
-
     authenticate(AuthMethod.OAuth.provider) {
         get("/loginRedirect") {
             //Ktor automatically redirects to callback URL
@@ -39,27 +42,43 @@ fun Route.authRoute() {
 
         get("/callback") {
             val currentPrincipal: OAuthAccessTokenResponse.OAuth2? = call.principal()
+            val loginMethod = call.sessions.get<ContextSession>()?.loginMethod ?: call.respond("No login method provided.")
+            call.sessions.clear<ContextSession>()
             currentPrincipal?.let { principal ->
                 principal.state?.let { state ->
-                    println(principal.expiresIn)
-                    call.sessions.set(Session(generateSessionId(), principal.accessToken))
-                    printIfDebugMode("Session ${call.getSession()} created.")
+                    val session = LoginSession(generateSessionId(),  principal.accessToken)
+                    if(loginMethod == LoginMethod.Session) {
+                        call.sessions.set(session)
+                        printIfDebugMode("Session ${call.getSession()} created.")
+                    }
+                    else {
+                        InMemoryLoginSessionStorage.write(session.id, session.token)
+                    }
                     authenticationService.login(principal)
                     redirects[state]?.let { redirectUrl ->
-                        call.respondRedirect(redirectUrl)
+                        call.respondRedirect("$redirectUrl?sessionId=${session.id.encodeBase64()}")
                         return@get
                     }
                 }
             }
-            call.respondRedirect(HOME_ROUTE)
         }
     }
 
     get("/login") {
-        if (call.sessions.get<Session>() != null)
-            call.respondRedirect(HOME_ROUTE)
-        else
-            call.respondRedirect("/loginRedirect?redirectUrl=${call.parameters["redirectUrl"] ?: HOME_ROUTE}")
+        val loginMethod =
+            call.parameters[LoginMethod.URL_PARAM]?.let {
+                LoginMethod.valueOf(it, false) } ?: LoginMethod.Session
+
+        val redirectUrl = call.parameters["redirectUrl"]
+        if(loginMethod == LoginMethod.Token)
+            redirectUrl ?: call.respond("For token retrieval, a redirect url MUST be provided.")
+
+        if (call.sessions.get<LoginSession>() != null || call.request.headers[HttpHeaders.Authorization] != null)
+            call.respondRedirect(redirectUrl ?: "/")
+        else {
+            call.sessions.set(ContextSession(loginMethod))
+            call.respondRedirect("/loginRedirect?redirectUrl=$redirectUrl")
+        }
 
     }
     get("/logout") {
@@ -67,7 +86,7 @@ fun Route.authRoute() {
         call.response.header("Cache-Control", "no-cache, no-store, must-revalidate")
         call.response.header("X-Robots-Tag", "noindex, nofollow, noarchive, nosnippet, noodp, notranslate, noimageindex")
         val authToken = call.getSession()?.token
-        call.sessions.clear<Session>()
+        call.sessions.clear<LoginSession>()
         authToken?.let { authenticationService.logout(it) }
         call.respondRedirect(getLogoutRequestUrl())
     }
@@ -99,27 +118,22 @@ suspend fun ApplicationCall.getProfileInfoFromSession(): ProfileInfo? {
     return session?.let {
         try {
             authenticationService.getProfileInfoFromToken(it.token) {
-                sessions.clear<Session>()
+                sessions.clear<LoginSession>()
             }
         }
         catch (e: Exception) { null }
     }
 }
 
-/**
- * Gets the requested service from the current session scope. If the session is not found, an exception is thrown.
- * Additionally, the session is received through the call's [getProfileInfoFromSession] method. It redirects to the login page if the
- * session is not found.
- * @return The requested service
- * @throws Exception if the session is not found
- * @see getProfileInfoFromSession
- */
-suspend inline fun<reified T> ApplicationCall.getScopedService(): T {
-    val loggedInEmail = getProfileInfoFromSession()?.email ?: throw UnauthorizedException("User is not logged in.")
-    return getKoin().getOrCreateScope<Session>(loggedInEmail).get { parametersOf(loggedInEmail) }
+enum class LoginMethod {
+    Session,
+    Token;
+    companion object {
+        const val URL_PARAM = "method"
+        fun valueOf(value: String, isCaseSensitive : Boolean = false): LoginMethod {
+            if(isCaseSensitive) return valueOf(value)
+            return LoginMethod.valueOf(value.lowercase().replaceFirstChar { it.uppercase() })
+        }
+    }
 }
 
-inline fun<reified T> getScopedService(loggedInEmail: String): T {
-    val scope = getKoin().getOrCreateScope<Session>(loggedInEmail)
-    return scope.get { parametersOf(loggedInEmail) }
-}

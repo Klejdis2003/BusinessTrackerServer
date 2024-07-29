@@ -64,7 +64,7 @@ class ItemService(
         val image = multiPartProcessResult.fileItemData.apply { name = ItemImageStorage.generateImageName() }
         item.imageFilename = image.getFullFileName()
         val createdItem = executeCreateBlockWithErrorHandling { itemRepository.create(item) }
-        ItemImageStorage.save(image, generateRandomFilename = false)
+        ItemImageStorage.save(image, generateRandomFileName = false)
 
         return itemMapper.toItemDto(createdItem)
     }

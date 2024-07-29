@@ -83,6 +83,8 @@ dependencies {
     implementation("io.ktor:ktor-server-netty")
     implementation("io.ktor:ktor-client-core")
     implementation("io.ktor:ktor-client-cio")
+    implementation("io.ktor:ktor-server-cors:$ktor_version")
+    implementation("io.swagger.core.v3:swagger-annotations:2.1.10")
     implementation("io.insert-koin:koin-ktor:$koin_version")
     implementation("org.postgresql:postgresql:$postgresql_driver_version")
     implementation("org.ktorm:ktorm-core:$ktorm_version")
