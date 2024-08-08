@@ -12,12 +12,11 @@ import io.ktor.server.routing.*
 fun Route.analyticsRoute() {
     route("/analytics") {
         get {
-            val analyticsService = call.getScopedService<AnalyticsService>()
-            val startDate = call.parameters["startDate"]
-            val endDate = call.parameters["endDate"]
-            val datePeriod = DatePeriod.fromString(startDate, endDate)
-
             call.executeWithExceptionHandling {
+                val analyticsService = call.getScopedService<AnalyticsService>()
+                val startDate = call.parameters["startDate"]
+                val endDate = call.parameters["endDate"]
+                val datePeriod = DatePeriod.fromString(startDate, endDate)
                 it.respond(analyticsService.getAnalytics(datePeriod))
             }
         }
@@ -28,7 +27,6 @@ fun Route.analyticsRoute() {
             val endDate = call.parameters["endDate"]
             val limit = call.parameters["limit"]?.toIntOrNull()
             val datePeriod = DatePeriod.fromString(startDate, endDate)
-
             call.respondWithExceptionHandling(
                 limit?.let { analyticsService.getTopCustomers(datePeriod, it) }
                     ?: analyticsService.getTopCustomers(datePeriod)

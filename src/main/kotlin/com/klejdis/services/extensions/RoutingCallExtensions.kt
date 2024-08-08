@@ -37,9 +37,10 @@ fun ApplicationCall.getSession(): LoginSession? {
 
 suspend fun ApplicationCall.getProfileInfoFromHeaderToken(): ProfileInfo? {
     val authenticationService = get<OAuthenticationService>()
+    val memoryLoginSessionStorage = get<InMemoryLoginSessionStorage>()
     val sessionId = request.headers["Authorization"] ?: return null
     val token =
-        try { InMemoryLoginSessionStorage.read(sessionId) }
+        try { memoryLoginSessionStorage.read(sessionId) }
         catch (e: NoSuchElementException) { return null }
 
     return authenticationService.getProfileInfoFromToken(token)

@@ -74,6 +74,13 @@ class AnalyticsService(
         )
     }
 
+    private suspend fun getExpenses() = expenseRepository.filterByBusinessOwnerEmail(loggedInEmail)
+
+    private fun getTotalExpenses(expenses: List<Expense>) = expenses.sumOf { it.amount }
+    private fun getTotalRevenue(orders: List<Order>) = orders.sumOf {order -> order.items.sumOf { it.item.price * it.quantity } }
+
+    private fun getTotalProfit(orders: List<Order>, expenses: List<Expense>) = getTotalRevenue(orders) - getTotalExpenses(expenses)
+
     /**
      * @param orderItem The order item to calculate the profit for.
      * @return The profit generated from the specified order item.
@@ -204,13 +211,14 @@ class AnalyticsService(
             }
         }
 
+
     /**
      * @param orders The list of orders to calculate the total profit from.
      * @param expenses The list of expenses to subtract from the total profit.
      * @return The total profit generated from the specified list of orders after subtracting the expenses.
      */
     private fun calculateTotalProfit(orders: List<Order>, expenses: List<Expense>) =
-        calculateOrderProfits(orders) - expenses.sumOf { it.amount }
+        calculateOrderProfits(orders) - getTotalExpenses(expenses)
 
 
     /**
@@ -222,9 +230,14 @@ class AnalyticsService(
         val expenses = getExpenses(datePeriod)
         return Analytics(
             totalProfit = calculateTotalProfit(orders, expenses),
+            totalCustomers = orders.map { it.customer }.distinct().size,
+            totalRevenue = getTotalRevenue(orders),
+            totalExpenses = getTotalExpenses(expenses),
             mostPopularItems = getMostPopularItems(orders),
             mostProfitableItems = getMostProfitableItems(orders),
             mostProfitableCustomers = getMostProfitableCustomers(orders),
+            orderNumber = orders.size,
+            soldItemsNumber = orders.sumOf { it.items.size },
             timePeriod = TimePeriodDto.fromTimePeriod(datePeriod)
         )
     }

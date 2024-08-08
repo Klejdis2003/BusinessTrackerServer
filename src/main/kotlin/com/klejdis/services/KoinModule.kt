@@ -7,6 +7,8 @@ import com.klejdis.services.model.LoginSession
 import com.klejdis.services.repositories.*
 import com.klejdis.services.routes.ItemsRouteConstants
 import com.klejdis.services.services.*
+import com.klejdis.services.storage.InMemoryLoginSessionStorage
+import com.klejdis.services.util.TimeFrame
 import io.ktor.client.*
 import io.ktor.client.engine.cio.*
 import io.ktor.client.plugins.contentnegotiation.*
@@ -49,6 +51,15 @@ val appModule = module {
         OAuthenticationServiceImpl(get())
     }
     single<CurrencyService> { CurrencyService() }
+
+    single<InMemoryLoginSessionStorage> {
+        InMemoryLoginSessionStorage(
+        System.getenv()["SESSION_MAX_AGE"]?.let {
+            TimeFrame.seconds(it.toLong())
+        }
+            ?: TimeFrame.days(1)
+        )
+    }
 
 
 }

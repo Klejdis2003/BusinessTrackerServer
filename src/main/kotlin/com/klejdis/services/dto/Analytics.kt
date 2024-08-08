@@ -10,6 +10,11 @@ data class Analytics(
     val mostProfitableItems: List<MostProfitableItemDto>?,
     val mostProfitableCustomers: List<MostProfitableCustomerDto>?,
     val totalProfit: Int,
+    val totalRevenue: Int,
+    val totalExpenses: Int,
+    val totalCustomers: Int,
+    val soldItemsNumber: Int,
+    val orderNumber: Int,
     val timePeriod: TimePeriodDto
 )
 
@@ -20,12 +25,12 @@ data class TimePeriodDto(
 ) {
     companion object {
         fun fromTimePeriod(datePeriod: DatePeriod) = TimePeriodDto(
-            datePeriod.startDate.toString(),
-            datePeriod.endDate.toString()
+            datePeriod.hasStartBound().takeIf { it }?.let { datePeriod.startDate.toString() } ?: "",
+            datePeriod.hasEndBound().takeIf { it }?.let { datePeriod.endDate.toString() } ?: ""
         )
         fun toTimePeriod(timePeriodDto: TimePeriodDto) = DatePeriod(
-            LocalDate.parse(timePeriodDto.startDate),
-            LocalDate.parse(timePeriodDto.endDate)
+            timePeriodDto.startDate.takeIf { it.isNotEmpty() }?.let { LocalDate.parse(it) } ?: LocalDate.MIN,
+            timePeriodDto.endDate.takeIf { it.isNotEmpty() }?.let { LocalDate.parse(it) } ?: LocalDate.MAX
         )
     }
 }

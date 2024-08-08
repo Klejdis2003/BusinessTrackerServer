@@ -35,6 +35,7 @@ import org.koin.ktor.ext.get as koinGet
  */
 fun Route.authRoute() {
     val authenticationService = koinGet<OAuthenticationService>()
+    val sessionStorage = koinGet<InMemoryLoginSessionStorage>()
     authenticate(AuthMethod.OAuth.provider) {
         get("/loginRedirect") {
             //Ktor automatically redirects to callback URL
@@ -52,7 +53,7 @@ fun Route.authRoute() {
                         printIfDebugMode("Session ${call.getSession()} created.")
                     }
                     else {
-                        InMemoryLoginSessionStorage.write(session.id, session.token)
+                        sessionStorage.write(session.id, session.token)
                     }
                     authenticationService.login(principal)
                     redirects[state]?.let { redirectUrl ->

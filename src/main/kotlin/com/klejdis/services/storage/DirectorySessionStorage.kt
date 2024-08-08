@@ -1,5 +1,6 @@
 package com.klejdis.services.storage
 
+import com.klejdis.services.util.TimeFrame
 import io.ktor.server.sessions.*
 import java.util.concurrent.ConcurrentHashMap
 
@@ -7,7 +8,9 @@ import java.util.concurrent.ConcurrentHashMap
  * An in memory session id to token mapper, used for securely accessing tokens without exposing them
  * externally.
  */
-object InMemoryLoginSessionStorage : SessionStorage{
+class InMemoryLoginSessionStorage(
+    private val sessionMaxAgeInSeconds: TimeFrame = TimeFrame.days(1)
+) : SessionStorage{
     private val sessions = ConcurrentHashMap<String, String>()
 
     /**
