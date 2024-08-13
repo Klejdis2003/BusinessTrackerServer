@@ -176,23 +176,23 @@ class TimeFrame private constructor(
         days * HOURS_IN_DAY + hours
 
 
-        private class LongWrapper(var value: Long) {
-            companion object {
-                fun fromInt(value: Int) = LongWrapper(value.toLong())
-            }
-        operator fun div(other: Long): Long {
-            val result = value / other
-            value = value.rem(other)
-            return result
+    private class LongWrapper(var value: Long) {
+        companion object {
+            fun fromInt(value: Int) = LongWrapper(value.toLong())
         }
+    operator fun div(other: Long): Long {
+        val result = value / other
+        value = value.rem(other)
+        return result
+    }
 
-        fun divideAndApplyRemainder(other: Long): Long {
-            val result = value / other
-            value %= other
-            return result
-        }
+    fun divideAndApplyRemainder(other: Long): Long {
+        val result = value / other
+        value %= other
+        return result
+    }
 
-        fun divideAndApplyRemainder(other: Int) = divideAndApplyRemainder(other.toLong())
+    fun divideAndApplyRemainder(other: Int) = divideAndApplyRemainder(other.toLong())
 
     }
 }

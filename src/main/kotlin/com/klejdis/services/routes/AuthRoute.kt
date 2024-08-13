@@ -1,5 +1,6 @@
 package com.klejdis.services.routes
 
+import com.klejdis.services.extensions.getProfileInfoFromHeaderToken
 import com.klejdis.services.extensions.getScopedService
 import com.klejdis.services.extensions.getSession
 import com.klejdis.services.model.LoginSession
@@ -90,6 +91,18 @@ fun Route.authRoute() {
         call.sessions.clear<LoginSession>()
         authToken?.let { authenticationService.logout(it) }
         call.respondRedirect(getLogoutRequestUrl())
+    }
+
+    get("/validate-session") {
+        val profileInfo = call.getProfileInfoFromHeaderToken()
+        if(profileInfo != null) {
+            call.respond(HttpStatusCode.OK, "Session is valid.")
+        }
+        else {
+            printIfDebugMode("Session is invalid.")
+            call.respond(HttpStatusCode.Unauthorized, "Session is invalid.")
+        }
+
     }
 
 }
