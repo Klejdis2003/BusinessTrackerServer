@@ -38,7 +38,6 @@ fun main() {
 }
 
 fun Application.module() {
-    configureCORS()
     configureHTTPSRedirect()
     configureSecurity()
     configureSerialization()

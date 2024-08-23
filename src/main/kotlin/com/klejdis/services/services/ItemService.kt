@@ -23,7 +23,7 @@ class ItemService(
 ) {
     suspend fun getAll(filters: Iterable<Filter>) =
         itemRepository
-            .getAll(filters)
+            .getByBusinessOwnerEmail(loggedInEmail, filters)
             .map { itemMapper.toItemDto(it) }
 
     suspend fun get(id: Int) =

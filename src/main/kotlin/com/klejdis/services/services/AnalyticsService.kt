@@ -1,14 +1,17 @@
 package com.klejdis.services.services
 
 import com.klejdis.services.dto.*
-import com.klejdis.services.filters.ExpenseFilterCategory
 import com.klejdis.services.filters.Filter
 import com.klejdis.services.filters.OrderFilterCategory
 import com.klejdis.services.model.Expense
+import com.klejdis.services.model.Item
 import com.klejdis.services.model.Order
 import com.klejdis.services.model.OrderItem
 import com.klejdis.services.repositories.ExpenseRepository
+import com.klejdis.services.repositories.ItemRepository
 import com.klejdis.services.repositories.OrderRepository
+import com.klejdis.services.sort.SortMethod
+import com.klejdis.services.sort.sortEntityByField
 import com.klejdis.services.util.DatePeriod
 
 /**
@@ -20,32 +23,36 @@ import com.klejdis.services.util.DatePeriod
 class AnalyticsService(
     private val orderRepository: OrderRepository,
     private val expenseRepository: ExpenseRepository,
+    private val itemRepository: ItemRepository,
     private val itemMapper: ItemMapper,
     private val loggedInEmail: String
 ) {
+
+    private fun getFilters(datePeriod: DatePeriod): List<Filter> {
+        val filters = mutableListOf<Filter>()
+        if(datePeriod.hasStartBound()) {
+            filters.add(Filter(
+                OrderFilterCategory.MinDate.typeName,
+                datePeriod.startDate.toString(),
+            ))
+        }
+        if(datePeriod.hasEndBound()) {
+            filters.add(Filter(
+                OrderFilterCategory.MaxDate.typeName,
+                datePeriod.endDate.toString(),
+            ))
+        }
+        return filters
+    }
 
     /**
      * @param datePeriod The time period to filter orders by.
      * @return A list of orders made within the specified time period.
      */
     private suspend fun getOrders(datePeriod: DatePeriod): List<Order>{
-        val filters = buildList {
-            if(datePeriod.hasStartBound()) {
-                add(Filter(
-                    OrderFilterCategory.MinDate.typeName,
-                    datePeriod.startDate.toString(),
-                ))
-            }
-            if(datePeriod.hasEndBound()) {
-                add(Filter(
-                    OrderFilterCategory.MaxDate.typeName,
-                    datePeriod.endDate.toString(),
-                ))
-            }
-        }
         return orderRepository.filterByBusinessOwnerEmail(
             loggedInEmail,
-            filters
+            getFilters(datePeriod)
         )
     }
 
@@ -54,23 +61,16 @@ class AnalyticsService(
      * @return A list of expenses made within the specified time period.
      */
     private suspend fun getExpenses(datePeriod: DatePeriod): List<Expense> {
-        val filters = buildList {
-            if(datePeriod.hasStartBound()) {
-                add(Filter(
-                    ExpenseFilterCategory.MinDate.typeName,
-                    datePeriod.startDate.toString(),
-                ))
-            }
-            if(datePeriod.hasEndBound()) {
-                add(Filter(
-                    ExpenseFilterCategory.MaxDate.typeName,
-                    datePeriod.endDate.toString(),
-                ))
-            }
-        }
         return expenseRepository.filterByBusinessOwnerEmail(
             loggedInEmail,
-            filters
+            getFilters(datePeriod)
+        )
+    }
+
+    private suspend fun getItems(datePeriod: DatePeriod): List<Item> {
+        return itemRepository.getByBusinessOwnerEmail(
+            loggedInEmail,
+            getFilters(datePeriod)
         )
     }
 
@@ -282,4 +282,20 @@ class AnalyticsService(
 
     suspend fun getTopCustomers(datePeriod: DatePeriod = DatePeriod.max(), limit: Int = 10) =
         getMostProfitableCustomers(getOrders(datePeriod), limit)
+
+    suspend fun getItemStats(datePeriod: DatePeriod = DatePeriod.max(), sortMethod: SortMethod? = SortMethod.none()): List<ItemStat> {
+        val stats = mutableListOf<ItemStat>()
+        val orders = getOrders(datePeriod)
+        val items = getItems(datePeriod)
+        items.forEach { item ->
+            val sales = orders.sumOf { order ->
+                order.items.filter { orderItem -> orderItem.item == item }.sumOf { it.quantity }
+            }
+            val totalRevenue = sales * item.price
+            val totalExpenses = sales * item.purchasePrice
+            val totalProfit = totalRevenue - totalExpenses
+            stats.add(ItemStat(itemMapper.toItemDto(item), sales, totalProfit, totalRevenue, totalExpenses))
+        }
+        return sortMethod?.let { stats.sortEntityByField(it.fieldName!!, it.sortOrder!!) } ?: stats
+    }
 }

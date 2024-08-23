@@ -2,6 +2,8 @@ package com.klejdis.services.dto
 
 import com.klejdis.services.model.Item
 import com.klejdis.services.model.ItemType
+import com.klejdis.services.model.SortableEntity
+import com.klejdis.services.model.SortableField
 import com.klejdis.services.storage.ItemImageStorage
 import kotlinx.serialization.Serializable
 import java.util.*
@@ -16,14 +18,14 @@ class ItemMapper(private val imageLinkMapper: ImageLinkMapper) {
 
 @Serializable
 data class ItemDto(
-    val id: Int,
-    val name: String,
-    val purchasePrice: Int,
-    val price: Int,
+    @SortableField val id: Int,
+    @SortableField val name: String,
+    @SortableField val purchasePrice: Int,
+    @SortableField val price: Int,
     val currency: CurrencyDto,
     val imageUrl: String,
     val type: ItemTypeDto
-) {
+) : SortableEntity {
     companion object {
         fun fromEntity(item: Item, imageUrl: String): ItemDto {
             return ItemDto(

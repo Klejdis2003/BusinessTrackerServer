@@ -1,5 +1,7 @@
 package com.klejdis.services.dto
 
+import com.klejdis.services.model.EveryFieldSortable
+import com.klejdis.services.model.SortableEntity
 import com.klejdis.services.util.DatePeriod
 import kotlinx.serialization.Serializable
 import java.time.LocalDate
@@ -52,3 +54,13 @@ data class MostPopularItemDto(
     val item: ItemDto,
     val count: Int
 )
+
+@Serializable
+@EveryFieldSortable(exclusions = ["item"])
+data class ItemStat(
+    val item: ItemDto,
+    val sales: Int,
+    val totalProfit: Int,
+    val totalRevenue: Int,
+    val totalExpenses: Int
+) : SortableEntity

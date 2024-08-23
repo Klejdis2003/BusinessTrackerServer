@@ -1,5 +1,6 @@
 package com.klejdis.services.plugins
 
+import com.klejdis.services.APPLICATION_DOMAIN
 import io.ktor.client.*
 import io.ktor.http.*
 import io.ktor.server.application.*
@@ -32,7 +33,7 @@ fun Application.configureSecurity() {
                     }
                 )
 
-            urlProvider = { System.getenv("AUTH0_CALLBACK_URL") ?: "https://localhost:8443/callback" }
+            urlProvider = { System.getenv("AUTH0_CALLBACK_URL") ?: "$APPLICATION_DOMAIN/callback" }
             providerLookup = { oAuthServerSettings }
             client = httpClient
         }

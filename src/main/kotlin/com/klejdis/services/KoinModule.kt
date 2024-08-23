@@ -83,7 +83,7 @@ val businessServicesModule = module {
         }
 
         scoped<AnalyticsService> { (loggedInEmail: String) ->
-            AnalyticsService(get(), get(), get(), loggedInEmail)
+            AnalyticsService(get(), get(), get(), get(), loggedInEmail)
         }
 
         scoped<ItemService> { (loggedInEmail: String) ->
