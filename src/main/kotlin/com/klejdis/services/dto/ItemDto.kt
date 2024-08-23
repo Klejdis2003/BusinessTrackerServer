@@ -2,8 +2,8 @@ package com.klejdis.services.dto
 
 import com.klejdis.services.model.Item
 import com.klejdis.services.model.ItemType
-import com.klejdis.services.model.SortableEntity
-import com.klejdis.services.model.SortableField
+import com.klejdis.services.sort.SortableEntity
+import com.klejdis.services.sort.SortableField
 import com.klejdis.services.storage.ItemImageStorage
 import kotlinx.serialization.Serializable
 import java.util.*

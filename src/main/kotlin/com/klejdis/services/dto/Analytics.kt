@@ -1,7 +1,7 @@
 package com.klejdis.services.dto
 
-import com.klejdis.services.model.EveryFieldSortable
-import com.klejdis.services.model.SortableEntity
+import com.klejdis.services.sort.EveryFieldSortable
+import com.klejdis.services.sort.SortableEntity
 import com.klejdis.services.util.DatePeriod
 import kotlinx.serialization.Serializable
 import java.time.LocalDate

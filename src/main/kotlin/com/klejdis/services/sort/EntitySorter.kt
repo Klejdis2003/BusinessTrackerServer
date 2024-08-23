@@ -1,9 +1,5 @@
 package com.klejdis.services.sort
 
-import com.klejdis.services.model.EveryFieldSortable
-import com.klejdis.services.model.SortOrder
-import com.klejdis.services.model.SortableEntity
-import com.klejdis.services.model.SortableField
 import kotlinx.serialization.Serializable
 
 /**
@@ -51,11 +47,12 @@ object EntitySorter {
 inline fun<reified T: SortableEntity> Iterable<T>.sortEntityByField(fieldName: String, sortOrder: SortOrder = SortOrder.ASC) = EntitySorter.sortEntities(this, fieldName, sortOrder)
 
 @Serializable
-class SortMethod private constructor(val fieldName: String?, val sortOrder: SortOrder?) {
+class SortMethod private constructor(val fieldName: String?, val sortOrder: SortOrder?, private val isInvalid : Boolean = false) {
     companion object {
-        fun none(): SortMethod? = null
-        fun of(fieldName: String?, sortOrder: SortOrder?): SortMethod? {
-            if(fieldName.isNullOrBlank()) return null
+        fun none(): SortMethod = SortMethod(null, null, true)
+
+        fun of(fieldName: String?, sortOrder: SortOrder?): SortMethod {
+            if(fieldName.isNullOrBlank()) return none()
             return SortMethod(fieldName, sortOrder)
         }
     }

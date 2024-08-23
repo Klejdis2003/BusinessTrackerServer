@@ -3,9 +3,9 @@ package com.klejdis.services.routes
 
 import com.klejdis.services.extensions.executeWithExceptionHandling
 import com.klejdis.services.extensions.getScopedService
-import com.klejdis.services.model.SortOrder
 import com.klejdis.services.services.AnalyticsService
 import com.klejdis.services.sort.SortMethod
+import com.klejdis.services.sort.SortOrder
 import com.klejdis.services.util.DatePeriod
 import io.ktor.server.application.*
 import io.ktor.server.response.*
@@ -13,9 +13,11 @@ import io.ktor.server.routing.*
 
 fun Route.analyticsRoute() {
     /**
-     * Executes the block with the analytics context. The context includes the analytics service and the date period.
+     * Provides context for the analytics route with the common parameters for all endpoints.
+     * It reduces boilerplate code and provides a way to handle exceptions in a single place.
+     * @param block the block of code that will be executed with the analytics context
      */
-    suspend fun ApplicationCall.withAnalyticsContext(block: suspend (AnalyticsService, DatePeriod) -> Unit) {
+    suspend fun ApplicationCall.withAnalyticsContext(block: suspend ApplicationCall.(AnalyticsService, DatePeriod) -> Unit) {
         val analyticsService = getScopedService<AnalyticsService>()
         val startDate = parameters["startDate"]
         val endDate = parameters["endDate"]
@@ -27,14 +29,14 @@ fun Route.analyticsRoute() {
     route("/analytics") {
         get {
             call.withAnalyticsContext { analyticsService, datePeriod ->
-                call.respond(analyticsService.getAnalytics(datePeriod))
+                respond(analyticsService.getAnalytics(datePeriod))
             }
         }
 
         get("/topCustomers") {
             call.withAnalyticsContext { analyticsService, datePeriod ->
                 val limit = call.parameters["limit"]?.toIntOrNull()
-                call.respond(
+                respond(
                     limit?.let { analyticsService.getTopCustomers(datePeriod, it) }
                         ?: analyticsService.getTopCustomers(datePeriod)
                 )
@@ -47,7 +49,7 @@ fun Route.analyticsRoute() {
                 val sortBy = call.parameters["sortBy"]
                 val sortOrder = call.parameters["order"]
                 val sortMethod = SortMethod.of(sortBy, SortOrder.fromString(sortOrder))
-                call.respond(analyticsService.getItemStats(datePeriod, sortMethod))
+                respond(analyticsService.getItemStats(datePeriod, sortMethod))
             }
         }
     }
